@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "student_history.schema.json",
+  "title": "StudentHistorySchema",
+  "$defs": {
+    "Student": {
+      "type": "object",
+      "required": [
+        "student_id",
+        "regulation",
+        "program"
+      ],
+      "properties": {
+        "student_id": {
+          "type": "string"
+        },
+        "regulation": {
+          "type": "integer",
+          "enum": [
+            2018,
+            2023
+          ]
+        },
+        "program": {
+          "type": "string"
+        },
+        "track": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "StudentCourseAttempt": {
+      "type": "object",
+      "required": [
+        "student_id",
+        "course_id",
+        "attempt_number",
+        "term",
+        "academic_year",
+        "status"
+      ],
+      "properties": {
+        "student_id": {
+          "type": "string"
+        },
+        "course_id": {
+          "type": "string"
+        },
+        "attempt_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "term": {
+          "type": "string"
+        },
+        "academic_year": {
+          "type": "string"
+        },
+        "grade": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "grade_points": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "credits_attempted": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "credits_earned": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string"
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "failed": {
+          "type": "boolean"
+        },
+        "withdrawn": {
+          "type": "boolean"
+        },
+        "repeated": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "CurrentRegistration": {
+      "type": "object",
+      "required": [
+        "student_id",
+        "course_id",
+        "term",
+        "academic_year"
+      ],
+      "properties": {
+        "student_id": {
+          "type": "string"
+        },
+        "course_id": {
+          "type": "string"
+        },
+        "term": {
+          "type": "string"
+        },
+        "academic_year": {
+          "type": "string"
+        },
+        "registration_status": {
+          "type": "string"
+        }
+      }
+    },
+    "AcademicSnapshot": {
+      "type": "object",
+      "required": [
+        "student_id",
+        "regulation",
+        "program",
+        "gpa",
+        "earned_credit_hours"
+      ],
+      "properties": {
+        "student_id": {
+          "type": "string"
+        },
+        "gpa": {
+          "type": "number"
+        },
+        "earned_credit_hours": {
+          "type": "number"
+        },
+        "registered_credit_hours": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "academic_level": {
+          "type": [
+            "string",
+            "integer",
+            "null"
+          ]
+        },
+        "academic_standing": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "regulation": {
+          "type": "integer",
+          "enum": [
+            2018,
+            2023
+          ]
+        },
+        "program": {
+          "type": "string"
+        },
+        "track": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "student": {
+      "$ref": "#/$defs/Student"
+    },
+    "course_attempts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/StudentCourseAttempt"
+      }
+    },
+    "current_registrations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CurrentRegistration"
+      }
+    },
+    "academic_snapshot": {
+      "$ref": "#/$defs/AcademicSnapshot"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "course.schema.json",
+  "title": "Course",
+  "type": "object",
+  "required": [
+    "course_id",
+    "regulation",
+    "program",
+    "course_code",
+    "course_name",
+    "credit_hours",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "course_id": {
+      "type": "string",
+      "pattern": "^R(18|23):[A-Z]+:.+"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "program": {
+      "type": "string"
+    },
+    "course_code": {
+      "type": "string"
+    },
+    "course_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credit_hours": {
+      "type": "number",
+      "minimum": 0
+    },
+    "ects": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "swl": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "lecture_hours": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "tutorial_hours": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "lab_hours": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "total_contact_hours": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "semester": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "maximum": 10
+    },
+    "course_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "concentration_or_track": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_page": {
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ]
+    },
+    "section_if_known": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extraction_method": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "conflict_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "planner_usable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

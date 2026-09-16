@@ -1,0 +1,2220 @@
+[
+  {
+    "rule_id": "R18-001",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "PROGRAM_COURSE_COUNT",
+    "conditions": {},
+    "result": {
+      "required_course_count": 62
+    },
+    "source_text": {
+      "condition": "Program completion",
+      "threshold_or_value": 62,
+      "unit": "courses",
+      "effect": "Program lists 62 courses."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 4,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-002",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "PROGRAM_TOTAL_CREDITS",
+    "conditions": {},
+    "result": {
+      "required_credit_hours": 170
+    },
+    "source_text": {
+      "condition": "Program completion",
+      "threshold_or_value": 170,
+      "unit": "CH",
+      "effect": "Student must complete the program credit-hour requirement."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 4,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-003",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "CURRICULUM_SHARE",
+    "conditions": {},
+    "result": {
+      "group": "UNIVERSITY",
+      "percentage": 8
+    },
+    "source_text": {
+      "condition": "Program curriculum",
+      "threshold_or_value": 8,
+      "unit": "percent",
+      "effect": "University requirements represent 8% of curriculum."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 4,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-004",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "CURRICULUM_SHARE",
+    "conditions": {},
+    "result": {
+      "group": "FACULTY",
+      "percentage": 25
+    },
+    "source_text": {
+      "condition": "Program curriculum",
+      "threshold_or_value": 25,
+      "unit": "percent",
+      "effect": "Faculty requirements represent 25% of curriculum."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 4,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-005",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "CURRICULUM_SHARE",
+    "conditions": {},
+    "result": {
+      "group": "DISCIPLINE",
+      "percentage": 67
+    },
+    "source_text": {
+      "condition": "Program curriculum",
+      "threshold_or_value": 67,
+      "unit": "percent",
+      "effect": "Discipline requirements represent 67% of curriculum."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 4,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-006",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "LEVEL_PROGRESSION",
+    "conditions": {
+      "metric": "COMPLETED_PROGRAM_REQUIREMENTS_PERCENT"
+    },
+    "result": {
+      "progression_step_percent": 20.0
+    },
+    "source_text": {
+      "condition": "Completed program requirements",
+      "threshold_or_value": 20,
+      "unit": "percent",
+      "effect": "Student transfers to a higher study level whenever 20% of graduation requirements is completed."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 4,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "NEEDS_VERIFICATION",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [
+      "CF-2018-001"
+    ],
+    "notes": "The displayed level table has boundary gaps at exact 34/68/102/136 CH; do not infer missing boundaries."
+  },
+  {
+    "rule_id": "R18-007",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "MIN_STUDY_DURATION",
+    "conditions": {},
+    "result": {
+      "main_semesters": 9
+    },
+    "source_text": {
+      "condition": "Normal program study",
+      "threshold_or_value": 9,
+      "unit": "main semesters",
+      "effect": "Minimum allowed study duration."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-008",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "MAX_STUDY_DURATION",
+    "conditions": {
+      "exclude_accepted_frozen_semesters": true
+    },
+    "result": {
+      "main_semesters": 20,
+      "academic_years": 10
+    },
+    "source_text": {
+      "condition": "Excluding accepted frozen semesters",
+      "threshold_or_value": 20,
+      "unit": "main semesters",
+      "effect": "After this duration the student is dismissed from the program."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": "Source also describes this as ten years."
+  },
+  {
+    "rule_id": "R18-009",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "MIN_GRADUATION_GPA",
+    "conditions": {
+      "event": "GRADUATION"
+    },
+    "result": {
+      "min_cumulative_gpa": 2.0
+    },
+    "source_text": {
+      "condition": "At graduation",
+      "threshold_or_value": 2,
+      "unit": "GPA",
+      "effect": "Graduation requires GPA >= 2.0."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-010",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "ZERO_CREDIT_COMPLETION",
+    "conditions": {
+      "event": "GRADUATION"
+    },
+    "result": {
+      "all_zero_credit_courses_must_be_passed": true
+    },
+    "source_text": {
+      "condition": "At graduation",
+      "threshold_or_value": "ALL",
+      "unit": "courses",
+      "effect": "All zero-credit courses must be passed."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-011",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "GRAD_PROJECT_ELIGIBILITY",
+    "conditions": {
+      "event": "GRAD_PROJECT_REGISTRATION"
+    },
+    "result": {
+      "min_earned_credit_hours": 130
+    },
+    "source_text": {
+      "condition": "Before registering graduation project",
+      "threshold_or_value": 130,
+      "unit": "earned CH",
+      "effect": "Student must earn at least 130 CH to register for the graduation project."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-012",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "GRAD_PROJECT_SEQUENCE",
+    "conditions": {},
+    "result": {
+      "sequence": [
+        "CSE491",
+        "CSE492"
+      ],
+      "must_register_in_order": true
+    },
+    "source_text": {
+      "condition": "If project is divided over two semesters",
+      "threshold_or_value": "CSE491 -> CSE492",
+      "unit": "sequence",
+      "effect": "Project parts must be registered in order."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-013",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "FIELD_TRAINING_REQUIREMENT",
+    "conditions": {
+      "event": "GRADUATION"
+    },
+    "result": {
+      "required_weeks": 12
+    },
+    "source_text": {
+      "condition": "Before graduation",
+      "threshold_or_value": 12,
+      "unit": "weeks",
+      "effect": "Field training is mandatory for graduation."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-014",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "FIELD_TRAINING_PERIODS",
+    "conditions": {},
+    "result": {
+      "period_weeks": [
+        4,
+        4,
+        4
+      ]
+    },
+    "source_text": {
+      "condition": "During study duration",
+      "threshold_or_value": "4+4+4",
+      "unit": "weeks",
+      "effect": "Training is divided into 4-week periods after first, second and third levels; fourth level also possible."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-015",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "MAX_TRANSFER_CREDITS",
+    "conditions": {
+      "prior_faculty_approval": true
+    },
+    "result": {
+      "max_credit_hours": 68
+    },
+    "source_text": {
+      "condition": "Courses taken at cooperating university with prior approval",
+      "threshold_or_value": 68,
+      "unit": "CH",
+      "effect": "Transferred credits counted toward graduation must not exceed 68 CH."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-016",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "GLOBAL_COURSE_PREREQUISITE",
+    "conditions": {
+      "course_scope": "FACULTY_REQUIREMENTS"
+    },
+    "result": {
+      "required_course_code": "ASU011"
+    },
+    "source_text": {
+      "condition": "Faculty requirement courses",
+      "threshold_or_value": "ASU011",
+      "unit": "course",
+      "effect": "Technical English Language is a prerequisite for all Faculty requirements courses."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 5,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-017",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "COURSE_EXEMPTION",
+    "conditions": {
+      "equivalent_certificate_present": true
+    },
+    "result": {
+      "course_code": "ASU322",
+      "exemption_allowed": true
+    },
+    "source_text": {
+      "condition": "Equivalent certificate for ASU322",
+      "threshold_or_value": "Allowed",
+      "unit": "exemption",
+      "effect": "Student may be exempted from ASU322 with an equivalent certificate."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 5,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-018",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "TECHNICAL_ELECTIVE_COUNT",
+    "conditions": {},
+    "result": {
+      "required_courses": 7
+    },
+    "source_text": {
+      "condition": "Program technical electives",
+      "threshold_or_value": 7,
+      "unit": "courses",
+      "effect": "Student must select seven technical elective courses."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 7,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-019",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "TECHNICAL_ELECTIVE_CREDITS",
+    "conditions": {},
+    "result": {
+      "required_credit_hours": 18
+    },
+    "source_text": {
+      "condition": "Program technical electives",
+      "threshold_or_value": 18,
+      "unit": "CH",
+      "effect": "Seven technical electives must total 18 CH."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 7,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-020",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "CONCENTRATION_ELECTIVE_MINIMUM",
+    "conditions": {
+      "among_technical_electives": 7
+    },
+    "result": {
+      "min_courses_from_one_concentration": 5
+    },
+    "source_text": {
+      "condition": "Among the seven technical electives",
+      "threshold_or_value": 5,
+      "unit": "courses",
+      "effect": "At least five technical electives must come from one concentration field."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 7,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R18-021",
+    "regulation": 2018,
+    "program": "CESS",
+    "rule_type": "ACADEMIC_ADVISOR_ASSIGNMENT",
+    "conditions": {},
+    "result": {
+      "advisor_required": true
+    },
+    "source_text": {
+      "condition": "All students",
+      "threshold_or_value": "Required",
+      "unit": "advisor",
+      "effect": "Every student is assigned an academic advisor who follows progress and assists with course selection."
+    },
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": false,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-001",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "LEVEL_PROGRESSION",
+    "conditions": {
+      "metric": "COMPLETED_PROGRAM_REQUIREMENTS_PERCENT"
+    },
+    "result": {
+      "progression_step_percent": 25.0,
+      "document_equivalent_credit_hours": 36
+    },
+    "source_text": {
+      "condition": "Completed program requirements",
+      "threshold_or_value": 25,
+      "unit": "percent",
+      "effect": "Student transfers to next level whenever 25% of program requirements is completed; document equates this to 36 CH."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-002",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MIN_STUDY_DURATION",
+    "conditions": {},
+    "result": {
+      "main_semesters": 8
+    },
+    "source_text": {
+      "condition": "Normal program study",
+      "threshold_or_value": 8,
+      "unit": "main semesters",
+      "effect": "Minimum allowed study duration."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 11,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-003",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_STUDY_DURATION",
+    "conditions": {
+      "exclude_accepted_frozen_semesters": true
+    },
+    "result": {
+      "academic_years": 8
+    },
+    "source_text": {
+      "condition": "Excluding accepted frozen semesters",
+      "threshold_or_value": 8,
+      "unit": "academic years",
+      "effect": "Student is dismissed after maximum study duration."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-004",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "STUDY_DURATION_EXTENSION_FOR_MINOR",
+    "conditions": {
+      "minor_registered": true
+    },
+    "result": {
+      "additional_academic_years": 1
+    },
+    "source_text": {
+      "condition": "Student registers a Minor",
+      "threshold_or_value": 1,
+      "unit": "academic year",
+      "effect": "One academic year is added to maximum study duration."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-005",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FINAL_GRADUATION_OPPORTUNITY",
+    "conditions": {
+      "min_total_credits_completed_percent": 75,
+      "graduation_feasible": true
+    },
+    "result": {
+      "additional_main_semesters": 2,
+      "additional_summer_semester": true
+    },
+    "source_text": {
+      "condition": "At least 75% of total CH passed and graduation is feasible",
+      "threshold_or_value": "2 main + summer",
+      "unit": "semesters",
+      "effect": "Faculty Council may allow two consecutive main semesters plus summer."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-006",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_CREDIT_LOAD",
+    "conditions": {
+      "term_type": "MAIN",
+      "gpa_min": 3.0
+    },
+    "result": {
+      "max_credit_hours": 21,
+      "max_courses": 8,
+      "limit_combination": "WHICHEVER_GREATER",
+      "advisor_approval_required": true
+    },
+    "source_text": {
+      "condition": "Cumulative GPA >= 3.0",
+      "threshold_or_value": "21 CH OR 8 courses",
+      "unit": "whichever greater",
+      "effect": "Maximum registration load after academic-advisor approval."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-007",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_CREDIT_LOAD",
+    "conditions": {
+      "term_type": "MAIN",
+      "gpa_min": 2.0,
+      "gpa_max_exclusive": 3.0
+    },
+    "result": {
+      "max_credit_hours": 18,
+      "max_courses": 7,
+      "limit_combination": "WHICHEVER_GREATER",
+      "advisor_approval_required": true
+    },
+    "source_text": {
+      "condition": "2.0 <= cumulative GPA < 3.0",
+      "threshold_or_value": "18 CH OR 7 courses",
+      "unit": "whichever greater",
+      "effect": "Maximum registration load after academic-advisor approval."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-008",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_CREDIT_LOAD",
+    "conditions": {
+      "term_type": "MAIN",
+      "gpa_max_exclusive": 2.0
+    },
+    "result": {
+      "max_credit_hours": 14,
+      "max_courses": 5,
+      "limit_combination": "WHICHEVER_GREATER",
+      "advisor_approval_required": true
+    },
+    "source_text": {
+      "condition": "Cumulative GPA < 2.0",
+      "threshold_or_value": "14 CH OR 5 courses",
+      "unit": "whichever greater",
+      "effect": "Maximum registration load after academic-advisor approval."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-009",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_CREDIT_LOAD",
+    "conditions": {
+      "term_type": "SUMMER",
+      "gpa_min": 3.0
+    },
+    "result": {
+      "max_credit_hours": 9,
+      "max_courses": 3,
+      "limit_combination": "WHICHEVER_GREATER",
+      "advisor_approval_required": true
+    },
+    "source_text": {
+      "condition": "Cumulative GPA >= 3.0",
+      "threshold_or_value": "9 CH OR 3 courses",
+      "unit": "whichever greater",
+      "effect": "Maximum summer load after academic-advisor approval."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-010",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_CREDIT_LOAD",
+    "conditions": {
+      "term_type": "SUMMER",
+      "gpa_max_exclusive": 3.0
+    },
+    "result": {
+      "max_credit_hours": 8,
+      "max_courses": 2,
+      "limit_combination": "WHICHEVER_GREATER",
+      "advisor_approval_required": true
+    },
+    "source_text": {
+      "condition": "Cumulative GPA < 3.0",
+      "threshold_or_value": "8 CH OR 2 courses",
+      "unit": "whichever greater",
+      "effect": "Maximum summer load after academic-advisor approval."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-011",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "GRADUATING_EXTRA_COURSE",
+    "conditions": {
+      "extra_course_enables_graduation": true,
+      "advisor_approval_required": true
+    },
+    "result": {
+      "additional_courses_allowed": 1
+    },
+    "source_text": {
+      "condition": "Extra course leads to graduation at end of semester and advisor approves",
+      "threshold_or_value": "1",
+      "unit": "additional course",
+      "effect": "One course beyond normal limits may be registered, subject to source conditions."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-012",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MIN_GRADUATION_GPA",
+    "conditions": {
+      "event": "GRADUATION"
+    },
+    "result": {
+      "min_cumulative_gpa": 2.0
+    },
+    "source_text": {
+      "condition": "At graduation",
+      "threshold_or_value": 2,
+      "unit": "GPA",
+      "effect": "Graduation requires GPA >= 2.0."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-013",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ZERO_CREDIT_COMPLETION",
+    "conditions": {
+      "event": "GRADUATION"
+    },
+    "result": {
+      "all_zero_credit_courses_must_be_passed": true
+    },
+    "source_text": {
+      "condition": "At graduation",
+      "threshold_or_value": "ALL",
+      "unit": "courses",
+      "effect": "All zero-credit courses in the program must be passed."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-014",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "GRAD_PROJECT_ELIGIBILITY",
+    "conditions": {
+      "event": "GRAD_PROJECT_REGISTRATION"
+    },
+    "result": {
+      "min_program_completion_percent": 70
+    },
+    "source_text": {
+      "condition": "Before registering graduation-project courses",
+      "threshold_or_value": 70,
+      "unit": "percent of total CH",
+      "effect": "Student must pass at least 70% of total program CH before registering graduation-project courses."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-015",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MAX_TRANSFER_CREDITS",
+    "conditions": {
+      "prior_approval": true
+    },
+    "result": {
+      "max_program_credit_percent": 40
+    },
+    "source_text": {
+      "condition": "Courses studied at another cooperating university with prior approval",
+      "threshold_or_value": 40,
+      "unit": "percent of program CH",
+      "effect": "Transferred credits counted toward graduation must not exceed 40% of total program CH."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-016",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FIELD_TRAINING_REQUIREMENT",
+    "conditions": {
+      "event": "GRADUATION"
+    },
+    "result": {
+      "required_weeks": 8
+    },
+    "source_text": {
+      "condition": "Before graduation",
+      "threshold_or_value": 8,
+      "unit": "weeks",
+      "effect": "Field training is mandatory."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-017",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FIELD_TRAINING_PERIODS",
+    "conditions": {},
+    "result": {
+      "period_weeks": [
+        4,
+        4
+      ],
+      "additional_senior_period_possible": true
+    },
+    "source_text": {
+      "condition": "Normal training plan",
+      "threshold_or_value": "4+4",
+      "unit": "weeks",
+      "effect": "Training is divided into four-week periods after Sophomore and Junior levels; Senior also possible."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-018",
+    "regulation": 2023,
+    "program": "INTERDISCIPLINARY_MAJORS",
+    "rule_type": "EARLY_FIELD_TRAINING_ELIGIBILITY",
+    "conditions": {
+      "program_type": "INTERDISCIPLINARY",
+      "freshman_credit_completion_percent_min": 70
+    },
+    "result": {
+      "max_counted_weeks": 2
+    },
+    "source_text": {
+      "condition": "Before early training",
+      "threshold_or_value": 70,
+      "unit": "percent of Freshman-level CH",
+      "effect": "Early field training may start after passing at least 70% of Freshman-level credit hours; counted period must not exceed two weeks."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-019",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FIELD_TRAINING_SIX_WEEK_LIMIT",
+    "conditions": {},
+    "result": {
+      "max_occurrences": 1
+    },
+    "source_text": {
+      "condition": "During study duration",
+      "threshold_or_value": 1,
+      "unit": "time",
+      "effect": "A six-week training period is allowed only once during study duration."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-020",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FIELD_TRAINING_GRADING",
+    "conditions": {},
+    "result": {
+      "grading": "PASS_FAIL",
+      "included_in_gpa": false
+    },
+    "source_text": {
+      "condition": "Field training",
+      "threshold_or_value": "Pass/Fail",
+      "unit": "grading",
+      "effect": "Field training does not count in cumulative GPA."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-021",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ADD_DEADLINE",
+    "conditions": {
+      "term_type": "MAIN"
+    },
+    "result": {
+      "deadline_value": 1,
+      "deadline_unit": "week"
+    },
+    "source_text": {
+      "condition": "Course addition",
+      "threshold_or_value": 1,
+      "unit": "week",
+      "effect": "Student may add courses during first week of main semesters."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-022",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ADD_DEADLINE",
+    "conditions": {
+      "term_type": "SUMMER"
+    },
+    "result": {
+      "deadline_value": 3,
+      "deadline_unit": "days"
+    },
+    "source_text": {
+      "condition": "Course addition",
+      "threshold_or_value": 3,
+      "unit": "days",
+      "effect": "Student may add courses during first three days of summer semester."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-023",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "DROP_DEADLINE",
+    "conditions": {
+      "term_type": "MAIN"
+    },
+    "result": {
+      "deadline_value": 2,
+      "deadline_unit": "weeks"
+    },
+    "source_text": {
+      "condition": "Refundable drop if applicable",
+      "threshold_or_value": 2,
+      "unit": "weeks",
+      "effect": "Drop permitted until end of second week of main semesters."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-024",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "DROP_DEADLINE",
+    "conditions": {
+      "term_type": "SUMMER"
+    },
+    "result": {
+      "deadline_value": 1,
+      "deadline_unit": "week"
+    },
+    "source_text": {
+      "condition": "Refundable drop if applicable",
+      "threshold_or_value": 1,
+      "unit": "week",
+      "effect": "Drop permitted until end of first week of summer semester."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-025",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "WITHDRAWAL_DEADLINE",
+    "conditions": {
+      "term_type": "MAIN"
+    },
+    "result": {
+      "deadline_value": 10,
+      "deadline_unit": "weeks"
+    },
+    "source_text": {
+      "condition": "Course withdrawal",
+      "threshold_or_value": 10,
+      "unit": "weeks",
+      "effect": "Student may withdraw within first ten weeks of main semesters."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-026",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "WITHDRAWAL_DEADLINE",
+    "conditions": {
+      "term_type": "SUMMER"
+    },
+    "result": {
+      "deadline_value": 5,
+      "deadline_unit": "weeks"
+    },
+    "source_text": {
+      "condition": "Course withdrawal",
+      "threshold_or_value": 5,
+      "unit": "weeks",
+      "effect": "Student may withdraw within first five weeks of summer semester."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-027",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "WITHDRAWAL_GRADE",
+    "conditions": {
+      "withdrawal_approved_within_deadline": true
+    },
+    "result": {
+      "grade": "W",
+      "counts_as_failure": false,
+      "course_can_be_repeated": true
+    },
+    "source_text": {
+      "condition": "Approved withdrawal within deadline",
+      "threshold_or_value": "W",
+      "unit": "grade",
+      "effect": "Student does not fail; a W appears in academic record and course may be registered later."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-028",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "INCOMPLETE_GRADE",
+    "conditions": {
+      "accepted_excuse_for_missed_final": true
+    },
+    "result": {
+      "temporary_grade": "I",
+      "included_in_gpa": false,
+      "miss_next_available_final_grade": "F"
+    },
+    "source_text": {
+      "condition": "Accepted excuse for missed final",
+      "threshold_or_value": "I",
+      "unit": "grade",
+      "effect": "Temporary I grade does not count in cumulative GPA; missing next available final leads to F."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-029",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "IMPROVEMENT_REPEAT_LIMIT",
+    "conditions": {
+      "course_already_passed": true
+    },
+    "result": {
+      "max_improvement_repeats": 5,
+      "exceptions_exist": true
+    },
+    "source_text": {
+      "condition": "Passed course repeated for improvement",
+      "threshold_or_value": 5,
+      "unit": "times",
+      "effect": "Maximum five improvement repeats during study, except specified probation/graduation cases."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-030",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FAILED_COURSE_REPEAT_GRADE_CAP",
+    "conditions": {
+      "previous_grade": "F"
+    },
+    "result": {
+      "max_grade_after_repeat": "B+"
+    },
+    "source_text": {
+      "condition": "Course previously failed with F",
+      "threshold_or_value": "B+",
+      "unit": "maximum grade",
+      "effect": "Maximum grade after repeating a failed course is B+."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-031",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MIN_TUTORIAL_LAB_ATTENDANCE",
+    "conditions": {
+      "course_has_tutorial_or_lab": true
+    },
+    "result": {
+      "min_attendance_percent": 75,
+      "below_threshold_outcome": "FAIL_AND_NO_FINAL_ASSESSMENT"
+    },
+    "source_text": {
+      "condition": "Course with tutorial/lab hours",
+      "threshold_or_value": 75,
+      "unit": "percent",
+      "effect": "Below threshold student is considered failed and not allowed technical/final assessment."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-032",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MIN_FINAL_ASSESSMENT_MARK",
+    "conditions": {},
+    "result": {
+      "min_final_assessment_percent": 40,
+      "below_threshold_outcome": "FAIL"
+    },
+    "source_text": {
+      "condition": "To pass course",
+      "threshold_or_value": 40,
+      "unit": "percent of final-assessment marks",
+      "effect": "Below this threshold student fails regardless of overall marks."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-033",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "MIN_OVERALL_PASS_MARK",
+    "conditions": {},
+    "result": {
+      "min_total_mark_percent": 60
+    },
+    "source_text": {
+      "condition": "Course total marks",
+      "threshold_or_value": 60,
+      "unit": "percent",
+      "effect": "F grade if total course mark is less than 60%."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-034",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ZERO_CREDIT_PASS_MARK",
+    "conditions": {
+      "credit_hours": 0
+    },
+    "result": {
+      "min_total_mark_percent": 60,
+      "included_in_gpa": false
+    },
+    "source_text": {
+      "condition": "Zero-credit course",
+      "threshold_or_value": 60,
+      "unit": "percent",
+      "effect": "Zero-credit course requires at least 60% to pass and does not count in GPA."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-035",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ACADEMIC_WARNING",
+    "conditions": {
+      "term_type": "MAIN",
+      "cumulative_gpa_lt": 2.0
+    },
+    "result": {
+      "academic_warning": true
+    },
+    "source_text": {
+      "condition": "At any main semester",
+      "threshold_or_value": 2,
+      "unit": "CGPA",
+      "effect": "Academic warning if cumulative GPA is less than 2.0."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-036",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ACADEMIC_WARNING_RESET",
+    "conditions": {
+      "cumulative_gpa_gt": 2.0
+    },
+    "result": {
+      "reset_consecutive_warning_count": true
+    },
+    "source_text": {
+      "condition": "Cumulative GPA exceeds 2.0",
+      "threshold_or_value": "Reset",
+      "unit": "warning counter",
+      "effect": "Consecutive academic-warning count is reset."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-037",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "DISMISSAL_NON_REGISTRATION",
+    "conditions": {
+      "consecutive_unregistered_main_semesters_gt": 2,
+      "acceptable_excuse": false
+    },
+    "result": {
+      "dismissed": true
+    },
+    "source_text": {
+      "condition": "No course registration without acceptable excuse",
+      "threshold_or_value": ">2",
+      "unit": "main semesters",
+      "effect": "Student is dismissed if not registered for more than two main semesters."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-038",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "DISMISSAL_EARLY_LOW_GPA",
+    "conditions": {
+      "first_consecutive_main_semesters": 3,
+      "gpa_lt": 1.0
+    },
+    "result": {
+      "dismissed": true
+    },
+    "source_text": {
+      "condition": "First three consecutive main semesters",
+      "threshold_or_value": "GPA < 1.0",
+      "unit": "condition",
+      "effect": "Student is dismissed."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-039",
+    "regulation": 2023,
+    "program": "SPECIALIZED_PROGRAMS",
+    "rule_type": "DISMISSAL_FIRST_LEVEL_LOW_GPA",
+    "conditions": {
+      "program_type": "SPECIALIZED",
+      "consecutive_main_semesters": 4,
+      "gpa_lt": 2.0
+    },
+    "result": {
+      "dismissed": true
+    },
+    "source_text": {
+      "condition": "Four consecutive main semesters",
+      "threshold_or_value": "GPA < 2.0",
+      "unit": "condition",
+      "effect": "First-level specialized-program student is dismissed."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-040",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "DISMISSAL_CONSECUTIVE_LOW_SEMESTER_GPA",
+    "conditions": {
+      "consecutive_semesters_excluding_summer": 6,
+      "semester_gpa_lt": 2.0
+    },
+    "result": {
+      "dismissed": true
+    },
+    "source_text": {
+      "condition": "Six consecutive semesters excluding summer",
+      "threshold_or_value": "Semester GPA < 2.0",
+      "unit": "condition",
+      "effect": "Student is dismissed, subject to preceding rule."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-041",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "FINAL_GPA_RECOVERY_CHANCE",
+    "conditions": {
+      "completed_total_credits_percent_min": 75,
+      "dismissal_risk_due_gpa": true
+    },
+    "result": {
+      "additional_main_semesters": 2,
+      "additional_summer_semester": true,
+      "target_cgpa_min": 2.0
+    },
+    "source_text": {
+      "condition": "At least 75% total CH completed and dismissal risk due GPA",
+      "threshold_or_value": "2 main + summer",
+      "unit": "semesters",
+      "effect": "Additional final chance to reach GPA >=2.0 and graduation requirements."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-042",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "HONOURS_ELIGIBILITY",
+    "conditions": {
+      "cgpa_min": 3.3,
+      "every_semester_gpa_min": 3.3,
+      "failed_courses_count": 0,
+      "disciplinary_penalty": false
+    },
+    "result": {
+      "honours_eligible": true
+    },
+    "source_text": {
+      "condition": "Throughout study",
+      "threshold_or_value": "CGPA >=3.3; each semester GPA >=3.3; no failed course; no penalty",
+      "unit": "conditions",
+      "effect": "All listed conditions are required."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-043",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "ELECTIVE_COURSE_OPENING_MINIMUM",
+    "conditions": {
+      "course_type": "ELECTIVE",
+      "resources_available": true
+    },
+    "result": {
+      "minimum_of": [
+        {
+          "students": 5
+        },
+        {
+          "program_level_percent": 25
+        }
+      ]
+    },
+    "source_text": {
+      "condition": "Elective course",
+      "threshold_or_value": "5 students OR 25% of program level",
+      "unit": "whichever less",
+      "effect": "Course opening also depends on teaching staff/resources."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-044",
+    "regulation": 2023,
+    "program": "ALL_FOE",
+    "rule_type": "OUT_OF_PLAN_COURSE_OPENING_MINIMUM",
+    "conditions": {
+      "outside_program_study_plan": true,
+      "resources_available": true
+    },
+    "result": {
+      "minimum_of": [
+        {
+          "students": 10
+        },
+        {
+          "program_level_percent": 75
+        }
+      ]
+    },
+    "source_text": {
+      "condition": "Course outside program study plan",
+      "threshold_or_value": "10 students OR 75% of program level",
+      "unit": "whichever less",
+      "effect": "Course opening also depends on teaching staff/resources."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-045",
+    "regulation": 2023,
+    "program": "CAIE",
+    "rule_type": "PROGRAM_TOTAL_CREDITS",
+    "conditions": {},
+    "result": {
+      "required_credit_hours": 144
+    },
+    "source_text": {
+      "condition": "Program completion",
+      "threshold_or_value": 144,
+      "unit": "CH",
+      "effect": "CAIE Required Courses table totals 144 CH."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 84,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-046",
+    "regulation": 2023,
+    "program": "CAIE",
+    "rule_type": "TECHNICAL_ELECTIVE_COUNT",
+    "conditions": {},
+    "result": {
+      "required_courses": 7
+    },
+    "source_text": {
+      "condition": "CAIE technical electives",
+      "threshold_or_value": 7,
+      "unit": "courses",
+      "effect": "Program concentration text requires seven technical electives."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 81,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": null
+  },
+  {
+    "rule_id": "R23-047",
+    "regulation": 2023,
+    "program": "CAIE",
+    "rule_type": "TECHNICAL_ELECTIVE_CREDITS",
+    "conditions": {},
+    "result": {
+      "required_credit_hours": 18
+    },
+    "source_text": {
+      "condition": "CAIE technical electives",
+      "threshold_or_value": 18,
+      "unit": "CH",
+      "effect": "Program concentration text states seven electives total 18 CH."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 81,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "NEEDS_VERIFICATION",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": "Internal conflict: CAIE required-courses table lists seven elective slots at 3 CH each (21 CH), and the 23P course tree also uses seven 3-CH slots."
+  },
+  {
+    "rule_id": "R23-048",
+    "regulation": 2023,
+    "program": "CAIE",
+    "rule_type": "CONCENTRATION_ELECTIVE_MINIMUM",
+    "conditions": {
+      "among_technical_electives": 7
+    },
+    "result": {
+      "min_courses_from_one_concentration": 5
+    },
+    "source_text": {
+      "condition": "Among seven technical electives",
+      "threshold_or_value": 5,
+      "unit": "courses",
+      "effect": "At least five electives must come from one concentration."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 81,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "NEEDS_VERIFICATION",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": "Selection-count rule is clear, but total elective CH conflicts with the required-courses table."
+  },
+  {
+    "rule_id": "R23-049",
+    "regulation": 2023,
+    "program": "CAIE",
+    "rule_type": "ELECTIVE_SLOT_CREDIT_TOTAL",
+    "conditions": {},
+    "result": {
+      "slot_count": 7,
+      "credits_per_slot": 3,
+      "implied_total_credit_hours": 21
+    },
+    "source_text": {
+      "condition": "Seven CAIE elective slots in Required Courses table",
+      "threshold_or_value": "3 CH each",
+      "unit": "table values",
+      "effect": "Seven slots imply 21 CH."
+    },
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 84,
+    "section_if_known": null,
+    "extraction_method": "CURATED_RULE_STRUCTURING",
+    "verification_status": "NEEDS_VERIFICATION",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "critical_for_planner": true,
+    "planner_usable": false,
+    "conflict_ids": [],
+    "notes": "Conflicts with page 81 statement that seven technical electives total 18 CH."
+  }
+]

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "academic_rule.schema.json",
+  "title": "AcademicRule",
+  "type": "object",
+  "required": [
+    "rule_id",
+    "regulation",
+    "program",
+    "rule_type",
+    "conditions",
+    "result",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "rule_id": {
+      "type": "string"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "program": {
+      "type": "string"
+    },
+    "rule_type": {
+      "type": "string"
+    },
+    "conditions": {
+      "type": "object"
+    },
+    "result": {
+      "type": "object"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_page": {
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ]
+    },
+    "section_if_known": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extraction_method": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "critical_for_planner": {
+      "type": "boolean"
+    },
+    "planner_usable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

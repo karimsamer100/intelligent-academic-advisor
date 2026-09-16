@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "prerequisite.schema.json",
+  "title": "PrerequisiteRule",
+  "type": "object",
+  "required": [
+    "prerequisite_rule_id",
+    "course_id",
+    "regulation",
+    "program",
+    "rule_type",
+    "expression",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "prerequisite_rule_id": {
+      "type": "string"
+    },
+    "course_id": {
+      "type": "string"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "program": {
+      "type": "string"
+    },
+    "rule_type": {
+      "type": "string",
+      "enum": [
+        "PREREQUISITE",
+        "CONDITIONAL_PREREQUISITE",
+        "ENTRY_REQUIREMENT",
+        "COREQUISITE"
+      ]
+    },
+    "expression": {
+      "$ref": "#/$defs/expression"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_page": {
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ]
+    },
+    "section_if_known": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extraction_method": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "conflict_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "planner_usable": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "expression": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "conditions"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "AND",
+                "OR"
+              ]
+            },
+            "conditions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/expression"
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "COURSE_PASSED",
+                "CONDITIONAL_COURSE_PASSED",
+                "CONCURRENT_COURSE",
+                "MIN_EARNED_CREDITS",
+                "MIN_GRADE",
+                "ENTRY_REQUIREMENT",
+                "UNRESOLVED_CONDITION"
+              ]
+            },
+            "course_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "course_code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "code": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "value": {},
+            "condition_note": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "reason": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    }
+  },
+  "additionalProperties": true
+}

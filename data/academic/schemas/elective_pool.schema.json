@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "elective_pool.schema.json",
+  "title": "ElectivePool",
+  "type": "object",
+  "required": [
+    "pool_id",
+    "regulation",
+    "program",
+    "pool_name",
+    "allowed_course_codes",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "pool_id": {
+      "type": "string"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "program": {
+      "type": "string"
+    },
+    "pool_name": {
+      "type": "string"
+    },
+    "pool_type": {
+      "type": "string"
+    },
+    "allowed_courses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowed_course_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_number_of_courses": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "required_credit_hours": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "selection_rules": {
+      "type": "object"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

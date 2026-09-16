@@ -1,0 +1,1544 @@
+[
+  {
+    "uel_module_id": "R18:UEL:CESS3001",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS3001",
+    "collaborative_module_code": "CESS3001",
+    "module_name": "Mathematics for Computing and Engineering",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM111",
+        "asu_course_name": "Probability and Statistics",
+        "weight_percent": 40
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM113",
+        "asu_course_name": "Differential Equations and Partial Differential Equations",
+        "weight_percent": 60
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS3002",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS3002",
+    "collaborative_module_code": "CESS3002",
+    "module_name": "Analog and Digital Circuits",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "EPM118",
+        "asu_course_name": "Electrical and Electronic Circuits",
+        "weight_percent": 60
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "EPM211",
+        "asu_course_name": "Properties of Electrical Materials",
+        "weight_percent": 40
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS3003",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS3003",
+    "collaborative_module_code": "CESS3003",
+    "module_name": "Computer Programming",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE131",
+        "asu_course_name": "Computer Programming",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE231",
+        "asu_course_name": "Advanced Computer Programming",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS3004",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS3004",
+    "collaborative_module_code": "CESS3004",
+    "module_name": "Software Development 1",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE334",
+        "asu_course_name": "Software Engineering",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM114",
+        "asu_course_name": "Numerical Analysis",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS3005",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS3005",
+    "collaborative_module_code": "CESS3005",
+    "module_name": "Computer Architecture",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE111",
+        "asu_course_name": "Logic Design",
+        "weight_percent": 40
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE112",
+        "asu_course_name": "Computer Organization and Architecture",
+        "weight_percent": 60
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS3006",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS3006",
+    "collaborative_module_code": "CESS3006",
+    "module_name": "Mental Wealth and Professional Fitness: Report Writing and Communication",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ASU112",
+        "asu_course_name": "Report Writing and Communication Skills",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS4001",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS4001",
+    "collaborative_module_code": "CESS4001",
+    "module_name": "Data Structures and Algorithms",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE331",
+        "asu_course_name": "Data Structures and Algorithms",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE332",
+        "asu_course_name": "Design and Analysis of Algorithms",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS4002",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS4002",
+    "collaborative_module_code": "CESS4002",
+    "module_name": "Software Development 2",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE232",
+        "asu_course_name": "Advanced Software Engineering",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE338",
+        "asu_course_name": "Software Testing, Validation and Verification",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS4003",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS4003",
+    "collaborative_module_code": "CESS4003",
+    "module_name": "Database Systems and Artificial Intelligence",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE333",
+        "asu_course_name": "Database Systems",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE472",
+        "asu_course_name": "Artificial Intelligence",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS4004",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS4004",
+    "collaborative_module_code": "CESS4004",
+    "module_name": "Engineering Systems",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ECE251",
+        "asu_course_name": "Signals and Systems Fundamentals",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE312",
+        "asu_course_name": "Electronic Design Automation",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS4005",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS4005",
+    "collaborative_module_code": "CESS4005",
+    "module_name": "Operating Systems and Design of Compilers",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE335",
+        "asu_course_name": "Operating Systems",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE439",
+        "asu_course_name": "Design of Compilers",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS4006",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS4006",
+    "collaborative_module_code": "CESS4006",
+    "module_name": "Mental Wealth and Professional Fitness: Human Rights",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ASU111",
+        "asu_course_name": "Human Rights",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS5001",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS5001",
+    "collaborative_module_code": "CESS5001",
+    "module_name": "Embedded Systems",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE211",
+        "asu_course_name": "Introduction to Embedded Systems",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE411",
+        "asu_course_name": "Real-time and Embedded Systems Design",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS5002",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS5002",
+    "collaborative_module_code": "CESS5002",
+    "module_name": "Software Engineering 1",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE233",
+        "asu_course_name": "Agile Software Engineering",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS5003",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS5003",
+    "collaborative_module_code": "CESS5003",
+    "module_name": "Computer Networks and Distributed Systems",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE351",
+        "asu_course_name": "Computer Networks",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE354",
+        "asu_course_name": "Distributed Computing",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS5004",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS5004",
+    "collaborative_module_code": "CESS5004",
+    "module_name": "Computer Vision",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE483",
+        "asu_course_name": "Computer Vision",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS5005",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS5005",
+    "collaborative_module_code": "CESS5005",
+    "module_name": "Internet Programming",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE341",
+        "asu_course_name": "Internet Programming",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 10,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS5006",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS5006",
+    "collaborative_module_code": "CESS5006",
+    "module_name": "Mental Wealth and Professional Fitness: Engineering Economy and Investments",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "EPM119",
+        "asu_course_name": "Engineering Economy and Investments",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 10,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS6001",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS6001",
+    "collaborative_module_code": "CESS6001",
+    "module_name": "High-Performance and Mobile Computing",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE455",
+        "asu_course_name": "High-Performance Computing",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE431",
+        "asu_course_name": "Mobile Computing",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 10,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS6002",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS6002",
+    "collaborative_module_code": "CESS6002",
+    "module_name": "Software Engineering 2",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE336",
+        "asu_course_name": "Software Design Patterns",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE441",
+        "asu_course_name": "Software Project Management",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 10,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS6003",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS6003",
+    "collaborative_module_code": "CESS6003",
+    "module_name": "Computer and Network Security",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE451",
+        "asu_course_name": "Computer and Network Security",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 10,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS6004",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS6004",
+    "collaborative_module_code": "CESS6004",
+    "module_name": "Computer & Systems Engineering Graduation Project (1)",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE491",
+        "asu_course_name": "Computer & Systems Engineering Graduation Project (1)",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 10,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS6005",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS6005",
+    "collaborative_module_code": "CESS6005",
+    "module_name": "Computer & Systems Engineering Graduation Project (2)",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE492",
+        "asu_course_name": "Computer & Systems Engineering Graduation Project (2)",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 11,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R18:UEL:CESS6006",
+    "regulation": 2018,
+    "asu_program": "CESS",
+    "module_code": "CESS6006",
+    "collaborative_module_code": "CESS6006",
+    "module_name": "Mental Wealth and Professional Fitness: Professional Ethics",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ASU113",
+        "asu_course_name": "Professional Ethics and Legislations",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+    "source_file": "Collaborative Course Handbook - NAF.pdf",
+    "source_page": 11,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN3308",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN3308",
+    "collaborative_module_code": "CESS3007",
+    "module_name": "Mathematics for Computing and Engineering",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM112",
+        "asu_course_name": "Mathematics (2)",
+        "weight_percent": 60
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM113",
+        "asu_course_name": "Probability and Statistics",
+        "weight_percent": 40
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 5,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN3306",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN3306",
+    "collaborative_module_code": "CESS3008",
+    "module_name": "Analog and Digital Circuits",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM123",
+        "asu_course_name": "Introduction to Physical Electronics",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 5,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN3307",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN3307",
+    "collaborative_module_code": "CESS3009",
+    "module_name": "Computer Programming",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE141",
+        "asu_course_name": "Introduction to Computer Programming",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 5,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN3309",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN3309",
+    "collaborative_module_code": "CESS3010",
+    "module_name": "Software Development 1",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE142",
+        "asu_course_name": "Introduction to Software Engineering",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "PHM114",
+        "asu_course_name": "Introduction to Discrete Mathematics",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 5,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN3305",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN3305",
+    "collaborative_module_code": "CESS3011",
+    "module_name": "Logic Design",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE121",
+        "asu_course_name": "Introduction to Logic Design",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 5,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN3010",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN3010",
+    "collaborative_module_code": "CESS3006",
+    "module_name": "Mental Wealth and Professional Fitness: Report Writing and Communication",
+    "credits": 20,
+    "ects": 10,
+    "level": 3,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ASUx48",
+        "asu_course_name": "Scientific Research",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 5,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN4023",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN4023",
+    "collaborative_module_code": "CESS4001",
+    "module_name": "Data Structures and Algorithms",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE243",
+        "asu_course_name": "Data Structures and Problem Solving",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE245",
+        "asu_course_name": "Advanced Algorithms and Complexity",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN4022",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN4022",
+    "collaborative_module_code": "CESS4002",
+    "module_name": "Software Development 2",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE242",
+        "asu_course_name": "Advanced Software Engineering",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN4017",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN4017",
+    "collaborative_module_code": "CESS4003",
+    "module_name": "Database Systems and Artificial Intelligence",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE244",
+        "asu_course_name": "Database Systems Design",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE281",
+        "asu_course_name": "Introduction to Artificial Intelligence",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN4018",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN4018",
+    "collaborative_module_code": "CESS4004",
+    "module_name": "Engineering Systems",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE221",
+        "asu_course_name": "Logic Design and Computer Organization",
+        "weight_percent": 60
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ECE261",
+        "asu_course_name": "Signals and Systems Fundamentals",
+        "weight_percent": 40
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN4021",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN4021",
+    "collaborative_module_code": "CESS4005",
+    "module_name": "Operating Systems and Design of Compilers",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE246",
+        "asu_course_name": "Design of Operating Systems",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE247",
+        "asu_course_name": "Design of Compilers",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 6,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN4019",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN4019",
+    "collaborative_module_code": "CESS4006",
+    "module_name": "Mental Wealth and Professional Fitness: Human Rights",
+    "credits": 20,
+    "ects": 10,
+    "level": 4,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ASUx12",
+        "asu_course_name": "Selected Topics in Contemporary Issues",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN5028",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN5028",
+    "collaborative_module_code": "CESS5001",
+    "module_name": "Embedded Systems",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE322",
+        "asu_course_name": "Introduction to Embedded Systems",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE323",
+        "asu_course_name": "Advanced Embedded Systems Design",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN5031",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN5031",
+    "collaborative_module_code": "CESS5002",
+    "module_name": "Software Engineering 1",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE342",
+        "asu_course_name": "Agile Software Development",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN5026",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN5026",
+    "collaborative_module_code": "CESS5003",
+    "module_name": "Computer Networks and Distributed Systems",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE361",
+        "asu_course_name": "Computer Networking",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE362",
+        "asu_course_name": "Distributed Computing",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN5027",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN5027",
+    "collaborative_module_code": "CESS5004",
+    "module_name": "Computer Vision",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE381",
+        "asu_course_name": "Image Processing",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE382",
+        "asu_course_name": "Introduction to Machine Learning",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 7,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN5029",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN5029",
+    "collaborative_module_code": "CESS5005",
+    "module_name": "Internet Programming",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE343",
+        "asu_course_name": "Web Development",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN5030",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN5030",
+    "collaborative_module_code": "CESS5006",
+    "module_name": "Mental Wealth and Professional Fitness: Engineering Economy and Investments",
+    "credits": 20,
+    "ects": 10,
+    "level": 5,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "EPM111",
+        "asu_course_name": "Engineering Economy and Investments",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN6032",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN6032",
+    "collaborative_module_code": "CESS6001",
+    "module_name": "High-Performance and Mobile Computing",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE421",
+        "asu_course_name": "High-Performance Computing",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE442",
+        "asu_course_name": "Mobile Applications Development",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN6034",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN6034",
+    "collaborative_module_code": "CESS6002",
+    "module_name": "Software Engineering 2",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE441",
+        "asu_course_name": "Design Patterns",
+        "weight_percent": 50
+      },
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE443",
+        "asu_course_name": "Software Product Management",
+        "weight_percent": 50
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN6031",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN6031",
+    "collaborative_module_code": "CESS6003",
+    "module_name": "Computer and Network Security",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE461",
+        "asu_course_name": "Cryptography and Security",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN6028",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN6028",
+    "collaborative_module_code": "CESS6004",
+    "module_name": "Computer & Systems Engineering Graduation Project (1)",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE493",
+        "asu_course_name": "CAIE Graduation Project (1)",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 8,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN6029",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN6029",
+    "collaborative_module_code": "CESS6005",
+    "module_name": "Computer & Systems Engineering Graduation Project (2)",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "CSE494",
+        "asu_course_name": "CAIE Graduation Project (2)",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  },
+  {
+    "uel_module_id": "R23:UEL:CN6033",
+    "regulation": 2023,
+    "asu_program": "CAIE",
+    "module_code": "CN6033",
+    "collaborative_module_code": "CESS6006",
+    "module_name": "Mental Wealth and Professional Fitness: Professional Ethics",
+    "credits": 20,
+    "ects": 10,
+    "level": 6,
+    "semester_or_term": null,
+    "module_status": "Core",
+    "assessment_components": [
+      {
+        "component_type": "ASU_COURSE_COMPONENT",
+        "asu_course_code": "ASUx47",
+        "asu_course_name": "Professional Ethics",
+        "weight_percent": 100
+      }
+    ],
+    "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_CAIE_25_26_PDF",
+    "source_file": "Collaborative Course Handbook CAIE 25-26.pdf",
+    "source_page": 9,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "SOURCE_VERIFIED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "All UEL modules are stated as core in the collaborative handbook."
+  }
+]

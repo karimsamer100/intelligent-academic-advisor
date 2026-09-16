@@ -1,0 +1,1063 @@
+[
+  {
+    "test_id": "GT18-001",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [],
+      "requested_course": "PHM013"
+    },
+    "question_or_action": "Can I take PHM013?",
+    "expected_result": {
+      "eligible": false,
+      "missing_prerequisites": [
+        "PHM012"
+      ]
+    },
+    "expected_reason": "PHM013 requires PHM012.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 8,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-002",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "PHM012"
+      ],
+      "requested_course": "PHM013"
+    },
+    "question_or_action": "I passed PHM012. Can I take PHM013?",
+    "expected_result": {
+      "eligible": true,
+      "missing_prerequisites": []
+    },
+    "expected_reason": "PHM012 is the listed prerequisite for PHM013.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 8,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-003",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE111"
+      ],
+      "requested_course": "CSE112"
+    },
+    "question_or_action": "I passed CSE111 only. Can I take CSE112?",
+    "expected_result": {
+      "eligible": false,
+      "missing_prerequisites": [
+        "CSE131"
+      ]
+    },
+    "expected_reason": "CSE112 requires both CSE111 and CSE131.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 9,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-004",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE111",
+        "CSE131"
+      ],
+      "requested_course": "CSE112"
+    },
+    "question_or_action": "I passed CSE111 and CSE131. Can I take CSE112?",
+    "expected_result": {
+      "eligible": true,
+      "missing_prerequisites": []
+    },
+    "expected_reason": "Both listed prerequisites are satisfied.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 9,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-005",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE131"
+      ],
+      "requested_course": "CSE232"
+    },
+    "question_or_action": "Can I take CSE232 if I have not passed CSE334?",
+    "expected_result": {
+      "eligible": false,
+      "missing_prerequisites": [
+        "CSE334"
+      ]
+    },
+    "expected_reason": "CSE232 requires CSE334.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 9,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-006",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE331"
+      ],
+      "requested_course": "CSE332"
+    },
+    "question_or_action": "I passed CSE331. Can I register CSE332?",
+    "expected_result": {
+      "eligible": true,
+      "missing_prerequisites": []
+    },
+    "expected_reason": "CSE331 is the listed prerequisite for CSE332.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 9,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-007",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Graduation Project",
+    "student_state": {
+      "completed_courses": [],
+      "earned_credit_hours": 129,
+      "requested_course": "CSE491"
+    },
+    "question_or_action": "I have completed 129 credit hours. Can I start the graduation project?",
+    "expected_result": {
+      "threshold_satisfied": false,
+      "required_earned_credit_hours": 130
+    },
+    "expected_reason": "Regulation 2018 requires at least 130 earned CH before graduation-project registration.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-008",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Graduation Project",
+    "student_state": {
+      "completed_courses": [],
+      "earned_credit_hours": 130,
+      "requested_course": "CSE491"
+    },
+    "question_or_action": "I have completed 130 credit hours. Do I satisfy the project credit threshold?",
+    "expected_result": {
+      "threshold_satisfied": true,
+      "required_earned_credit_hours": 130
+    },
+    "expected_reason": "The 130-CH registration threshold is satisfied; other registration conditions may still apply.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-009",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Graduation Project",
+    "student_state": {
+      "completed_courses": [],
+      "requested_course": "CSE492"
+    },
+    "question_or_action": "Can I take CSE492 before CSE491?",
+    "expected_result": {
+      "eligible": false,
+      "missing_prerequisites": [
+        "CSE491"
+      ]
+    },
+    "expected_reason": "The study plan lists CSE491 before CSE492 and the degree rule requires project parts in order.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 10,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-010",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Graduation",
+    "student_state": {
+      "completed_credit_hours": 170,
+      "gpa": 1.9,
+      "zero_credit_courses_passed": true,
+      "training_weeks": 12,
+      "graduation_project_passed": true
+    },
+    "question_or_action": "I finished 170 credits but my GPA is 1.9. Can I graduate?",
+    "expected_result": {
+      "graduation_requirements_met": false,
+      "blocking_reason": "GPA below 2.0"
+    },
+    "expected_reason": "Graduation GPA must be at least 2.0.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-011",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Graduation",
+    "student_state": {
+      "completed_credit_hours": 170,
+      "gpa": 2.0,
+      "zero_credit_courses_passed": true,
+      "training_weeks": 12,
+      "graduation_project_passed": true
+    },
+    "question_or_action": "I completed 170 credits, GPA 2.0, passed zero-credit courses and project, and finished 12 weeks training. Do I meet the listed CESS graduation requirements?",
+    "expected_result": {
+      "listed_graduation_requirements_met": true
+    },
+    "expected_reason": "These values satisfy the graduation requirements explicitly listed in the CESS bylaw.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-012",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Electives",
+    "student_state": {
+      "technical_elective_courses": 7,
+      "technical_elective_credit_hours": 18,
+      "max_courses_from_one_concentration": 4
+    },
+    "question_or_action": "I chose seven technical electives totaling 18 credits, but only four are from the same concentration. Is that valid?",
+    "expected_result": {
+      "valid": false,
+      "required_same_concentration_courses": 5
+    },
+    "expected_reason": "At least five of the seven technical electives must be from one concentration.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 7,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-013",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Electives",
+    "student_state": {
+      "technical_elective_courses": 7,
+      "technical_elective_credit_hours": 18,
+      "max_courses_from_one_concentration": 5
+    },
+    "question_or_action": "I chose seven technical electives totaling 18 credits and five are from one concentration. Does this satisfy the concentration selection rule?",
+    "expected_result": {
+      "valid": true
+    },
+    "expected_reason": "The source requires seven technical electives totaling 18 CH with at least five from one field.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 7,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT18-014",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Field Training",
+    "student_state": {
+      "completed_training_weeks": 8
+    },
+    "question_or_action": "I completed 8 weeks of field training. Is the 2018 training requirement complete?",
+    "expected_result": {
+      "training_requirement_met": false,
+      "required_weeks": 12
+    },
+    "expected_reason": "Regulation 2018 requires 12 weeks of field training.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-001",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE141"
+      ],
+      "requested_course": "CSE221"
+    },
+    "question_or_action": "I passed CSE141 but not CSE121. Can I take CSE221?",
+    "expected_result": {
+      "eligible": false,
+      "missing_prerequisites": [
+        "CSE121"
+      ]
+    },
+    "expected_reason": "CSE221 requires CSE141 AND CSE121.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 85,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-002",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE141",
+        "CSE121"
+      ],
+      "requested_course": "CSE221"
+    },
+    "question_or_action": "I passed CSE141 and CSE121. Can I take CSE221?",
+    "expected_result": {
+      "eligible": true,
+      "missing_prerequisites": []
+    },
+    "expected_reason": "Both listed prerequisites for CSE221 are satisfied.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 85,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-003",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Eligibility",
+    "student_state": {
+      "completed_courses": [
+        "CSE241",
+        "CSE361"
+      ],
+      "requested_course": "CSE362"
+    },
+    "question_or_action": "I passed CSE241 and CSE361. Can I take CSE362?",
+    "expected_result": {
+      "eligible": true,
+      "missing_prerequisites": []
+    },
+    "expected_reason": "CSE362 requires CSE241 AND CSE361.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 86,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-004",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Registration Load",
+    "student_state": {
+      "semester_type": "main",
+      "cumulative_gpa": 3.2,
+      "requested_credit_hours": 24,
+      "requested_course_count": 9
+    },
+    "question_or_action": "My GPA is 3.2. Can I register 24 credits in 9 courses in a main semester?",
+    "expected_result": {
+      "within_normal_limit": false
+    },
+    "expected_reason": "The source allows up to 21 CH or 8 courses, whichever is greater; this request exceeds both stated limits.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-005",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Registration Load",
+    "student_state": {
+      "semester_type": "main",
+      "cumulative_gpa": 2.5,
+      "requested_credit_hours": 20,
+      "requested_course_count": 8
+    },
+    "question_or_action": "My GPA is 2.5. Can I register 20 credits in 8 courses?",
+    "expected_result": {
+      "within_normal_limit": false
+    },
+    "expected_reason": "The source allows up to 18 CH or 7 courses, whichever is greater; this request exceeds both.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-006",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Registration Load",
+    "student_state": {
+      "semester_type": "main",
+      "cumulative_gpa": 1.8,
+      "requested_credit_hours": 15,
+      "requested_course_count": 6
+    },
+    "question_or_action": "My GPA is 1.8. Can I register 15 credits in 6 courses?",
+    "expected_result": {
+      "within_normal_limit": false
+    },
+    "expected_reason": "The source allows up to 14 CH or 5 courses, whichever is greater; this request exceeds both.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-007",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Registration Load",
+    "student_state": {
+      "semester_type": "summer",
+      "cumulative_gpa": 3.1,
+      "requested_credit_hours": 10,
+      "requested_course_count": 4
+    },
+    "question_or_action": "My GPA is 3.1. Can I take 10 credits in 4 summer courses?",
+    "expected_result": {
+      "within_normal_limit": false
+    },
+    "expected_reason": "Summer limit for GPA >=3.0 is up to 9 CH or 3 courses, whichever is greater; request exceeds both.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 12,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-008",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Graduation",
+    "student_state": {
+      "completed_credit_hours": 144,
+      "gpa": 1.9,
+      "zero_credit_courses_passed": true,
+      "training_weeks": 8
+    },
+    "question_or_action": "I completed the CAIE credits but my GPA is 1.9. Can I graduate?",
+    "expected_result": {
+      "graduation_requirements_met": false,
+      "blocking_reason": "GPA below 2.0"
+    },
+    "expected_reason": "Graduation requires GPA of at least 2.0.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-009",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Graduation Project",
+    "student_state": {
+      "completed_program_percentage": 69
+    },
+    "question_or_action": "I completed 69% of my program credits. Can I register a graduation-project course?",
+    "expected_result": {
+      "threshold_satisfied": false,
+      "required_percentage": 70
+    },
+    "expected_reason": "At least 70% of total program credit hours must be passed before graduation-project registration.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-010",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Graduation Project",
+    "student_state": {
+      "completed_program_percentage": 70
+    },
+    "question_or_action": "I completed 70% of my program credits. Do I satisfy the graduation-project credit threshold?",
+    "expected_result": {
+      "threshold_satisfied": true,
+      "required_percentage": 70
+    },
+    "expected_reason": "The 70% program-completion threshold is satisfied; other course-specific conditions may still apply.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-011",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Field Training",
+    "student_state": {
+      "completed_training_weeks": 7
+    },
+    "question_or_action": "I completed seven weeks of field training. Is the Regulation 2023 training requirement complete?",
+    "expected_result": {
+      "training_requirement_met": false,
+      "required_weeks": 8
+    },
+    "expected_reason": "Regulation 2023 requires eight weeks of field training.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-012",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Withdrawal",
+    "student_state": {
+      "semester_type": "main",
+      "week": 9
+    },
+    "question_or_action": "Can I withdraw from a course during week 9 of a main semester?",
+    "expected_result": {
+      "withdrawal_allowed_by_deadline": true
+    },
+    "expected_reason": "Withdrawal is allowed within the first ten weeks of a main semester.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-013",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Withdrawal",
+    "student_state": {
+      "semester_type": "main",
+      "week": 11
+    },
+    "question_or_action": "Can I withdraw from a course during week 11 of a main semester?",
+    "expected_result": {
+      "withdrawal_allowed_by_deadline": false
+    },
+    "expected_reason": "The normal withdrawal deadline is within the first ten weeks of a main semester.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-014",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Academic Standing",
+    "student_state": {
+      "cumulative_gpa": 1.9,
+      "semester_type": "main"
+    },
+    "question_or_action": "My cumulative GPA is 1.9 after a main semester. Do I receive an academic warning?",
+    "expected_result": {
+      "academic_warning": true
+    },
+    "expected_reason": "Academic warning applies when cumulative GPA is less than 2.0 at a main semester.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": null
+  },
+  {
+    "test_id": "GT23-015",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Data Conflict",
+    "student_state": {
+      "technical_elective_courses": 7
+    },
+    "question_or_action": "How many CAIE technical-elective credit hours must I complete: 18 or 21?",
+    "expected_result": {
+      "result": "REQUIRES_HUMAN_REVIEW",
+      "conflict": [
+        "18 CH stated in concentration text",
+        "21 CH implied by seven 3-CH elective slots"
+      ]
+    },
+    "expected_reason": "The supplied Regulation 2023 sources conflict on the CAIE technical-elective credit total.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": "81 & 84",
+    "expected_human_review": true,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Do not let the planner auto-resolve this value."
+  },
+  {
+    "test_id": "GT23-016",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Data Conflict",
+    "student_state": {
+      "requested_course": "CSE493"
+    },
+    "question_or_action": "Is CSE392 a strict prerequisite for CSE493, or can it be concurrent?",
+    "expected_result": {
+      "result": "REQUIRES_HUMAN_REVIEW",
+      "conflict": [
+        "Bylaw baseline: CSE392 prerequisite",
+        "23P course tree: CSE392 or concurrent"
+      ]
+    },
+    "expected_reason": "The supplied 2023 sources disagree on CSE493 prerequisite handling.",
+    "source_id": "SRC-BYLAW_2023_PDF",
+    "source_file": "Bylaw 2023.pdf / 23P - CAIE - course tree.pdf",
+    "source_page": "conflict rows",
+    "expected_human_review": true,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Existing 2023 Conflicts sheet records this discrepancy.",
+    "additional_source_ids": [
+      "SRC-23P_CAIE_COURSE_TREE_PDF"
+    ]
+  },
+  {
+    "test_id": "GT23-017",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Course Repeat",
+    "student_state": {
+      "previous_grade": "F",
+      "retake_raw_grade": "A"
+    },
+    "question_or_action": "What is the maximum grade after repeating a course previously failed with F?",
+    "expected_result": {
+      "max_allowed_grade": "B+"
+    },
+    "expected_reason": "Maximum grade after repeating a failed course is B+.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-018",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Course Repeat",
+    "student_state": {
+      "improvement_repeats_used": 5,
+      "has_exception": false
+    },
+    "question_or_action": "Can I repeat another already-passed course only to improve my grade?",
+    "expected_result": {
+      "allowed": false,
+      "reason": "normal improvement repeat limit reached"
+    },
+    "expected_reason": "Maximum five improvement repeats during study, except specified probation/graduation cases.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 14,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-019",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Attendance",
+    "student_state": {
+      "tutorial_lab_attendance_percent": 74
+    },
+    "question_or_action": "Can I continue to final assessment with 74% tutorial/lab attendance?",
+    "expected_result": {
+      "allowed_final_assessment": false,
+      "course_outcome": "FAIL"
+    },
+    "expected_reason": "Below threshold student is considered failed and not allowed technical/final assessment.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-020",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Assessment",
+    "student_state": {
+      "final_assessment_percent": 39,
+      "overall_mark_percent": 80
+    },
+    "question_or_action": "Can I pass if my overall mark is high but I scored 39% of final-assessment marks?",
+    "expected_result": {
+      "pass": false
+    },
+    "expected_reason": "Below this threshold student fails regardless of overall marks.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-021",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Assessment",
+    "student_state": {
+      "final_assessment_percent": 60,
+      "overall_mark_percent": 59
+    },
+    "question_or_action": "Can I pass with an overall course mark of 59%?",
+    "expected_result": {
+      "pass": false
+    },
+    "expected_reason": "F grade if total course mark is less than 60%.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-022",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Academic Standing",
+    "student_state": {
+      "cumulative_gpa": 2.1,
+      "term_type": "MAIN"
+    },
+    "question_or_action": "Do I receive the GPA academic warning at CGPA 2.1?",
+    "expected_result": {
+      "academic_warning": false
+    },
+    "expected_reason": "Academic warning if cumulative GPA is less than 2.0.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-023",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Dismissal",
+    "student_state": {
+      "consecutive_unregistered_main_semesters": 3,
+      "acceptable_excuse": false
+    },
+    "question_or_action": "What happens after more than two main semesters without registration and no acceptable excuse?",
+    "expected_result": {
+      "dismissal_condition_met": true
+    },
+    "expected_reason": "Student is dismissed if not registered for more than two main semesters.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 15,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-024",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Honours",
+    "student_state": {
+      "cgpa": 3.6,
+      "all_semester_gpas_at_least_3_3": true,
+      "failed_course_count": 1,
+      "disciplinary_penalty": false
+    },
+    "question_or_action": "Do I satisfy the listed honours conditions if I previously failed one course?",
+    "expected_result": {
+      "honours_eligible": false
+    },
+    "expected_reason": "All listed conditions are required.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 16,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-025",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Add/Drop",
+    "student_state": {
+      "term_type": "SUMMER",
+      "day": 4
+    },
+    "question_or_action": "Can I add a course on day 4 of the summer semester under the normal deadline?",
+    "expected_result": {
+      "add_allowed_by_deadline": false
+    },
+    "expected_reason": "Student may add courses during first three days of summer semester.",
+    "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+    "source_file": "Bylaw 2023 Brief-ICHEP.pdf",
+    "source_page": 13,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT18-015",
+    "regulation": 2018,
+    "program": "CESS",
+    "category": "Credit Rules",
+    "student_state": {
+      "external_transferred_credit_hours": 69,
+      "prior_approval": true
+    },
+    "question_or_action": "Can 69 external credit hours count toward Regulation 2018 graduation?",
+    "expected_result": {
+      "within_transfer_limit": false,
+      "max_credit_hours": 68
+    },
+    "expected_reason": "Transferred credits counted toward graduation must not exceed 68 CH.",
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "source_file": "CESS New Bylaw 2018.pdf",
+    "source_page": 11,
+    "expected_human_review": false,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "PENDING_ACADEMIC_REVIEW",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  },
+  {
+    "test_id": "GT23-026",
+    "regulation": 2023,
+    "program": "CAIE",
+    "category": "Conflict / Unsupported",
+    "student_state": {
+      "requested_course": "CSE486"
+    },
+    "question_or_action": "What is the complete prerequisite for CSE486?",
+    "expected_result": {
+      "requires_human_review": true,
+      "reason": "official source prerequisite is incomplete"
+    },
+    "expected_reason": "The supplied official source shows an incomplete prerequisite expression and the missing course must not be inferred.",
+    "source_id": "SRC-BYLAW_2023_PDF",
+    "source_file": "Bylaw 2023.pdf",
+    "source_page": 607,
+    "expected_human_review": true,
+    "verification_status": "SOURCE_VERIFIED",
+    "approval_status": "BLOCKED",
+    "approved_by": null,
+    "approved_at": null,
+    "notes": "Additional source-derived coverage generated from structured academic rules."
+  }
+]

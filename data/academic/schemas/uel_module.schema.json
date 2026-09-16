@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "uel_module.schema.json",
+  "title": "UELModule",
+  "type": "object",
+  "required": [
+    "uel_module_id",
+    "regulation",
+    "module_code",
+    "module_name",
+    "credits",
+    "level",
+    "assessment_components",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "uel_module_id": {
+      "type": "string"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "module_code": {
+      "type": "string"
+    },
+    "module_name": {
+      "type": "string"
+    },
+    "credits": {
+      "type": "number"
+    },
+    "level": {
+      "type": "integer"
+    },
+    "semester_or_term": {
+      "type": [
+        "string",
+        "integer",
+        "null"
+      ]
+    },
+    "assessment_components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "component_type",
+          "weight_percent"
+        ],
+        "properties": {
+          "component_type": {
+            "type": "string"
+          },
+          "asu_course_code": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "weight_percent": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

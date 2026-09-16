@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "uel_mapping.schema.json",
+  "title": "UELASUMapping",
+  "type": "object",
+  "required": [
+    "mapping_id",
+    "regulation",
+    "uel_module_id",
+    "asu_course_id",
+    "mapping_type",
+    "weight_percent",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "mapping_id": {
+      "type": "string"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "uel_module_id": {
+      "type": "string"
+    },
+    "asu_course_id": {
+      "type": "string"
+    },
+    "mapping_type": {
+      "type": "string"
+    },
+    "weight_percent": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

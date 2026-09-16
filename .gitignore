@@ -13,6 +13,19 @@ __pycache__/
 .venv/
 venv/
 
+# Handoff archives
+*.zip
+
+# Local databases and runtime storage
+*.sqlite
+*.sqlite3
+*.db
+runtime/
+storage/
+
+# JavaScript dependencies
+node_modules/
+
 # IDE
 .vscode/
 .idea/

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "program_requirement.schema.json",
+  "title": "ProgramRequirement",
+  "type": "object",
+  "required": [
+    "requirement_id",
+    "regulation",
+    "program",
+    "requirement_type",
+    "requirement_group",
+    "source_id",
+    "approval_status"
+  ],
+  "properties": {
+    "requirement_id": {
+      "type": "string"
+    },
+    "regulation": {
+      "type": "integer",
+      "enum": [
+        2018,
+        2023
+      ]
+    },
+    "program": {
+      "type": "string"
+    },
+    "requirement_type": {
+      "type": "string"
+    },
+    "requirement_group": {
+      "type": "string"
+    },
+    "required_courses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_credit_hours": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "min_courses": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "max_courses": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "elective_pool_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "conditions": {
+      "type": "object"
+    },
+    "source_id": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_page": {
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ]
+    },
+    "section_if_known": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "extraction_method": {
+      "type": "string"
+    },
+    "verification_status": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "EXTRACTED",
+        "SOURCE_VERIFIED",
+        "ACADEMICALLY_REVIEWED",
+        "APPROVED",
+        "BLOCKED",
+        "SUPERSEDED",
+        "PENDING_ACADEMIC_REVIEW"
+      ]
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "planner_usable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

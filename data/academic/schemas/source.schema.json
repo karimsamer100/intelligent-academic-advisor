@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "source.schema.json",
+  "title": "Source",
+  "type": "object",
+  "required": [
+    "source_id",
+    "file_name",
+    "document_type",
+    "relative_path",
+    "sha256",
+    "official_status"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string"
+    },
+    "file_name": {
+      "type": "string"
+    },
+    "document_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "regulations": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "effective_year": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "official_status": {
+      "type": "string"
+    },
+    "relative_path": {
+      "type": "string"
+    },
+    "page_count": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "used_for_structured_data": {
+      "type": "boolean"
+    },
+    "used_for_rag": {
+      "type": "boolean"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authority_level": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "authority_precedence": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "original_relative_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "size_bytes": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "rag_ingest_recommended": {
+      "type": "boolean"
+    },
+    "classification": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_role": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "project_priority": {
+      "type": [
+        "integer",
+        "number",
+        "null"
+      ]
+    },
+    "duplicate_or_superseded_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": true
+}
