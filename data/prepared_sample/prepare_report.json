@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "sources": 3,
+  "chunks": 80,
+  "source_ids": [
+    "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+    "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF"
+  ],
+  "fresh_extraction": false
+}

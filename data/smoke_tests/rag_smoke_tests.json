@@ -1,0 +1,80 @@
+[
+  {
+    "case_id": "RAG-EXACT-2023-CREDIT-LOAD",
+    "query": "GPA >= 3.0: up to 21 credit hours",
+    "filters": {
+      "regulation": 2023,
+      "document_types": [
+        "REGULATION"
+      ],
+      "language": "en"
+    },
+    "expected_source": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+    "expected_page": 8,
+    "expected_regulation": 2023
+  },
+  {
+    "case_id": "RAG-PARAPHRASE-2023-CREDIT-LOAD",
+    "query": "How many credits can a student with a GPA of at least 3 register in a main semester?",
+    "filters": {
+      "regulation": 2023,
+      "document_types": [
+        "REGULATION"
+      ],
+      "language": "en"
+    },
+    "expected_source": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+    "expected_page": 8,
+    "expected_regulation": 2023
+  },
+  {
+    "case_id": "RAG-2018-MAX-DURATION",
+    "query": "What is the maximum allowed study duration?",
+    "filters": {
+      "regulation": 2018,
+      "language": "en"
+    },
+    "expected_source": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "expected_page": 11,
+    "expected_regulation": 2018
+  },
+  {
+    "case_id": "RAG-2023-MAX-DURATION",
+    "query": "What is the maximum program duration?",
+    "filters": {
+      "regulation": 2023,
+      "document_types": [
+        "REGULATION"
+      ],
+      "language": "en"
+    },
+    "expected_source": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+    "expected_page": 6,
+    "expected_regulation": 2023,
+    "forbidden_source": "SRC-CESS_NEW_BYLAW_2018_PDF"
+  },
+  {
+    "case_id": "RAG-PROCEDURE-HELP-REQUEST",
+    "query": "If a portfolio issue is not resolved by the course instructor, who should the student ask next?",
+    "filters": {
+      "regulation": 2018,
+      "document_types": [
+        "PROCEDURE"
+      ],
+      "language": "en"
+    },
+    "expected_source": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+    "expected_page": 8,
+    "expected_regulation": 2018
+  },
+  {
+    "case_id": "RAG-UNSUPPORTED",
+    "query": "What is today's cafeteria lunch menu?",
+    "filters": {
+      "regulation": 2023,
+      "language": "en"
+    },
+    "expected_source": null,
+    "requires_min_score": true
+  }
+]

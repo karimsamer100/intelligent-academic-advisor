@@ -1,0 +1,70 @@
+{
+  "status": "PASS",
+  "academic_data_foundation_rag_sources_available": 11,
+  "academic_data_foundation_legacy_chunks_available": 3712,
+  "full_corpus_prepare_check": {
+    "sources": 11,
+    "chunks": 3803,
+    "unique_chunk_ids": 3803,
+    "missing_page_metadata": 0,
+    "empty_chunks": 0,
+    "languages": {
+      "en": 3686,
+      "mixed": 74,
+      "ar": 43
+    }
+  },
+  "proof_set": {
+    "source_count": 3,
+    "source_ids": [
+      "SRC-CESS_NEW_BYLAW_2018_PDF",
+      "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+      "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF"
+    ],
+    "foundation_extracted_text_path": {
+      "chunks": 80,
+      "duplicate_chunk_ids": 0,
+      "empty_chunks": 0,
+      "missing_page_metadata": 0,
+      "incorrect_single_regulation_tags": 0,
+      "languages": {
+        "en": 80
+      }
+    },
+    "fresh_pdf_extraction_path": {
+      "pdf_pages_processed": 55,
+      "chunks": 82,
+      "empty_pages_reported": [
+        {
+          "source_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+          "page": 32
+        }
+      ]
+    }
+  },
+  "citation_spot_checks": [
+    {
+      "query_target": "GPA >= 3.0 main-semester credit limit",
+      "source_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+      "page": 8,
+      "section": "Course Registration Rules",
+      "topic": "credit_load",
+      "regulation": 2023
+    },
+    {
+      "query_target": "maximum allowed study duration",
+      "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+      "page": 11,
+      "section": "7.6 Program Study Duration",
+      "regulation": 2018
+    },
+    {
+      "query_target": "portfolio help request procedure",
+      "source_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+      "page": 8,
+      "section": "4. Help request procedures",
+      "topic": "student_procedure",
+      "regulation": 2018
+    }
+  ]
+}

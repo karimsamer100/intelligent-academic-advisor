@@ -40,3 +40,8 @@ models/
 embeddings/
 vector_store/
 tmp/
+# Full academic package / generated RAG diagnostics
+data/academic_foundation/
+data/prepared_rag/
+data/rag_debug/
+.huggingface/

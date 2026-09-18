@@ -1,0 +1,104 @@
+[
+  {
+    "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+    "file_name": "CESS New Bylaw 2018.pdf",
+    "document_title": "CESS New Bylaw 2018",
+    "document_types": [
+      "Full Academic Regulation"
+    ],
+    "regulations": [
+      2018
+    ],
+    "programs": [
+      "CESS"
+    ],
+    "languages": [
+      "en"
+    ],
+    "effective_year": 2018,
+    "version": "2018",
+    "official_status": "COLLECTED_INSTITUTIONAL_SOURCE",
+    "file_hash": "04f27dc914efceb3d69712064b3dc0ab7500ae1e9b610228b751191a3e44c767",
+    "relative_path": "raw/documents/Bylaw 2018/CESS New Bylaw 2018.pdf",
+    "authority_level": "PRIMARY_REGULATION",
+    "verification_state": "SOURCE_SNAPSHOT_VERIFIED",
+    "page_count": 11,
+    "source_metadata": {
+      "classification": "BOTH",
+      "project_role": "PRIMARY_REGULATION",
+      "project_priority": 1,
+      "authority_precedence": "PENDING_ACADEMIC_CONFIRMATION",
+      "duplicate_or_superseded_by": null,
+      "notes": "DOCUMENT_ROLE_ASSIGNED_BY_PROJECT; INSTITUTIONAL_PRECEDENCE_NOT_CONFIRMED",
+      "original_document_type": "Full Academic Regulation"
+    }
+  },
+  {
+    "source_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+    "file_name": "Bylaw 2023 General Rules & Regulations UEL.pdf",
+    "document_title": "Bylaw 2023 General Rules & Regulations UEL",
+    "document_types": [
+      "General Rules & Regulations"
+    ],
+    "regulations": [
+      2023
+    ],
+    "programs": [
+      "UEL"
+    ],
+    "languages": [
+      "en"
+    ],
+    "effective_year": 2023,
+    "version": "2023",
+    "official_status": "COLLECTED_INSTITUTIONAL_SOURCE",
+    "file_hash": "4f4150b959c70c39da5c6c276b76285b2d1bf07d907d19917218acf8e2915650",
+    "relative_path": "raw/documents/UEL stuff/Bylaw 2023 General Rules & Regulations UEL.pdf",
+    "authority_level": "SUPPORTING_SOURCE",
+    "verification_state": "SOURCE_SNAPSHOT_VERIFIED",
+    "page_count": 32,
+    "source_metadata": {
+      "classification": "BOTH",
+      "project_role": "RULES_SUMMARY_OR_GENERAL_RULES",
+      "project_priority": 2,
+      "authority_precedence": "PENDING_ACADEMIC_CONFIRMATION",
+      "duplicate_or_superseded_by": null,
+      "notes": "DOCUMENT_ROLE_ASSIGNED_BY_PROJECT; INSTITUTIONAL_PRECEDENCE_NOT_CONFIRMED",
+      "original_document_type": "General Rules & Regulations"
+    }
+  },
+  {
+    "source_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+    "file_name": "Student_s Guidline Booklet - V1.5.pdf",
+    "document_title": "Student_s Guidline Booklet - V1.5",
+    "document_types": [
+      "Student Guideline Booklet"
+    ],
+    "regulations": [
+      2018
+    ],
+    "programs": [
+      "UEL"
+    ],
+    "languages": [
+      "en"
+    ],
+    "effective_year": 2018,
+    "version": "V1.5",
+    "official_status": "COLLECTED_INSTITUTIONAL_SOURCE",
+    "file_hash": "cc8031fb6e68c3b9624d3b077f12c8aa064392404975ce0a3e572889ada7c34a",
+    "relative_path": "raw/documents/Bylaw 2018/Student_s Guidline Booklet - V1.5.pdf",
+    "authority_level": "HANDBOOK",
+    "verification_state": "SOURCE_SNAPSHOT_VERIFIED",
+    "page_count": 12,
+    "source_metadata": {
+      "classification": "RAG",
+      "project_role": "OPERATIONAL_GUIDE",
+      "project_priority": 4,
+      "authority_precedence": "PENDING_ACADEMIC_CONFIRMATION",
+      "duplicate_or_superseded_by": null,
+      "notes": "DOCUMENT_ROLE_ASSIGNED_BY_PROJECT; INSTITUTIONAL_PRECEDENCE_NOT_CONFIRMED",
+      "original_document_type": "Student Guideline Booklet"
+    }
+  }
+]

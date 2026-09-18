@@ -1,0 +1,382 @@
+{
+  "package": "RAG_Pipeline_v0_SUBMISSION_READY",
+  "project": "Local Intelligent Academic Advisor",
+  "file_count": 75,
+  "files": [
+    {
+      "path": ".env.example",
+      "size_bytes": 797,
+      "sha256": "511f7ab24e691e9519d743faa0db4a6a8f89022df4017ec339ae1afca0d8256c"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 153,
+      "sha256": "32bfa07199588acf2ba7cd266e162bac0e1fa3631611b91d4738d3646680275e"
+    },
+    {
+      "path": "Makefile",
+      "size_bytes": 430,
+      "sha256": "69cb1b1008448ecc68fd8e1708cec9a50cceb78ef02c18e90f05a61bf80e60eb"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 9503,
+      "sha256": "3df46928159d051a768dadce384ad266d41b01a0373e7baddc988ae7d9d663fa"
+    },
+    {
+      "path": "TASK_IMPLEMENTATION_REPORT.md",
+      "size_bytes": 1533,
+      "sha256": "8ef20ad528bec70fbe3399f88b17a56b30287bfddb2325cc55e41a7b17ead96c"
+    },
+    {
+      "path": "backend/alembic/env.py",
+      "size_bytes": 1355,
+      "sha256": "80c26935d1b904f65e1f1959d32ba6b836f54be03a9b3b15ab76242b6a9158df"
+    },
+    {
+      "path": "backend/alembic/script.py.mako",
+      "size_bytes": 607,
+      "sha256": "6b662eb6505713e48359b1836e9eb1cdeb2cbb390599de5aa5d9b862f1ac6e2c"
+    },
+    {
+      "path": "backend/alembic/versions/0001_rag_pgvector.py",
+      "size_bytes": 4618,
+      "sha256": "5751c331f7c0a2e0b61ad942535c42c8e3f5442bc514633d2135ef4191b33913"
+    },
+    {
+      "path": "backend/alembic.ini",
+      "size_bytes": 608,
+      "sha256": "eb2468d726266952af0378c4b9be01b9b38cb10defe3f63216643cb40a8694af"
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/core/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/core/config.py",
+      "size_bytes": 1990,
+      "sha256": "0ebecf3e641d3fc008f778d548e6beef4b9f53ff0124e153b4b0ebc4c64f47ec"
+    },
+    {
+      "path": "backend/app/core/logging.py",
+      "size_bytes": 1031,
+      "sha256": "c23b482eac153f0b2651b553fd9ea4a39a0a300fca35bb666ca76064c141e39c"
+    },
+    {
+      "path": "backend/app/db/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/db/base.py",
+      "size_bytes": 83,
+      "sha256": "987edfd9dfe38b2c49492c7d1a4e774015d16b72e2281b018e4160be6b47d560"
+    },
+    {
+      "path": "backend/app/db/session.py",
+      "size_bytes": 599,
+      "sha256": "22c598b999bce9c0d9c3acb433bdf58ce30587342bb8ff8e505f447935be03ae"
+    },
+    {
+      "path": "backend/app/rag/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/chunkers/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/chunkers/base.py",
+      "size_bytes": 327,
+      "sha256": "5f9834336ee52bd6122f27c304d8224259e7db1e8ba717e469271a32622fb09c"
+    },
+    {
+      "path": "backend/app/rag/chunkers/section_chunker.py",
+      "size_bytes": 5716,
+      "sha256": "d66b079fc2cbec39312621572e1f054008ea2e978bd0c5482065a3731b5fc879"
+    },
+    {
+      "path": "backend/app/rag/cleaners/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/cleaners/academic_text_cleaner.py",
+      "size_bytes": 3689,
+      "sha256": "89c4aab3068f9b9845d480a0962610400fafd08a1f5a60456605c4c0f7fb2a18"
+    },
+    {
+      "path": "backend/app/rag/cleaners/base.py",
+      "size_bytes": 274,
+      "sha256": "05e6e2f537e5260e75509a505d5049dcc93f6e6b043d19de5ee329c207d522ff"
+    },
+    {
+      "path": "backend/app/rag/embeddings/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/embeddings/base.py",
+      "size_bytes": 538,
+      "sha256": "c09612a94ee80ea3a5d9a75feeaf4ad93781b56a4bc384aa07db2ad0595b3e8f"
+    },
+    {
+      "path": "backend/app/rag/embeddings/hash_test_provider.py",
+      "size_bytes": 1207,
+      "sha256": "4d3dc536be77be14a4270e85048e342326cd04392871d8a1171b023f540c3a16"
+    },
+    {
+      "path": "backend/app/rag/embeddings/sentence_transformer.py",
+      "size_bytes": 2460,
+      "sha256": "d3d539d34b9beda5b1c02916caefaf6e4ff7b407838d4b4d3093c37b053c27fe"
+    },
+    {
+      "path": "backend/app/rag/extractors/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/extractors/base.py",
+      "size_bytes": 306,
+      "sha256": "56a259f3af0f1d862047fa79e58e26f44db051c1aa7df4cd4054d6b7a3468b0c"
+    },
+    {
+      "path": "backend/app/rag/extractors/foundation_extractor.py",
+      "size_bytes": 1622,
+      "sha256": "b0baa25c3f7d15d801c90f4ef2c92d12505eb13a05455771cca73ba6114fee1a"
+    },
+    {
+      "path": "backend/app/rag/extractors/pymupdf_extractor.py",
+      "size_bytes": 1821,
+      "sha256": "bfd28e71e08669dc6fe2d136091703316e8e2ac52d1ff7437db3b3d3ea2f782a"
+    },
+    {
+      "path": "backend/app/rag/ingestion/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/ingestion/cli.py",
+      "size_bytes": 7730,
+      "sha256": "41232a6565d7c68208e6d523fe1b59a2dac1fe04c5da259b70f642e37b86eb3e"
+    },
+    {
+      "path": "backend/app/rag/ingestion/foundation_adapter.py",
+      "size_bytes": 3082,
+      "sha256": "d22787fc7d6058399eb92901a0af3b04e9b6b546b1898c68ebf1b10fd4efb6fe"
+    },
+    {
+      "path": "backend/app/rag/ingestion/pipeline.py",
+      "size_bytes": 6007,
+      "sha256": "7351712695c4ad2267eebe83cfa44f2732c2c445c38fe15678bdf7d05571a8fe"
+    },
+    {
+      "path": "backend/app/rag/metadata/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/metadata/enricher.py",
+      "size_bytes": 5020,
+      "sha256": "4d6f1617a729812baf22a7876fd8e62f8fe6522436b80032c58322e26f2ae293"
+    },
+    {
+      "path": "backend/app/rag/metadata/taxonomy.py",
+      "size_bytes": 1653,
+      "sha256": "a7121cdf5a0a91d4ed29e4adb5e2cc0c1ee322c7eb628582e539cd7987ff0960"
+    },
+    {
+      "path": "backend/app/rag/models/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/models/domain.py",
+      "size_bytes": 3151,
+      "sha256": "df5383ca7c8a49667947751aa3f2219ec23b67896176ae08eabede1c571ae63b"
+    },
+    {
+      "path": "backend/app/rag/models/orm.py",
+      "size_bytes": 4217,
+      "sha256": "b13134f083d31e28e90310d7eb2f44ca9d561a61d3cbdf0d93bc1ab34cdf8150"
+    },
+    {
+      "path": "backend/app/rag/repositories/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/repositories/base.py",
+      "size_bytes": 736,
+      "sha256": "ed2292131d219b4ebae333e1736c528a4e5e3cdd72c538364e64840e6a56aceb"
+    },
+    {
+      "path": "backend/app/rag/repositories/memory_repository.py",
+      "size_bytes": 3579,
+      "sha256": "2a651dbd726806210d49000f16394109a7a52bf88804ace823c016860f87a130"
+    },
+    {
+      "path": "backend/app/rag/repositories/pgvector_repository.py",
+      "size_bytes": 6178,
+      "sha256": "a83141f61a0193f62d152c9352fa8d575c4aa05e6f2a4f5c68bf9870499f061c"
+    },
+    {
+      "path": "backend/app/rag/retrieval/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/retrieval/service.py",
+      "size_bytes": 2090,
+      "sha256": "56324ec6dbe5f02abadb88a041a219f3e96877aca36ad306d7c4f85e090c53b8"
+    },
+    {
+      "path": "backend/app/rag/validation/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/rag/validation/validators.py",
+      "size_bytes": 1828,
+      "sha256": "5c4bee2000faee7154e60e9323b0b7f3a3ff7116e1700fad2fbad217625980d4"
+    },
+    {
+      "path": "backend/app/schemas/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/schemas/rag.py",
+      "size_bytes": 774,
+      "sha256": "89482b24013ae3f82aa70d88e00f0473d25804d4d06b3a1bc4575881fbb65339"
+    },
+    {
+      "path": "backend/app/services/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/app/services/rag_service.py",
+      "size_bytes": 871,
+      "sha256": "e3964220ac9edb90ac7ac061e0bfd95b74c59092524d105431e4d8fe99857f2a"
+    },
+    {
+      "path": "backend/pyproject.toml",
+      "size_bytes": 157,
+      "sha256": "39a6dda8e40624907ad8556ced22262633d7d02517de581937ea7f7451f88757"
+    },
+    {
+      "path": "backend/requirements.txt",
+      "size_bytes": 235,
+      "sha256": "f24429f440e7650bd01863ee2c15e9d44eea5194575ed5237996746e2c7f1983"
+    },
+    {
+      "path": "backend/tests/__init__.py",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "backend/tests/integration/test_pgvector_integration.py",
+      "size_bytes": 485,
+      "sha256": "e83609227a36d9d87888b9b956a9c9ab2b1c98d9c789b3dbb76c3ac04a181fbc"
+    },
+    {
+      "path": "backend/tests/unit/test_chunker.py",
+      "size_bytes": 1533,
+      "sha256": "653b302844678e46fa3dcd0b1eba33c8694775cf0cd56198973ce760e6af6da2"
+    },
+    {
+      "path": "backend/tests/unit/test_cleaner.py",
+      "size_bytes": 1094,
+      "sha256": "16004a9ae857779194ea80fac5dc7488fb130646f593e1be48e276c8479fd333"
+    },
+    {
+      "path": "backend/tests/unit/test_contracts.py",
+      "size_bytes": 858,
+      "sha256": "8215bf63039d21c9de4959a2042ae97969365a8f528b50b544ffa037e0f1c2c8"
+    },
+    {
+      "path": "backend/tests/unit/test_idempotent_ingestion.py",
+      "size_bytes": 1912,
+      "sha256": "72540b87844e5632576e2f7ffe90e5e20a9a6d65ceb8fe6eee387c7a64540564"
+    },
+    {
+      "path": "backend/tests/unit/test_metadata.py",
+      "size_bytes": 2263,
+      "sha256": "d6a30ab38878d2fe7e3816d64635440ffe7b68ede541d1ccb49e51c5060ba980"
+    },
+    {
+      "path": "backend/tests/unit/test_retrieval_filtering.py",
+      "size_bytes": 2093,
+      "sha256": "16fc6da91412e65b36ce949bc8c3e24a37a76d43a7d81eaedf00b5ac81a8ac91"
+    },
+    {
+      "path": "data/prepared_sample/chunks.jsonl",
+      "size_bytes": 119851,
+      "sha256": "504bec1c1fd1a7bcae9edc40482f0ef768af43426db3505122117b2969dbbfb8"
+    },
+    {
+      "path": "data/prepared_sample/prepare_report.json",
+      "size_bytes": 243,
+      "sha256": "ac5499ac04008022f794818317ea3ceb4965231e58c4307c2f26020b0d302771"
+    },
+    {
+      "path": "data/prepared_sample/source_registry.json",
+      "size_bytes": 3459,
+      "sha256": "15d4f73269e198130910b4dc8c3d122b1e56f690f17c8c3cca3af171330e4824"
+    },
+    {
+      "path": "data/smoke_tests/rag_smoke_tests.json",
+      "size_bytes": 2144,
+      "sha256": "6292d6808ae017d1e39cf8c17ddaf21f51707704f8383f358ac0cd144220a5b2"
+    },
+    {
+      "path": "docker-compose.rag.yml",
+      "size_bytes": 522,
+      "sha256": "83142955b78cce73abafc1865f53bc5b11b4b413916d8da871639b7981fa92ba"
+    },
+    {
+      "path": "docs/ACADEMIC_DATA_FOUNDATION_INTEGRATION.md",
+      "size_bytes": 2028,
+      "sha256": "8a3a5abd7b71c5c7364bb0af10323e92d00e40ad2f6792d293003346065afdc3"
+    },
+    {
+      "path": "docs/DESIGN_NOTES.md",
+      "size_bytes": 2347,
+      "sha256": "bd7087949fef6ba7f774d79c051e7efb955f495fc19ea8581b949514a6717e58"
+    },
+    {
+      "path": "docs/MERGE_INTO_PROJECT.md",
+      "size_bytes": 2059,
+      "sha256": "81415d28bf41646b59acdcc1a4c286245c3815f6355c49ff2baccb19ac2e5ed7"
+    },
+    {
+      "path": "docs/REQUIREMENTS_TRACEABILITY.md",
+      "size_bytes": 2972,
+      "sha256": "a4e63eb028da795cbc0ae008d825909047bbe82e2b532b76909c0819808d7819"
+    },
+    {
+      "path": "reports/REAL_DATA_VALIDATION.json",
+      "size_bytes": 1856,
+      "sha256": "7e185d8aafb10c44f7953487fa1532ac4ab03a0c9f738e5d26a2b8f00496a102"
+    },
+    {
+      "path": "reports/TEST_REPORT.md",
+      "size_bytes": 1508,
+      "sha256": "8f9d42f5de4e402cc356079dc60081178af93313554cd06779542927c817f7f5"
+    },
+    {
+      "path": "scripts/run_rag_smoke_tests.py",
+      "size_bytes": 2554,
+      "sha256": "59445087b1bf6f16803b23b143f489a1a7c5a1e4af0acfc53ab0857447af35ff"
+    }
+  ]
+}
