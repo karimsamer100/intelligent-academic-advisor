@@ -112,6 +112,37 @@ class NotExpression(RuleExpression):
 
 
 @dataclass(frozen=True, slots=True)
+class UnsupportedExpression(RuleExpression):
+    """Structured sentinel for source logic not yet supported by the engine."""
+
+    source_type: str
+    course_id: str | None = None
+    course_code: str | None = None
+    code: str | None = None
+    condition_note: str | None = None
+    reason: str | None = None
+    external_reference: bool | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.source_type, str) or not self.source_type.strip():
+            raise ValueError("source_type must be a non-empty string")
+        for name in (
+            "course_id",
+            "course_code",
+            "code",
+            "condition_note",
+            "reason",
+        ):
+            value = getattr(self, name)
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                raise ValueError(f"{name} must be a non-empty string when provided")
+        if self.external_reference is not None and not isinstance(
+            self.external_reference, bool
+        ):
+            raise TypeError("external_reference must be a bool or None")
+
+
+@dataclass(frozen=True, slots=True)
 class MinEarnedCreditsExpression(RuleExpression):
     """Require at least ``minimum`` earned credit hours."""
 

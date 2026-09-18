@@ -5,8 +5,8 @@ identity/value types, data lifecycle state, execution-safety policy, provenance,
 reason codes, structured rule expressions, deterministic rule evaluation,
 decision traces, result metadata, domain outcomes, and repository boundaries.
 
-It does not own FastAPI or HTTP, ORM/PostgreSQL access, JSON adapters, PDF
-extraction, RAG, LLM behavior, frontend concerns, or complete course
+It does not own FastAPI or HTTP, ORM/PostgreSQL access, JSON loading outside
+the narrow Academic Data adapter boundary, PDF extraction, RAG, LLM behavior, frontend concerns, or complete course
 eligibility, degree audit, or semester planning.
 
 ## Core contracts
@@ -122,6 +122,33 @@ produces `NOT_ELIGIBLE`; missing, conflicted, blocked, or otherwise
 indeterminate academic truth remains unresolved and carries review metadata.
 Unsupported concepts such as minimum-grade, concurrent-course, and
 semester-level co-requisite semantics must not be silently ignored.
+
+## Academic Data adapter boundary
+
+`repositories/adapters/` contains the narrow JSON consumer for the current
+Academic Data Foundation. It maps only dataset metadata, courses, and direct
+prerequisite expressions into Planning types. `AcademicEligibilityDataSource`
+is the small typed boundary that a future PostgreSQL-backed source can replace.
+Raw JSON records never reach `EligibilityService` or `RuleEvaluator`.
+The adapter selects records before constructing a
+`CourseEligibilityRuleSet`; its `target_course` is the trust binding because
+`AcademicRule` does not carry a target-course field.
+
+`NORMALIZED_DEVELOPMENT` and `VERIFIED_AUTHORITATIVE` are source tiers, not
+execution modes. Normalized data may be loaded for development only; it is
+never silently promoted to authoritative data, and verified data is never
+silently replaced by normalized data. The current repository has no verified
+export or trusted manifest, so the adapter reports verified data as
+unavailable and exposes no fabricated dataset version.
+
+Known elective-slot records are diagnosed as unsupported entities and are not
+indexed as `Course` values. Direct prerequisite trees are preserved without
+flattening. Source nodes such as conditional course requirements, opaque entry
+requirements, and unresolved conditions become immutable
+`UnsupportedExpression` nodes; the evaluator returns `INDETERMINATE` rather
+than dropping them. A missing formal no-prerequisite signal, an unavailable
+corequisite artifact, or an eligibility-relevant global rule outside this
+mapping slice keeps the supplied rule set `INCOMPLETE`.
 
 The result uses `eligible: bool | None`: `True` and `False` are definitive
 answers, while `None` means the academic truth is unresolved. `ResultMetadata`

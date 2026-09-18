@@ -15,6 +15,7 @@ from backend.app.planning.domain.expressions import (
     MinGpaExpression,
     NotExpression,
     OrExpression,
+    UnsupportedExpression,
 )
 
 
@@ -64,3 +65,22 @@ def test_logical_expressions_reject_empty_or_untyped_operands() -> None:
         OrExpression(())
     with pytest.raises(TypeError):
         NotExpression(())  # type: ignore[arg-type]
+
+
+def test_unsupported_expression_preserves_structured_source_fields() -> None:
+    expression = UnsupportedExpression(
+        source_type="CONDITIONAL_COURSE_PASSED",
+        course_code="ASU041",
+        condition_note="Only if applicable",
+        external_reference=True,
+    )
+
+    assert expression.source_type == "CONDITIONAL_COURSE_PASSED"
+    assert expression.course_code == "ASU041"
+    assert expression.condition_note == "Only if applicable"
+    assert expression.external_reference is True
+
+
+def test_unsupported_expression_rejects_empty_source_type() -> None:
+    with pytest.raises(ValueError, match="source_type"):
+        UnsupportedExpression(source_type="")

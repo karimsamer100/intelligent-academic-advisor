@@ -19,6 +19,7 @@ from ..domain.expressions import (
     NotExpression,
     OrExpression,
     RuleExpression,
+    UnsupportedExpression,
 )
 from ..domain.lifecycle import ApprovalStatus
 from ..domain.provenance import Provenance
@@ -297,6 +298,13 @@ class RuleEvaluator:
                 lambda actual: actual <= expression.maximum,
             )
 
+        if isinstance(expression, UnsupportedExpression):
+            return cls._unsupported_expression_evaluation(
+                rule_id,
+                path,
+                expression,
+            )
+
         return cls._unsupported_evaluation(rule_id, type(expression).__name__)
 
     @staticmethod
@@ -331,19 +339,46 @@ class RuleEvaluator:
     def _unsupported_evaluation(
         rule_id: str,
         expression_type: str,
+        path: str = "root",
+        metadata: tuple[TraceMetadata, ...] = (),
     ) -> _ExpressionEvaluation:
         trace_node = DecisionTraceNode(
-            node_id=rule_id,
+            node_id=_node_id(rule_id, path),
             code=TraceCode.RULE,
             node_type=TraceNodeType.RULE_CHECK,
             status=DecisionStatus.UNSUPPORTED,
             reason_codes=(ReasonCode.UNSUPPORTED_RULE,),
-            metadata=(TraceMetadata("expression_type", expression_type),),
+            metadata=(TraceMetadata("expression_type", expression_type), *metadata),
         )
         return _ExpressionEvaluation(
             EvaluationOutcome.INDETERMINATE,
             trace_node,
             (ReasonCode.UNSUPPORTED_RULE,),
+        )
+
+    @classmethod
+    def _unsupported_expression_evaluation(
+        cls,
+        rule_id: str,
+        path: str,
+        expression: UnsupportedExpression,
+    ) -> _ExpressionEvaluation:
+        metadata: list[TraceMetadata] = []
+        for key, value in (
+            ("course_id", expression.course_id),
+            ("course_code", expression.course_code),
+            ("code", expression.code),
+            ("condition_note", expression.condition_note),
+            ("reason", expression.reason),
+            ("external_reference", expression.external_reference),
+        ):
+            if value is not None:
+                metadata.append(TraceMetadata(key, value))
+        return cls._unsupported_evaluation(
+            rule_id,
+            expression.source_type,
+            path,
+            tuple(metadata),
         )
 
     @classmethod

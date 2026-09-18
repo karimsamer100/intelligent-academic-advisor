@@ -11,6 +11,7 @@ from backend.app.planning.domain.expressions import (
     MinGpaExpression,
     NotExpression,
     OrExpression,
+    UnsupportedExpression,
 )
 from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
 from backend.app.planning.domain.reasons import ReasonCode
@@ -417,3 +418,48 @@ def test_evaluator_keeps_child_traces_after_aggregate_outcome_is_known() -> None
     assert result.outcome is EvaluationOutcome.UNSATISFIED
     assert len(result.decision_trace.root.children) == 2
     assert result.decision_trace.root.children[1].status is DecisionStatus.INDETERMINATE
+
+
+def test_unsupported_expression_is_explicitly_indeterminate_with_trace_metadata() -> (
+    None
+):
+    rule = _rule(
+        UnsupportedExpression(
+            source_type="ENTRY_REQUIREMENT",
+            code="Eng/Math",
+        )
+    )
+
+    result = RuleEvaluator(
+        ExecutionPolicy.development(), DatasetVersion("academic-dev-1")
+    ).evaluate(rule, _student())
+
+    assert result.outcome is EvaluationOutcome.INDETERMINATE
+    assert ReasonCode.UNSUPPORTED_RULE in result.reason_codes
+    assert result.requires_human_review is True
+    root = result.decision_trace.root
+    assert root.status is DecisionStatus.UNSUPPORTED
+    metadata = {item.key: item.value for item in root.metadata}
+    assert metadata["expression_type"] == "ENTRY_REQUIREMENT"
+
+
+def test_unsupported_child_is_preserved_inside_logical_trace() -> None:
+    rule = _rule(
+        AndExpression(
+            (
+                CoursePassedExpression(CourseIdentity.parse("R23:CAIE:CSE241")),
+                UnsupportedExpression(
+                    source_type="UNRESOLVED_CONDITION",
+                    reason="missing condition",
+                ),
+            )
+        )
+    )
+
+    result = RuleEvaluator(
+        ExecutionPolicy.development(), DatasetVersion("academic-dev-1")
+    ).evaluate(rule, _student())
+
+    assert result.outcome is EvaluationOutcome.INDETERMINATE
+    assert len(result.decision_trace.root.children) == 2
+    assert result.decision_trace.root.children[1].status is DecisionStatus.UNSUPPORTED
