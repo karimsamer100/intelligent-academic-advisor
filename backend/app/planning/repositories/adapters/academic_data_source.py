@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from ...domain.course import Course, CourseIdentity
+from ...domain.course import Course, CourseIdentity, Program, Regulation
 from ...domain.eligibility import CourseEligibilityRuleSet
 from ...domain.version import DatasetVersion
 from .academic_data_types import (
@@ -32,6 +32,13 @@ class AcademicEligibilityDataSource(Protocol):
         self,
         course_id: CourseIdentity,
     ) -> AcademicDataLookup[Course]: ...
+
+    def list_courses(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+    ) -> tuple[Course, ...]: ...
 
     def get_eligibility_rules(
         self,

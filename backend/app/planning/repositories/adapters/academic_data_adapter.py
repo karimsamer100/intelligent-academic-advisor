@@ -240,6 +240,22 @@ class JsonAcademicDataAdapter:
             ),
         )
 
+    def list_courses(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+    ) -> tuple[Course, ...]:
+        if not isinstance(regulation, Regulation):
+            raise TypeError("regulation must be a Regulation")
+        if not isinstance(program, Program):
+            raise TypeError("program must be a Program")
+        return tuple(
+            course
+            for identity, course in self._courses
+            if identity.regulation is regulation and identity.program == program
+        )
+
     def get_eligibility_rules(
         self,
         course_id: CourseIdentity,

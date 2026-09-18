@@ -158,6 +158,42 @@ trace. Target-course lifecycle safety is assessed through the same
 `ExecutionPolicy` used by `RuleEvaluator`; development results remain
 non-authoritative.
 
-The next intentionally deferred component is semester-aware co-requisite and
-course-load validation, followed later by eligibility callers/adapters rather
-than repository logic inside this package.
+## Dependency graph
+
+`DependencyGraphBuilder` constructs a student-independent, regulation/program-
+scoped graph from typed `Course` values and `CourseEligibilityRuleSet` values.
+The original prerequisite expression stored in each immutable
+`DependencyConstraint` remains the semantic source of truth; derived
+`DependencyReference` values are only deterministic indexes for traversal and
+analysis. `AND`/`OR` structure is never reconstructed from flattened edges.
+
+For supported positive course references, the builder derives both all
+references and references that are definitely required in every satisfying
+branch. Thus `A AND (B OR C)` retains all three references but marks only `A`
+as definitely required. Unsupported, conditional, external, negative, and
+unresolved branches remain visible and make dependency coverage incomplete
+where their semantics cannot be established safely.
+
+Dependency coverage is intentionally separate from eligibility-rule coverage:
+a course can have a complete direct course-dependency expression while its
+eligibility rule set remains incomplete because global or otherwise unsupported
+eligibility data is outside this graph slice. `COMPLETE` therefore never means
+that a student is eligible. Missing nodes, cross-scope references, external
+references, duplicate relations, and incomplete source data produce typed
+diagnostics without fabricating courses or silently discarding relationships.
+
+The graph exposes deterministic direct dependency/dependent lookups,
+structural ancestors/descendants, positive-reference reachability, and
+`has_node`. Traversal uses only positive canonical course references and does
+not claim that every reachable course is individually mandatory. Cycle
+detection uses strongly connected components on both the positive-reference
+graph and the definitely-required graph, reporting `REFERENCE` versus
+`MANDATORY` cycles without enumerating exponential simple paths. Lifecycle and
+provenance stay attached to constraints and references; graph construction is
+policy-neutral, so authoritative consumers still apply `ExecutionPolicy`.
+
+The graph does not require `StudentState`, evaluate eligibility, perform
+degree-audit matching, calculate planning scores, validate semesters, or own
+repositories/adapters. The next intentionally deferred component is
+student-specific degree-audit/requirement matching, followed later by
+semester-aware planning.
