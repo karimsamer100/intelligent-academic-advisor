@@ -1,0 +1,12 @@
+# Runtime
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+pydantic>=2.9,<3.0
+pydantic-settings>=2.5,<3.0
+SQLAlchemy>=2.0.30,<2.1
+alembic>=1.13,<2.0
+psycopg[binary]>=3.2,<4.0
+
+# Tests (kept here so `docker compose exec backend pytest` works out of the box)
+pytest>=8.0,<9.0
+httpx>=0.27,<1.0

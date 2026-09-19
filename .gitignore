@@ -1,4 +1,4 @@
-# Environment
+# Secrets
 .env
 .env.*
 !.env.example
@@ -6,37 +6,16 @@
 # Python
 __pycache__/
 *.py[cod]
+.venv/
+venv/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.venv/
-venv/
+.coverage
+htmlcov/
 
-# IDE
+# Editors / OS
 .vscode/
 .idea/
-
-# OS
 .DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Local / generated data
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/README.md
-
-# Models
-models/
-*.gguf
-*.safetensors
-
-# Temporary RAG artifacts
-embeddings/
-vector_store/
-tmp/
