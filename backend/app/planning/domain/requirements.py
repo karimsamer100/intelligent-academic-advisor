@@ -14,6 +14,8 @@ from .course import CourseIdentity, Program, Regulation
 from .electives import ConcentrationId, ElectivePoolId, ElectiveSlotId
 from .lifecycle import ApprovalStatus, VerificationStatus
 from .provenance import Provenance
+from .reasons import ReasonCode
+from .version import DatasetVersion
 
 
 class RequirementStage(StrEnum):
@@ -21,6 +23,14 @@ class RequirementStage(StrEnum):
 
     PROGRAM_COMPLETION = "PROGRAM_COMPLETION"
     REGISTRATION_GATE = "REGISTRATION_GATE"
+
+
+class RequirementSetStatus(StrEnum):
+    """Coverage of a governed program-requirement collection."""
+
+    COMPLETE = "COMPLETE"
+    INCOMPLETE = "INCOMPLETE"
+    UNAVAILABLE = "UNAVAILABLE"
 
 
 class RequirementDefinition:
@@ -302,6 +312,110 @@ class ProgramRequirement:
             "provenance": self.provenance.to_dict() if self.provenance else None,
             "definition": self.definition.to_dict() if self.definition else None,
         }
+
+
+@dataclass(frozen=True, slots=True)
+class ProgramRequirementSet:
+    """Governed, explicitly covered requirements for one program scope.
+
+    An empty ``requirements`` tuple is meaningful only when ``status`` is
+    ``COMPLETE``.  ``INCOMPLETE`` and ``UNAVAILABLE`` preserve the fact that
+    absence of supplied records cannot be interpreted as absence of academic
+    requirements.
+    """
+
+    regulation: Regulation
+    program: Program
+    requirements: tuple[ProgramRequirement, ...]
+    status: RequirementSetStatus
+    dataset_version: DatasetVersion | None = None
+    provenance: tuple[Provenance, ...] = ()
+    reason_codes: tuple[ReasonCode, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.regulation, Regulation):
+            raise TypeError("regulation must be a Regulation")
+        if not isinstance(self.program, Program):
+            raise TypeError("program must be a Program")
+        if not isinstance(self.status, RequirementSetStatus):
+            raise TypeError("status must be a RequirementSetStatus")
+        requirements = tuple(self.requirements)
+        if not all(isinstance(item, ProgramRequirement) for item in requirements):
+            raise TypeError("requirements must contain ProgramRequirement values")
+        if any(
+            item.regulation is not self.regulation or item.program != self.program
+            for item in requirements
+        ):
+            raise ValueError("all requirements must match the requirement-set scope")
+        if len({item.requirement_id for item in requirements}) != len(requirements):
+            raise ValueError("requirement IDs must be unique within a requirement set")
+        if self.dataset_version is not None and not isinstance(
+            self.dataset_version, DatasetVersion
+        ):
+            raise TypeError("dataset_version must be a DatasetVersion or None")
+        provenance = tuple(self.provenance)
+        if not all(isinstance(item, Provenance) for item in provenance):
+            raise TypeError("provenance must contain Provenance values")
+        reason_codes = tuple(
+            sorted(set(self.reason_codes), key=lambda item: item.value)
+        )
+        if not all(isinstance(item, ReasonCode) for item in reason_codes):
+            raise TypeError("reason_codes must contain ReasonCode values")
+        object.__setattr__(
+            self,
+            "requirements",
+            tuple(sorted(requirements, key=lambda item: item.requirement_id)),
+        )
+        object.__setattr__(
+            self,
+            "provenance",
+            tuple(sorted(provenance, key=lambda item: item.to_dict().__repr__())),
+        )
+        object.__setattr__(self, "reason_codes", reason_codes)
+
+    def requirements_for_stage(
+        self, stage: RequirementStage
+    ) -> tuple[ProgramRequirement, ...]:
+        """Return requirements applicable to ``stage``.
+
+        Metadata-only definitions have unknown applicability and remain in the
+        result so an audit cannot silently ignore a governed requirement.
+        """
+
+        if not isinstance(stage, RequirementStage):
+            raise TypeError("stage must be a RequirementStage")
+        return tuple(
+            requirement
+            for requirement in self.requirements
+            if requirement_stage(requirement.definition) in (stage, None)
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "regulation": self.regulation.value,
+            "program": str(self.program),
+            "status": self.status.value,
+            "dataset_version": (
+                self.dataset_version.to_dict() if self.dataset_version else None
+            ),
+            "reason_codes": [reason.value for reason in self.reason_codes],
+            "provenance": [item.to_dict() for item in self.provenance],
+            "requirements": [item.to_dict() for item in self.requirements],
+        }
+
+
+def requirement_stage(
+    definition: RequirementDefinition | None,
+) -> RequirementStage | None:
+    """Return a definition's explicit stage, or ``None`` when unknown."""
+
+    if definition is None:
+        return None
+    if isinstance(
+        definition, (EarnedCreditThresholdRequirement, TotalProgramCreditsRequirement)
+    ):
+        return definition.stage
+    return RequirementStage.PROGRAM_COMPLETION
 
 
 def _validate_number(value: object, name: str) -> None:

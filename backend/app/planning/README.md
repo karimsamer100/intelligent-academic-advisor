@@ -7,7 +7,8 @@ decision traces, result metadata, domain outcomes, and repository boundaries.
 
 It does not own FastAPI or HTTP, ORM/PostgreSQL access, JSON loading outside
 the narrow Academic Data adapter boundary, PDF extraction, RAG, LLM behavior,
-frontend concerns, Degree Audit, or semester planning.
+frontend concerns, or semester planning. Degree Audit consumes the typed
+contracts in this package but does not provide official graduation clearance.
 
 ## Core contracts
 
@@ -213,8 +214,44 @@ such as an explicit 101-CH fixture from the 144-CH program-completion total.
 `ElectivePoolId`, `ElectiveSlotId`, and `ConcentrationId` are scoped
 requirements identities and are deliberately not `CourseIdentity` values.
 Slots are not fake courses; a slot may bind to an explicit pool or remain
-unresolved. These contracts do not perform Degree Audit matching, GPA
-calculation, course offering checks, or semester validation.
+unresolved. These contracts do not calculate GPA, course offerings, or
+semester validity.
+
+## Degree Audit and Program Progress
+
+`ProgramRequirementSet` makes requirement coverage explicit: `COMPLETE` means
+the supplied set is known complete for its scope, while `INCOMPLETE` and
+`UNAVAILABLE` prevent a definitive overall audit even when individual supplied
+requirements can still be evaluated. `DegreeAuditService` evaluates typed
+definitions against canonical `StudentState` and separate
+`StudentProgramFacts`; it does not parse transcripts, fetch repositories, or
+claim official graduation clearance. Its successful status means only that
+all modeled requirements in a complete, safe set were satisfied.
+
+Requirement results preserve typed evidence and deterministic decision traces.
+Course and zero-credit requirements use canonical pass facts; current
+registration is progress evidence, not completion. Credit and GPA thresholds
+use trusted snapshot values, elective pools count distinct real courses, and
+concentrations are inferred from scoped membership rather than a declared
+student concentration. Elective slots are requirement entities and are
+allocated deterministically without reusing one course across mutually
+consumptive slots. Field Training is represented by typed non-course facts,
+never a fake course.
+
+`ProgramProgress` exposes earned/remaining credits, requirement counts,
+in-progress and unresolved items, pool and concentration progress, GPA, and
+Field Training facts. It intentionally does not invent an overall completion
+percentage. The result is structured for future API/tool/LLM explanation;
+prompts, chat messages, and conversational advice remain outside the Planning
+Engine.
+
+The current Academic Data adapter intentionally returns an incomplete
+requirement-set contract because the normalized package has no authoritative
+requirement-coverage signal. It does not synthesize the absent 101-CH record
+or `ASUx11`, and blocked/conflicted elective data remains unsafe for
+authoritative audit results. Degree Audit is the current student-specific
+requirement-matching layer; semester validation, planning, and official
+administrative clearance remain later components.
 
 The deterministic Planning Engine is LLM-independent. A future orchestrator
 may translate user language into these typed requests and ask an LLM to
@@ -256,7 +293,7 @@ provenance stay attached to constraints and references; graph construction is
 policy-neutral, so authoritative consumers still apply `ExecutionPolicy`.
 
 The graph does not require `StudentState`, evaluate eligibility, perform
-degree-audit matching, calculate planning scores, validate semesters, or own
-repositories/adapters. The next intentionally deferred component is
-student-specific degree-audit/requirement matching, followed later by
-semester-aware planning.
+student-specific audit evaluation, calculate planning scores, validate
+semesters, or own repositories/adapters. Degree Audit now consumes the graph
+and requirement contracts separately; semester validation and semester-aware
+planning remain later components.

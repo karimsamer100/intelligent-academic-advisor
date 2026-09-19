@@ -14,7 +14,13 @@ from ...domain.lifecycle import ApprovalStatus, VerificationStatus
 from ...domain.provenance import Provenance
 from ...domain.reasons import ReasonCode
 from ...domain.rules import AcademicRule
-from ...domain.requirements import ProgramRequirement
+from ...domain.requirements import (
+    ProgramRequirement,
+    ProgramRequirementSet,
+    RequirementSetStatus,
+    RequirementStage,
+    requirement_stage as _requirement_stage,
+)
 from ...domain.version import DatasetVersion
 from ...policy import ExecutionMode
 from .academic_data_types import (
@@ -273,6 +279,46 @@ class JsonAcademicDataAdapter:
             pool
             for pool in self._elective_pools
             if pool.pool_id.regulation is regulation and pool.pool_id.program == program
+        )
+
+    def get_requirement_set(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+        stage: RequirementStage | None = None,
+    ) -> ProgramRequirementSet:
+        """Expose mapped requirements without claiming unsupported coverage.
+
+        The current Academic Data package has no formal schema-backed
+        requirement-set completeness signal.  Consequently this adapter keeps
+        the set ``INCOMPLETE`` even when individual definitions are mapped.
+        ``stage`` is applied only as a typed view; it does not upgrade source
+        coverage.
+        """
+
+        requirements = self.list_requirements(
+            regulation=regulation,
+            program=program,
+        )
+        if stage is not None:
+            requirements = tuple(
+                item
+                for item in requirements
+                if item.definition is None
+                or _requirement_stage(item.definition) is stage
+            )
+        provenance = tuple(
+            item.provenance for item in requirements if item.provenance is not None
+        )
+        return ProgramRequirementSet(
+            regulation=regulation,
+            program=program,
+            requirements=requirements,
+            status=RequirementSetStatus.INCOMPLETE,
+            dataset_version=self.dataset_version,
+            provenance=provenance,
+            reason_codes=(ReasonCode.MISSING_REQUIRED_DATA,),
         )
 
     def get_course(

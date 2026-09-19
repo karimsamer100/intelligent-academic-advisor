@@ -20,6 +20,7 @@ from backend.app.planning.domain.expressions import (
 )
 from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
 from backend.app.planning.domain.reasons import ReasonCode
+from backend.app.planning.domain.requirements import RequirementSetStatus
 from backend.app.planning.domain.student import StudentState
 from backend.app.planning.domain.version import DatasetVersion
 from backend.app.planning.eligibility.service import EligibilityService
@@ -109,6 +110,22 @@ def test_normalized_data_cannot_be_selected_for_authoritative_execution() -> Non
     assert any(
         diagnostic.code is AcademicDataDiagnosticCode.DATASET_MODE_MISMATCH
         for diagnostic in loaded.diagnostics
+    )
+
+
+def test_requirement_set_lookup_preserves_incomplete_source_coverage() -> None:
+    adapter = _load_normalized()
+
+    requirement_set = adapter.get_requirement_set(
+        regulation=Regulation.R23,
+        program=Program("CAIE"),
+    )
+
+    assert requirement_set.status is RequirementSetStatus.INCOMPLETE
+    assert requirement_set.dataset_version is None
+    assert any(
+        requirement.requirement_id == "REQ23-001"
+        for requirement in requirement_set.requirements
     )
 
 

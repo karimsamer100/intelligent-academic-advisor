@@ -60,6 +60,7 @@ def test_repository_protocols_expose_only_domain_oriented_contracts() -> None:
     assert callable(RuleRepository.get_rule)
     assert callable(RuleRepository.list_rules)
     assert callable(RequirementRepository.list_requirements)
+    assert callable(RequirementRepository.get_requirement_set)
     assert callable(StudentRepository.get_student_state)
 
 
