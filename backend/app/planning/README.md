@@ -253,6 +253,40 @@ authoritative audit results. Degree Audit is the current student-specific
 requirement-matching layer; semester validation, planning, and official
 administrative clearance remain later components.
 
+## Semester validation
+
+`SemesterValidator` validates an explicitly supplied `ProposedSemester`; it
+does not choose courses, check offerings, or resolve timetable conflicts. Each
+`ProposedCourse` carries its own `RegistrationIntent`, and a projected
+semester builds a target-aware `ProposedTermContext` for every eligibility
+check. Current registration is never treated as same-term concurrency.
+
+`TermType` distinguishes only `MAIN` and `SUMMER`. `SemesterLoadPolicy` keeps
+GPA bands and the Regulation-23 alternative caps as immutable policy data. A
+load is valid when it satisfies the credit-hour cap **or** the course-count
+cap; both limits are not applied conjunctively. Missing GPA, unsafe policy
+lifecycle, unknown course credits, duplicate canonical courses, conditional
+eligibility, and review-required eligibility remain structured validation
+outcomes rather than guessed academic facts.
+
+## Candidate generation and priority
+
+`CandidateGenerator` is separate from eligibility and semester validation. It
+combines typed program requirements, Degree Audit progress, governed elective
+pools/concentrations, and structural DependencyGraph references. It returns
+`AVAILABLE`, `CONDITIONAL`, and `REVIEW_REQUIRED` groups plus explicit
+source-coverage metadata. A structural unlock reason is not a claim that the
+course is a mandatory requirement, and candidate relevance is not course
+offering availability.
+
+`PriorityRankingService` orders candidates with deterministic lexicographic
+`PriorityFactors`: eligibility category, requirement/blocker role, unlock
+impact, concentration contribution, and elective contribution, followed by
+canonical course identity. The factors are serialized with every ranked item;
+there is no opaque weighted score and no personalization or UEL policy yet.
+These results are typed inputs for a future planner or LLM explanation layer,
+not conversational recommendations.
+
 The deterministic Planning Engine is LLM-independent. A future orchestrator
 may translate user language into these typed requests and ask an LLM to
 explain structured results, but prompts, chat messages, model confidence, and
