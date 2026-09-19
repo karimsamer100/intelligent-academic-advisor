@@ -331,3 +331,29 @@ student-specific audit evaluation, calculate planning scores, validate
 semesters, or own repositories/adapters. Degree Audit now consumes the graph
 and requirement contracts separately; semester validation and semester-aware
 planning remain later components.
+
+## Single-semester planning
+
+`SingleSemesterPlanner` is the first deterministic orchestration layer for a
+proposed term. It consumes typed candidate-generation input, reuses
+`PriorityRankingService`, and sends every explored course combination through
+`SemesterValidator`. It therefore does not reimplement prerequisites, load
+limits, concurrency, lifecycle safety, or requirement satisfaction.
+
+`PlanningPreferences` are product preferences rather than academic rules.
+The default is `BALANCED`; `LIGHT` and `MAXIMIZE_ALLOWED` select transparent
+load targets, while explicit target and preferred-maximum values remain soft.
+Academic validation always wins. Candidate selection uses bounded,
+deterministic combination search rather than taking a prefix of the ranked
+list. Search limits are engineering controls and are surfaced as coverage and
+diagnostic evidence; no global optimum is claimed.
+
+`SingleSemesterPlanResult` preserves selected-course evidence, registration
+intent, eligibility conditions, priority factors, requirement and dependency
+reasons, exclusions, alternatives, and a decision trace. `VALID` describes
+the academic result of the selected set. Offering and timetable coverage are
+currently `UNAVAILABLE`, so an academically valid plan remains explicitly
+`registration_ready=False` until those operational sources exist. Projected
+conditions and advisor-review paths are never silently promoted to ordinary
+validity. The result contains no prompts, chat data, or LLM decisions; a
+future orchestrator may serialize these typed fields for explanation.

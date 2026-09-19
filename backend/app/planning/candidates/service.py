@@ -271,7 +271,10 @@ class CandidateGenerator:
                 )
             proposed_courses = request.context.proposed_courses
             proposed_term = None
-            if request.context.horizon is EvaluationHorizon.PROJECTED:
+            if (
+                request.context.horizon is EvaluationHorizon.PROJECTED
+                or proposed_courses
+            ):
                 proposed_term = ProposedTermContext(
                     target_course=identity,
                     proposed_courses=tuple(

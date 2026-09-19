@@ -25,10 +25,13 @@ class EvaluationHorizon(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class ProposedTermContext:
-    """Immutable same-term registration scenario for projected checks.
+    """Immutable same-term registration scenario for an eligibility check.
 
     ``target_course`` makes the concurrency invariant explicit: a proposed
-    course list is meaningful only for the target being evaluated.
+    course list is meaningful only for the target being evaluated.  This
+    scenario is orthogonal to the current/projected horizon: CURRENT checks
+    still use only current academic facts for passed prerequisites, while an
+    explicitly proposed same-term course may satisfy a concurrent branch.
     """
 
     target_course: CourseIdentity
@@ -85,8 +88,6 @@ class EligibilityContext:
             self.proposed_term, ProposedTermContext
         ):
             raise TypeError("proposed_term must be a ProposedTermContext or None")
-        if self.horizon is EvaluationHorizon.CURRENT and self.proposed_term is not None:
-            raise ValueError("current evaluations cannot carry proposed-term context")
 
     def to_dict(self) -> dict[str, object]:
         """Return a deterministic machine-readable evaluation context."""

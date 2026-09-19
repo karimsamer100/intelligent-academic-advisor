@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..domain.context import EligibilityContext, EvaluationHorizon
+from ..domain.context import EligibilityContext
 from ..domain.eligibility import (
     CourseEligibilityRuleSet,
     EligibilityDecision,
@@ -70,10 +70,8 @@ class SemesterValidator:
             context = EligibilityContext(
                 intent=proposed_course.registration_intent,
                 horizon=request.horizon,
-                proposed_term=(
-                    _proposed_context(identity, proposed_ids, request.semester.term_id)
-                    if request.horizon is EvaluationHorizon.PROJECTED
-                    else None
+                proposed_term=_proposed_context(
+                    identity, proposed_ids, request.semester.term_id
                 ),
             )
             eligibility = self.eligibility_service.check(
