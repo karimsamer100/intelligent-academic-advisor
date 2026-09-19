@@ -26,7 +26,7 @@ from ..domain.provenance import Provenance
 from ..domain.reasons import ReasonCode
 from ..domain.results import ResultMetadata
 from ..domain.rules import AcademicRule
-from ..domain.student import StudentState
+from ..domain.student import FactStatus, StudentState
 from ..domain.trace import (
     DecisionStatus,
     DecisionTrace,
@@ -203,18 +203,8 @@ class RuleEvaluator:
 
         if isinstance(expression, CoursePassedExpression):
             course = expression.course
-            if student.passed_courses is None:
-                return cls._leaf(
-                    rule_id,
-                    path,
-                    TraceCode.COURSE_PASSED,
-                    subject=course,
-                    expected_value=True,
-                    actual_value=None,
-                    outcome=EvaluationOutcome.INDETERMINATE,
-                    reason_codes=(ReasonCode.MISSING_REQUIRED_DATA,),
-                )
-            if course in student.unknown_pass_status_courses:
+            status = student.pass_status(course)
+            if status is FactStatus.UNKNOWN:
                 return cls._unknown_course_leaf(
                     rule_id,
                     path,
@@ -226,12 +216,13 @@ class RuleEvaluator:
                 path,
                 TraceCode.COURSE_PASSED,
                 course,
-                course in student.passed_courses,
+                status is FactStatus.KNOWN_TRUE,
             )
 
         if isinstance(expression, CourseCompletedExpression):
             course = expression.course
-            if course in student.unknown_completion_status_courses:
+            status = student.completion_status(course)
+            if status is FactStatus.UNKNOWN:
                 return cls._unknown_course_leaf(
                     rule_id,
                     path,
@@ -243,17 +234,25 @@ class RuleEvaluator:
                 path,
                 TraceCode.COURSE_COMPLETED,
                 course,
-                course in student.completed_courses,
+                status is FactStatus.KNOWN_TRUE,
             )
 
         if isinstance(expression, CourseCurrentlyRegisteredExpression):
             course = expression.course
+            status = student.registration_status(course)
+            if status is FactStatus.UNKNOWN:
+                return cls._unknown_course_leaf(
+                    rule_id,
+                    path,
+                    TraceCode.COURSE_CURRENTLY_REGISTERED,
+                    course,
+                )
             return cls._course_leaf(
                 rule_id,
                 path,
                 TraceCode.COURSE_CURRENTLY_REGISTERED,
                 course,
-                course in student.current_courses,
+                status is FactStatus.KNOWN_TRUE,
             )
 
         if isinstance(expression, MinEarnedCreditsExpression):

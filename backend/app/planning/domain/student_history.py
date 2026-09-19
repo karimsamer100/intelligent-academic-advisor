@@ -8,8 +8,28 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from enum import StrEnum
 
 from .course import CourseIdentity, Program, Regulation
+
+
+class AttemptOutcome(StrEnum):
+    """Canonical outcome of one historical course attempt."""
+
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+    WITHDRAWN = "WITHDRAWN"
+    INCOMPLETE = "INCOMPLETE"
+    UNKNOWN = "UNKNOWN"
+
+
+class AttemptPurpose(StrEnum):
+    """Purpose of an attempt when the source explicitly supplies it."""
+
+    INITIAL = "INITIAL"
+    REPEAT = "REPEAT"
+    IMPROVEMENT = "IMPROVEMENT"
+    UNKNOWN = "UNKNOWN"
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +56,8 @@ class CourseAttempt:
     withdrawn: bool | None = None
     repeated: bool | None = None
     source: str | None = None
+    outcome: AttemptOutcome | None = None
+    purpose: AttemptPurpose | None = None
 
     def __post_init__(self) -> None:
         _validate_student_id(self.student_id)
@@ -68,6 +90,32 @@ class CourseAttempt:
             value = getattr(self, field_name)
             if value is not None and not isinstance(value, bool):
                 raise TypeError(f"{field_name} must be a bool or None")
+        if self.outcome is not None and not isinstance(self.outcome, AttemptOutcome):
+            raise TypeError("outcome must be an AttemptOutcome or None")
+        if self.purpose is not None and not isinstance(self.purpose, AttemptPurpose):
+            raise TypeError("purpose must be an AttemptPurpose or None")
+
+        # Legacy boolean fields are translated once at the input boundary.  A
+        # contradictory combination remains UNKNOWN and is rejected by the
+        # builder's structured validation rather than raising here.
+        if self.outcome is None:
+            true_flags = tuple(
+                field_name
+                for field_name in ("passed", "failed", "withdrawn")
+                if getattr(self, field_name) is True
+            )
+            inferred = {
+                "passed": AttemptOutcome.PASSED,
+                "failed": AttemptOutcome.FAILED,
+                "withdrawn": AttemptOutcome.WITHDRAWN,
+            }
+            object.__setattr__(
+                self,
+                "outcome",
+                inferred[true_flags[0]]
+                if len(true_flags) == 1
+                else AttemptOutcome.UNKNOWN,
+            )
 
 
 @dataclass(frozen=True, slots=True)

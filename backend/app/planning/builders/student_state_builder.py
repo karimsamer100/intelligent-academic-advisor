@@ -4,7 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..domain.academic_state import (
+    AcademicHistoryCoverage,
+    FactStatus,
+    RegistrationCoverage,
+)
 from ..domain.course import Program, Regulation
+from ..domain.reasons import ReasonCode
 from ..domain.student import StudentState
 from ..domain.student_diagnostics import (
     DiagnosticSeverity,
@@ -18,17 +24,17 @@ from ..domain.student_history import (
     CourseAttempt,
     CurrentRegistration,
 )
-from .student_state_derivation import derive_attempt_credits, missing_pass_diagnostics
+from .student_state_derivation import build_course_records, derive_total_credits
 from .student_state_validation import sort_diagnostics, validate_records
 
 
 @dataclass(frozen=True, slots=True)
 class StudentStateBuildInput:
-    """Complete typed input supplied to :class:`StudentStateBuilder`.
+    """Typed source records plus explicit coverage declarations.
 
-    ``course_attempts`` is expected to represent the student's complete
-    available academic-attempt history. Loading that history is the
-    responsibility of a future repository or adapter, not this builder.
+    The caller must declare whether each supplied collection is complete.  A
+    future repository or adapter is responsible for loading the complete
+    history; this builder never fetches or infers missing records.
     """
 
     student_id: str
@@ -38,6 +44,8 @@ class StudentStateBuildInput:
     course_attempts: tuple[CourseAttempt, ...] = ()
     current_registrations: tuple[CurrentRegistration, ...] = ()
     academic_snapshot: AcademicSnapshot | None = None
+    history_coverage: AcademicHistoryCoverage | None = None
+    registration_coverage: RegistrationCoverage | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.student_id, str) or not self.student_id.strip():
@@ -65,6 +73,18 @@ class StudentStateBuildInput:
             self.academic_snapshot, AcademicSnapshot
         ):
             raise TypeError("academic_snapshot must be an AcademicSnapshot or None")
+        if self.history_coverage is not None and not isinstance(
+            self.history_coverage, AcademicHistoryCoverage
+        ):
+            raise TypeError(
+                "history_coverage must be an AcademicHistoryCoverage or None"
+            )
+        if self.registration_coverage is not None and not isinstance(
+            self.registration_coverage, RegistrationCoverage
+        ):
+            raise TypeError(
+                "registration_coverage must be a RegistrationCoverage or None"
+            )
         object.__setattr__(self, "course_attempts", attempts)
         object.__setattr__(self, "current_registrations", registrations)
 
@@ -74,14 +94,11 @@ class StudentStateBuilder:
     """Stateless pure builder; repository access belongs outside this class."""
 
     def build(self, input_data: StudentStateBuildInput) -> StudentStateBuildResult:
-        """Build canonical state from typed records.
-
-        An empty input is a complete empty history and therefore produces
-        known-empty course facts rather than unavailable course facts.
-        """
+        """Build a deterministic state or return structured diagnostics."""
 
         if not isinstance(input_data, StudentStateBuildInput):
             raise TypeError("input_data must be a StudentStateBuildInput")
+
         attempts = tuple(sorted(input_data.course_attempts, key=_attempt_sort_key))
         registrations = tuple(
             sorted(input_data.current_registrations, key=_registration_sort_key)
@@ -97,35 +114,53 @@ class StudentStateBuilder:
                 snapshot=input_data.academic_snapshot,
             )
         )
+        diagnostics.extend(_coverage_diagnostics(input_data))
         if any(diagnostic.fatal for diagnostic in diagnostics):
             return StudentStateBuildResult(
                 student_state=None,
-                diagnostics=tuple(diagnostics),
+                diagnostics=tuple(sort_diagnostics(diagnostics)),
             )
 
+        records = build_course_records(
+            attempts=attempts,
+            registrations=registrations,
+            history_coverage=input_data.history_coverage,
+            registration_coverage=input_data.registration_coverage,
+        )
+        diagnostics.extend(
+            diagnostic for record in records for diagnostic in record.diagnostics
+        )
+
         passed_courses = frozenset(
-            attempt.course for attempt in attempts if attempt.passed is True
+            record.course
+            for record in records
+            if record.pass_status is FactStatus.KNOWN_TRUE
         )
         failed_courses = frozenset(
-            attempt.course for attempt in attempts if attempt.failed is True
+            record.course for record in records if record.has_failed_attempt
         )
         withdrawn_courses = frozenset(
-            attempt.course for attempt in attempts if attempt.withdrawn is True
+            record.course for record in records if record.has_withdrawn_attempt
         )
         repeated_courses = frozenset(
-            attempt.course for attempt in attempts if attempt.repeated is True
+            record.course
+            for record in records
+            if record.has_repeat_or_improvement_attempt
         )
         unknown_pass_courses = frozenset(
-            attempt.course
-            for attempt in attempts
-            if attempt.passed is None and attempt.course not in passed_courses
+            record.course
+            for record in records
+            if record.pass_status is FactStatus.UNKNOWN
         )
-        derived_credits, credit_diagnostics = derive_attempt_credits(
-            attempts,
-            passed_courses,
+        current_courses = frozenset(
+            record.course
+            for record in records
+            if record.registration_status is FactStatus.KNOWN_TRUE
         )
-        diagnostics.extend(credit_diagnostics)
-        diagnostics.extend(missing_pass_diagnostics(unknown_pass_courses))
+        derived_credits = derive_total_credits(
+            records,
+            history_coverage=input_data.history_coverage,
+        )
 
         snapshot = input_data.academic_snapshot
         if snapshot is None:
@@ -152,9 +187,7 @@ class StudentStateBuilder:
             track=track,
             earned_credit_hours=earned_credit_hours,
             completed_courses=passed_courses,
-            current_courses=frozenset(
-                registration.course for registration in registrations
-            ),
+            current_courses=current_courses,
             gpa=gpa,
             passed_courses=passed_courses,
             course_attempts=attempts,
@@ -167,6 +200,9 @@ class StudentStateBuilder:
             academic_standing=academic_standing,
             unknown_pass_status_courses=unknown_pass_courses,
             unknown_completion_status_courses=unknown_pass_courses,
+            course_records=records,
+            history_coverage=input_data.history_coverage,
+            registration_coverage=input_data.registration_coverage,
         )
         return StudentStateBuildResult(
             student_state=state,
@@ -175,6 +211,9 @@ class StudentStateBuilder:
 
 
 def _attempt_sort_key(attempt: CourseAttempt) -> tuple[str, int, int, str]:
+    # ``attempt_number`` is the authoritative chronology for this domain.  The
+    # remaining fields only make otherwise-invalid/tied input deterministic;
+    # duplicate attempt numbers are rejected before state construction.
     return (
         attempt.course.course_id,
         attempt.attempt_number,
@@ -191,6 +230,42 @@ def _registration_sort_key(
         registration.academic_year,
         registration.term,
         registration.registration_status or "",
+    )
+
+
+def _coverage_diagnostics(
+    input_data: StudentStateBuildInput,
+) -> tuple[StudentStateDiagnostic, ...]:
+    diagnostics: list[StudentStateDiagnostic] = []
+    if input_data.history_coverage is None:
+        diagnostics.append(
+            _missing_coverage_diagnostic(
+                StudentRecordType.COURSE_ATTEMPT,
+                "history_coverage",
+            )
+        )
+    if input_data.registration_coverage is None:
+        diagnostics.append(
+            _missing_coverage_diagnostic(
+                StudentRecordType.CURRENT_REGISTRATION,
+                "registration_coverage",
+            )
+        )
+    return tuple(diagnostics)
+
+
+def _missing_coverage_diagnostic(
+    record_type: StudentRecordType,
+    field: str,
+) -> StudentStateDiagnostic:
+    return StudentStateDiagnostic(
+        code=StudentStateDiagnosticCode.MISSING_COVERAGE_DECLARATION,
+        severity=DiagnosticSeverity.ERROR,
+        record_type=record_type,
+        reason_codes=(ReasonCode.MISSING_REQUIRED_DATA,),
+        field=field,
+        fatal=True,
+        requires_human_review=True,
     )
 
 

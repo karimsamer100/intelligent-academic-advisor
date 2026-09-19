@@ -15,6 +15,21 @@ def test_valid_canonical_course_identity() -> None:
     assert str(identity) == "R23:CAIE:CSE341"
 
 
+@pytest.mark.parametrize("course_code", ["ASUx31", "ASUx11", "ASUx48"])
+def test_canonical_asu_mixed_case_course_identities_are_valid(
+    course_code: str,
+) -> None:
+    identity = CourseIdentity.parse(f"R23:CAIE:{course_code}")
+
+    assert identity.course_code == course_code
+    assert str(identity) == f"R23:CAIE:{course_code}"
+
+
+def test_elective_slot_identity_is_not_a_course_identity() -> None:
+    with pytest.raises(ValueError):
+        CourseIdentity.parse("R23:CAIE:SLOT:ASU_ELECTIVE_1")
+
+
 @pytest.mark.parametrize(
     "raw_identity",
     [
@@ -25,6 +40,9 @@ def test_valid_canonical_course_identity() -> None:
         "R23:CAIE:",
         "R23:CAIE:CSE 341",
         "R23:CAIE:CSE341:EXTRA",
+        "R23:CAIE:ASUX31",
+        "R23:CAIE:asux31",
+        "R23:CAIE:Cse141",
     ],
 )
 def test_malformed_course_identity_is_rejected(raw_identity: str) -> None:

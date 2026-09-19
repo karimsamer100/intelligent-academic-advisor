@@ -15,6 +15,10 @@ from backend.app.planning.domain.student_history import (
     CourseAttempt,
     CurrentRegistration,
 )
+from backend.app.planning.domain.student import (
+    AcademicHistoryCoverage,
+    RegistrationCoverage,
+)
 from backend.app.planning.builders.student_state_builder import (
     StudentStateBuildInput,
     StudentStateBuilder,
@@ -72,6 +76,8 @@ def _build(
             course_attempts=attempts,
             current_registrations=current_registrations,
             academic_snapshot=academic_snapshot,
+            history_coverage=AcademicHistoryCoverage.COMPLETE,
+            registration_coverage=RegistrationCoverage.COMPLETE,
         )
     )
 
@@ -82,6 +88,8 @@ def test_builder_can_build_an_empty_complete_history() -> None:
             student_id="student-001",
             regulation=Regulation.R23,
             program=Program("CAIE"),
+            history_coverage=AcademicHistoryCoverage.COMPLETE,
+            registration_coverage=RegistrationCoverage.COMPLETE,
         )
     )
 

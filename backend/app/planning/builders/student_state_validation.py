@@ -15,6 +15,8 @@ from ..domain.student_diagnostics import (
 )
 from ..domain.student_history import (
     AcademicSnapshot,
+    AttemptOutcome,
+    AttemptPurpose,
     CourseAttempt,
     CurrentRegistration,
 )
@@ -259,6 +261,53 @@ def _contradiction_diagnostics(
                     course=attempt.course,
                     attempt_number=attempt.attempt_number,
                     field="outcome_flags",
+                    fatal=True,
+                    requires_human_review=True,
+                )
+            )
+        elif len(terminal_flags) == 1:
+            expected_outcome = {
+                "passed": AttemptOutcome.PASSED,
+                "failed": AttemptOutcome.FAILED,
+                "withdrawn": AttemptOutcome.WITHDRAWN,
+            }[terminal_flags[0]]
+            if attempt.outcome is not expected_outcome:
+                diagnostics.append(
+                    StudentStateDiagnostic(
+                        code=StudentStateDiagnosticCode.CONTRADICTORY_RECORD,
+                        severity=DiagnosticSeverity.ERROR,
+                        record_type=StudentRecordType.COURSE_ATTEMPT,
+                        course=attempt.course,
+                        attempt_number=attempt.attempt_number,
+                        field="outcome",
+                        fatal=True,
+                        requires_human_review=True,
+                    )
+                )
+        if attempt.purpose in (AttemptPurpose.REPEAT, AttemptPurpose.IMPROVEMENT) and (
+            attempt.repeated is False
+        ):
+            diagnostics.append(
+                StudentStateDiagnostic(
+                    code=StudentStateDiagnosticCode.CONTRADICTORY_RECORD,
+                    severity=DiagnosticSeverity.ERROR,
+                    record_type=StudentRecordType.COURSE_ATTEMPT,
+                    course=attempt.course,
+                    attempt_number=attempt.attempt_number,
+                    field="repeated",
+                    fatal=True,
+                    requires_human_review=True,
+                )
+            )
+        if attempt.purpose is AttemptPurpose.INITIAL and attempt.repeated is True:
+            diagnostics.append(
+                StudentStateDiagnostic(
+                    code=StudentStateDiagnosticCode.CONTRADICTORY_RECORD,
+                    severity=DiagnosticSeverity.ERROR,
+                    record_type=StudentRecordType.COURSE_ATTEMPT,
+                    course=attempt.course,
+                    attempt_number=attempt.attempt_number,
+                    field="purpose",
                     fatal=True,
                     requires_human_review=True,
                 )

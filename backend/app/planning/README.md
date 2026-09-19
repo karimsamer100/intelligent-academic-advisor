@@ -37,27 +37,41 @@ eligibility, degree audit, or semester planning.
 ## Student state construction
 
 `StudentStateBuilder` is the single framework-independent boundary that turns
-typed student context, complete available course-attempt history, current
+typed student context, explicitly covered attempt history, current
 registrations, and an optionally selected academic snapshot into canonical
-`StudentState`. A future repository or adapter must load the complete history;
-the builder never fetches records itself. Attempts and registrations remain in
-immutable, deterministic order on the resulting state.
+`StudentState`. A future repository or adapter must load and declare the
+coverage of each collection; the builder never fetches records itself.
+Attempts and registrations remain visible in immutable, deterministic order on
+the resulting state.
 
-For the current Academic Data Foundation, `passed_courses` contains courses
-with at least one internally consistent attempt whose explicit `passed` fact is
-`True`. `completed_courses` currently derives from that same fact, but remains
-a separate field so a future authoritative contract can distinguish successful
-completion from passing. Failed and withdrawn attempts are preserved as
-historical facts and do not populate either set. The builder never infers
-outcomes from grade text, opaque statuses, or positive credits.
+The v2 canonical state is attempt-based. `CourseAttempt.outcome` uses the
+typed vocabulary `PASSED`, `FAILED`, `WITHDRAWN`, `INCOMPLETE`, and `UNKNOWN`;
+`INCOMPLETE` is a historical academic outcome and is not current
+registration. `CourseAcademicRecord` keeps attempts and registrations while
+exposing independent pass and registration facts plus a derived effective
+course view. `attempt_number` is the current authoritative chronology field;
+the builder never infers chronology from tuple order, term text, grades, or
+record IDs.
 
-Missing pass facts are represented per course by
-`unknown_pass_status_courses` and `unknown_completion_status_courses`; they do
-not poison known facts for unrelated courses. With complete history, a course
-outside the known or unknown sets is known not to have the corresponding fact.
-Exact and conflicting duplicate records, scope mismatches, and contradictory
-attempt facts fail closed with structured diagnostics. Nonfatal incomplete or
-conflicting credit data leaves state available with review diagnostics.
+History and registration coverage are explicit: `COMPLETE` permits a missing
+course row to become a known false fact, while `PARTIAL` and `UNAVAILABLE`
+make absence unknown. Unknown state is course-local and does not poison
+unrelated courses. Failed, withdrawn, incomplete, and repeated attempts stay
+in the complete history even when a later attempt determines the effective
+pass fact. Explicit improvement outcomes are handled conservatively; unknown
+purpose or missing chronology produces a course-local review diagnostic.
+
+`passed_courses`, `failed_courses`, `withdrawn_courses`, `repeated_courses`,
+and `current_courses` are derived compatibility views. `completed_courses` and
+`COURSE_COMPLETED` temporarily alias successful/pass truth for builder-created
+v2 state; they are not an independent canonical completion concept. The
+builder never infers outcomes from grade text, opaque statuses, or positive
+credits.
+
+Exact and conflicting duplicate records, scope mismatches, contradictory
+attempt facts, and missing coverage declarations fail closed with structured
+diagnostics. Nonfatal incomplete or conflicting credit data leaves state
+available with review diagnostics.
 
 An `AcademicSnapshot` is selected by the upstream adapter and its GPA, earned
 credits, registered credits, academic level, standing, and track are passed
@@ -85,11 +99,18 @@ expression fail closed in the same structured way.
 Expression logic is separate from `AcademicRule` lifecycle metadata. The rule
 record carries approval, verification, scope, and provenance; expressions only
 describe logic. `COURSE_PASSED` reads the explicit
-`StudentState.passed_courses` field and its course-local unknown set, while
-`COURSE_COMPLETED` reads `completed_courses` and its corresponding unknown set.
-A `None` `passed_courses` value remains a backwards-compatible marker that
-successful-pass data is globally unavailable; an empty set means it is known
-that no courses have been passed when no course-local unknown marker applies.
+`StudentState` fact-query methods and their course-local unknown sets. A
+`None` `passed_courses` value remains a backwards-compatible marker for legacy
+states in which successful-pass data is globally unavailable; builder-created
+v2 states always carry explicit coverage and per-course records. An empty
+complete history therefore means known no pass, while an empty partial or
+unavailable history is unknown.
+
+Canonical course identities remain regulation/program scoped. Ordinary codes
+remain strict uppercase tokens, while official Regulation 2023 ASU course
+codes use the exact mixed-case form `R23:CAIE:ASUx31` (also `ASUx11` and
+`ASUx48`). `SLOT:ASU_ELECTIVE_1` is an elective requirement placeholder, not a
+`CourseIdentity`.
 
 The current evaluator supports `COURSE_PASSED`, `COURSE_COMPLETED`,
 `COURSE_CURRENTLY_REGISTERED`, `MIN_EARNED_CREDITS`, `MAX_EARNED_CREDITS`,

@@ -15,9 +15,12 @@ from .lifecycle import ApprovalStatus, VerificationStatus
 
 
 _IDENTITY_TOKEN = re.compile(r"^[A-Z][A-Z0-9_-]*$")
+_COURSE_CODE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
+_ASU_COURSE_CODE = re.compile(r"^ASUx[0-9]+$")
+_NON_CANONICAL_ASU_COURSE_CODE = re.compile(r"^ASUX[0-9]+$")
 _COURSE_IDENTITY = re.compile(
     r"^R(?P<regulation>18|23):(?P<program>[A-Z][A-Z0-9_-]*):"
-    r"(?P<course_code>[A-Z][A-Z0-9_-]*)$"
+    r"(?P<course_code>(?:[A-Z][A-Z0-9_-]*|ASUx[0-9]+))$"
 )
 
 
@@ -66,8 +69,13 @@ class CourseIdentity:
             raise TypeError("regulation must be a Regulation")
         if not isinstance(self.program, Program):
             raise TypeError("program must be a Program")
-        if not isinstance(self.course_code, str) or not _IDENTITY_TOKEN.fullmatch(
-            self.course_code
+        if (
+            not isinstance(self.course_code, str)
+            or not (
+                _COURSE_CODE.fullmatch(self.course_code)
+                or _ASU_COURSE_CODE.fullmatch(self.course_code)
+            )
+            or _NON_CANONICAL_ASU_COURSE_CODE.fullmatch(self.course_code)
         ):
             raise ValueError(f"Invalid course code: {self.course_code!r}")
 

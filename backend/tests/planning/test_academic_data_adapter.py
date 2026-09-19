@@ -143,8 +143,11 @@ def test_known_non_course_entities_are_diagnosed_but_do_not_poison_load() -> Non
     )
     assert loaded.value.corequisites_loaded is True
     assert loaded.value.corequisite_count == 0
-    assert loaded.value.course_count == 168
-    assert any(
+    assert loaded.value.course_count == 169
+    asu_lookup = loaded.value.get_course(CourseIdentity.parse("R23:CAIE:ASUx31"))
+    assert asu_lookup.value is not None
+    assert asu_lookup.value.approval_status is ApprovalStatus.BLOCKED
+    assert not any(
         diagnostic.code is AcademicDataDiagnosticCode.MALFORMED_IDENTITY
         and diagnostic.record_id == "R23:CAIE:ASUx31"
         for diagnostic in loaded.diagnostics
