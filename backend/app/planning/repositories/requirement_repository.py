@@ -3,6 +3,7 @@
 from typing import Protocol, runtime_checkable
 
 from ..domain.course import Program, Regulation
+from ..domain.electives import ElectivePool
 from ..domain.requirements import ProgramRequirement
 
 
@@ -17,5 +18,15 @@ class RequirementRepository(Protocol):
         program: Program,
     ) -> tuple[ProgramRequirement, ...]:
         """Return requirements for one regulation/program scope."""
+
+        ...
+
+    def list_elective_pools(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+    ) -> tuple[ElectivePool, ...]:
+        """Return scoped elective pools without exposing source-file fields."""
 
         ...

@@ -5,11 +5,19 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
+from ..domain.conditions import (
+    AllConditions,
+    AnyConditions,
+    CourseMustBePassedCondition,
+    FutureCondition,
+)
+from ..domain.context import EligibilityContext, EvaluationHorizon
 from ..domain.course import CourseIdentity
 from ..domain.evaluation import EvaluationOutcome, RuleEvaluationResult
 from ..domain.expressions import (
     AndExpression,
     CourseCompletedExpression,
+    CourseConcurrentExpression,
     CourseCurrentlyRegisteredExpression,
     CoursePassedExpression,
     MaxEarnedCreditsExpression,
@@ -26,7 +34,7 @@ from ..domain.provenance import Provenance
 from ..domain.reasons import ReasonCode
 from ..domain.results import ResultMetadata
 from ..domain.rules import AcademicRule
-from ..domain.student import FactStatus, StudentState
+from ..domain.student import AcademicHistoryCoverage, FactStatus, StudentState
 from ..domain.trace import (
     DecisionStatus,
     DecisionTrace,
@@ -45,6 +53,7 @@ class _ExpressionEvaluation:
     outcome: EvaluationOutcome
     trace_node: DecisionTraceNode
     reason_codes: tuple[ReasonCode, ...] = ()
+    conditions: tuple[FutureCondition, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,12 +80,42 @@ class RuleEvaluator:
         rule: AcademicRule,
         student: StudentState,
     ) -> RuleEvaluationResult:
+        """Evaluate using the backward-compatible current-state defaults."""
+
+        return self._evaluate(
+            rule,
+            student,
+            context=EligibilityContext(),
+        )
+
+    def evaluate_with_context(
+        self,
+        rule: AcademicRule,
+        student: StudentState,
+        context: EligibilityContext,
+    ) -> RuleEvaluationResult:
+        """Evaluate one rule with explicit current/projected context."""
+
+        if not isinstance(context, EligibilityContext):
+            raise TypeError("context must be an EligibilityContext")
+        return self._evaluate(rule, student, context=context)
+
+    def _evaluate(
+        self,
+        rule: AcademicRule,
+        student: StudentState,
+        *,
+        context: EligibilityContext | None = None,
+    ) -> RuleEvaluationResult:
         """Evaluate one rule without consulting repositories or external systems."""
 
         if not isinstance(rule, AcademicRule):
             raise TypeError("rule must be an AcademicRule")
         if not isinstance(student, StudentState):
             raise TypeError("student must be a StudentState")
+        context = context or EligibilityContext()
+        if not isinstance(context, EligibilityContext):
+            raise TypeError("context must be an EligibilityContext")
         decision = self.policy.assess(
             rule.approval_status,
             verification_status=rule.verification_status,
@@ -88,7 +127,10 @@ class RuleEvaluator:
             evaluation = self._unsupported_evaluation(rule.rule_id, "MISSING")
         else:
             evaluation = self._evaluate_expression(
-                rule.expression, student, rule.rule_id
+                rule.expression,
+                student,
+                rule.rule_id,
+                context=context,
             )
         provenance = self._provenance(rule)
         trace_node = replace(
@@ -102,16 +144,26 @@ class RuleEvaluator:
             (*decision.reason_codes, *evaluation.reason_codes)
         )
         indeterminate = evaluation.outcome is EvaluationOutcome.INDETERMINATE
+        requires_human_review = (
+            decision.requires_human_review
+            or (
+                evaluation.outcome is not EvaluationOutcome.SATISFIED
+                and _trace_contains_unresolved_child(evaluation.trace_node)
+            )
+            or (indeterminate and not evaluation.conditions)
+        )
         metadata = ResultMetadata(
             dataset_version=self.dataset_version,
             execution_mode=decision.mode,
-            authoritative=decision.authoritative and not indeterminate,
+            authoritative=decision.authoritative
+            and not indeterminate
+            and not requires_human_review,
             approval_status=decision.approval_status,
             verification_status=decision.verification_status,
             reason_codes=reason_codes,
             provenance=provenance,
             decision_trace=trace,
-            requires_human_review=decision.requires_human_review or indeterminate,
+            requires_human_review=requires_human_review,
             engine_version=self.engine_version,
             ruleset_version=self.ruleset_version,
         )
@@ -119,6 +171,7 @@ class RuleEvaluator:
             rule_id=rule.rule_id,
             outcome=evaluation.outcome,
             metadata=metadata,
+            conditions=evaluation.conditions,
         )
 
     @classmethod
@@ -128,6 +181,8 @@ class RuleEvaluator:
         student: StudentState,
         rule_id: str,
         path: str = "root",
+        *,
+        context: EligibilityContext,
     ) -> _ExpressionEvaluation:
         """Evaluate an expression recursively and preserve every child trace."""
 
@@ -138,6 +193,7 @@ class RuleEvaluator:
                     student,
                     rule_id,
                     f"{path}.{index}",
+                    context=context,
                 )
                 for index, child in enumerate(expression.children)
             )
@@ -154,6 +210,9 @@ class RuleEvaluator:
                 TraceCode.AND,
                 outcome,
                 children,
+                conditions=_logical_conditions(
+                    children, operator="AND", outcome=outcome
+                ),
             )
 
         if isinstance(expression, OrExpression):
@@ -163,6 +222,7 @@ class RuleEvaluator:
                     student,
                     rule_id,
                     f"{path}.{index}",
+                    context=context,
                 )
                 for index, child in enumerate(expression.children)
             )
@@ -179,6 +239,9 @@ class RuleEvaluator:
                 TraceCode.OR,
                 outcome,
                 children,
+                conditions=_logical_conditions(
+                    children, operator="OR", outcome=outcome
+                ),
             )
 
         if isinstance(expression, NotExpression):
@@ -187,6 +250,7 @@ class RuleEvaluator:
                 student,
                 rule_id,
                 f"{path}.0",
+                context=context,
             )
             outcome = {
                 EvaluationOutcome.SATISFIED: EvaluationOutcome.UNSATISFIED,
@@ -199,6 +263,11 @@ class RuleEvaluator:
                 TraceCode.NOT,
                 outcome,
                 (child,),
+                conditions=(
+                    child.conditions
+                    if outcome is EvaluationOutcome.INDETERMINATE
+                    else ()
+                ),
             )
 
         if isinstance(expression, CoursePassedExpression):
@@ -210,6 +279,28 @@ class RuleEvaluator:
                     path,
                     TraceCode.COURSE_PASSED,
                     course,
+                )
+            if (
+                status is FactStatus.KNOWN_FALSE
+                and context.horizon is EvaluationHorizon.PROJECTED
+                and student.registration_status(course) is FactStatus.KNOWN_TRUE
+                and student.history_coverage is AcademicHistoryCoverage.COMPLETE
+            ):
+                condition = CourseMustBePassedCondition(
+                    course=course,
+                    rule_id=rule_id,
+                    expression_path=path,
+                )
+                return cls._leaf(
+                    rule_id,
+                    path,
+                    TraceCode.COURSE_PASSED,
+                    subject=course,
+                    expected_value=True,
+                    actual_value=False,
+                    outcome=EvaluationOutcome.INDETERMINATE,
+                    reason_codes=(ReasonCode.CONDITIONAL_REQUIREMENT,),
+                    conditions=(condition,),
                 )
             return cls._course_leaf(
                 rule_id,
@@ -253,6 +344,14 @@ class RuleEvaluator:
                 TraceCode.COURSE_CURRENTLY_REGISTERED,
                 course,
                 status is FactStatus.KNOWN_TRUE,
+            )
+
+        if isinstance(expression, CourseConcurrentExpression):
+            return cls._concurrent_leaf(
+                rule_id,
+                path,
+                expression.course,
+                context,
             )
 
         if isinstance(expression, MinEarnedCreditsExpression):
@@ -388,6 +487,7 @@ class RuleEvaluator:
         code: TraceCode,
         outcome: EvaluationOutcome,
         children: tuple[_ExpressionEvaluation, ...],
+        conditions: tuple[FutureCondition, ...] = (),
     ) -> _ExpressionEvaluation:
         reason_codes = _unique_reason_codes(
             tuple(code for child in children for code in child.reason_codes)
@@ -396,11 +496,53 @@ class RuleEvaluator:
             node_id=_node_id(rule_id, path),
             code=code,
             node_type=TraceNodeType.LOGICAL,
-            status=_trace_status(outcome),
+            status=_trace_status(outcome, conditional=bool(conditions)),
             reason_codes=reason_codes,
             children=tuple(child.trace_node for child in children),
         )
-        return _ExpressionEvaluation(outcome, trace_node, reason_codes)
+        return _ExpressionEvaluation(outcome, trace_node, reason_codes, conditions)
+
+    @classmethod
+    def _concurrent_leaf(
+        cls,
+        rule_id: str,
+        path: str,
+        course: CourseIdentity,
+        context: EligibilityContext,
+    ) -> _ExpressionEvaluation:
+        proposed = context.proposed_term
+        if proposed is None:
+            return cls._leaf(
+                rule_id,
+                path,
+                TraceCode.COURSE_CONCURRENT,
+                subject=course,
+                expected_value=True,
+                actual_value=None,
+                outcome=EvaluationOutcome.INDETERMINATE,
+                reason_codes=(ReasonCode.MISSING_REQUIRED_DATA,),
+            )
+        if not proposed.contains(proposed.target_course):
+            return cls._leaf(
+                rule_id,
+                path,
+                TraceCode.COURSE_CONCURRENT,
+                subject=course,
+                expected_value=True,
+                actual_value=None,
+                outcome=EvaluationOutcome.INDETERMINATE,
+                reason_codes=(ReasonCode.CONCURRENT_CONTEXT_INVALID,),
+            )
+        actual = proposed.contains(course)
+        return cls._leaf(
+            rule_id,
+            path,
+            TraceCode.COURSE_CONCURRENT,
+            subject=course,
+            expected_value=True,
+            actual_value=actual,
+            outcome=_boolean_outcome(actual),
+        )
 
     @classmethod
     def _course_leaf(
@@ -500,6 +642,7 @@ class RuleEvaluator:
         actual_value: TraceValue = None,
         outcome: EvaluationOutcome,
         reason_codes: tuple[ReasonCode, ...] = (),
+        conditions: tuple[FutureCondition, ...] = (),
     ) -> _ExpressionEvaluation:
         trace_node = DecisionTraceNode(
             node_id=_node_id(rule_id, path),
@@ -509,13 +652,13 @@ class RuleEvaluator:
                 if subject is not None
                 else TraceNodeType.VALUE_CHECK
             ),
-            status=_trace_status(outcome),
+            status=_trace_status(outcome, conditional=bool(conditions)),
             subject=subject,
             expected_value=expected_value,
             actual_value=actual_value,
             reason_codes=reason_codes,
         )
-        return _ExpressionEvaluation(outcome, trace_node, reason_codes)
+        return _ExpressionEvaluation(outcome, trace_node, reason_codes, conditions)
 
     @staticmethod
     def _provenance(rule: AcademicRule) -> tuple[Provenance, ...]:
@@ -538,7 +681,13 @@ def _node_id(rule_id: str, path: str) -> str:
     return rule_id if path == "root" else f"{rule_id}:{path}"
 
 
-def _trace_status(outcome: EvaluationOutcome) -> DecisionStatus:
+def _trace_status(
+    outcome: EvaluationOutcome,
+    *,
+    conditional: bool = False,
+) -> DecisionStatus:
+    if conditional and outcome is EvaluationOutcome.INDETERMINATE:
+        return DecisionStatus.CONDITIONAL
     return {
         EvaluationOutcome.SATISFIED: DecisionStatus.SATISFIED,
         EvaluationOutcome.UNSATISFIED: DecisionStatus.FAILED,
@@ -546,7 +695,45 @@ def _trace_status(outcome: EvaluationOutcome) -> DecisionStatus:
     }[outcome]
 
 
+def _logical_conditions(
+    children: tuple[_ExpressionEvaluation, ...],
+    *,
+    operator: str,
+    outcome: EvaluationOutcome,
+) -> tuple[FutureCondition, ...]:
+    """Preserve projected conditions without turning unknown facts into plans."""
+
+    if outcome is not EvaluationOutcome.INDETERMINATE:
+        return ()
+    conditions = tuple(
+        condition for child in children for condition in child.conditions
+    )
+    if not conditions:
+        return ()
+    if len(conditions) == 1:
+        return conditions
+    group: FutureCondition = (
+        AllConditions(conditions) if operator == "AND" else AnyConditions(conditions)
+    )
+    return (group,)
+
+
 def _unique_reason_codes(
     reason_codes: tuple[ReasonCode, ...],
 ) -> tuple[ReasonCode, ...]:
     return tuple(dict.fromkeys(reason_codes))
+
+
+def _trace_contains_unresolved_child(node: DecisionTraceNode) -> bool:
+    """Find unresolved nested branches that affect a non-satisfied result."""
+
+    unresolved_statuses = {
+        DecisionStatus.INDETERMINATE,
+        DecisionStatus.BLOCKED,
+        DecisionStatus.CONFLICTED,
+        DecisionStatus.NOT_EVALUATED,
+        DecisionStatus.UNSUPPORTED,
+    }
+    return node.status in unresolved_statuses or any(
+        _trace_contains_unresolved_child(child) for child in node.children
+    )

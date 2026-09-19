@@ -4,7 +4,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..domain.course import Course
+from ..domain.academic_state import AcademicHistoryCoverage, FactStatus
+from ..domain.conditions import FutureCondition
+from ..domain.context import (
+    EligibilityContext,
+    RegistrationIntent,
+)
+from ..domain.course import Course, CourseIdentity
 from ..domain.eligibility import (
     CourseEligibilityRuleSet,
     EligibilityRequest,
@@ -99,11 +105,30 @@ class EligibilityService:
                 rule_results=(),
             )
 
-        completion_unknown = (
-            course.identity in student.unknown_completion_status_courses
-        )
-        completed = course.identity in student.completed_courses
-        currently_registered = course.identity in student.current_courses
+        if (
+            request.context.proposed_term is not None
+            and request.context.proposed_term.target_course != course.identity
+        ):
+            context_node = _proposed_context_trace(course, request.context)
+            return self._result(
+                request,
+                status=EligibilityStatus.HUMAN_REVIEW_REQUIRED,
+                eligible=None,
+                children=tuple((*base_children, context_node)),
+                reason_codes=(
+                    *target_decision.reason_codes,
+                    ReasonCode.CONCURRENT_CONTEXT_INVALID,
+                ),
+                requires_human_review=True,
+                target_decision=target_decision,
+                rule_results=(),
+            )
+
+        pass_status = _eligibility_pass_status(student, course.identity)
+        registration_status = _eligibility_registration_status(student, course.identity)
+        completion_unknown = pass_status is FactStatus.UNKNOWN
+        completed = pass_status is FactStatus.KNOWN_TRUE
+        currently_registered = registration_status is FactStatus.KNOWN_TRUE
         not_completed_node = _not_completed_trace(
             course,
             completed=None if completion_unknown else completed,
@@ -125,6 +150,30 @@ class EligibilityService:
                     ReasonCode.MISSING_REQUIRED_DATA,
                 ),
                 requires_human_review=True,
+                target_decision=target_decision,
+                rule_results=(),
+            )
+
+        intent_result = _intent_gate(
+            student,
+            course.identity,
+            request.context.intent,
+            pass_status=pass_status,
+        )
+        if intent_result is not None:
+            intent_status, intent_eligible, intent_reasons, intent_review = (
+                intent_result
+            )
+            return self._result(
+                request,
+                status=intent_status,
+                eligible=intent_eligible,
+                children=tuple(base_children),
+                reason_codes=(
+                    *target_decision.reason_codes,
+                    *intent_reasons,
+                ),
+                requires_human_review=intent_review,
                 target_decision=target_decision,
                 rule_results=(),
             )
@@ -170,7 +219,11 @@ class EligibilityService:
                 rule_scope_reasons.extend(reasons)
                 children.append(_rule_scope_trace(rule, reasons))
                 continue
-            evaluation = self.rule_evaluator.evaluate(rule, student)
+            evaluation = self.rule_evaluator.evaluate_with_context(
+                rule,
+                student,
+                request.context,
+            )
             rule_results.append(evaluation)
             children.append(evaluation.decision_trace.root)
 
@@ -205,6 +258,14 @@ class EligibilityService:
             rule_results,
         )
 
+        conditions = tuple(
+            condition for result in rule_results for condition in result.conditions
+        )
+        has_conditional_results = bool(conditions) and all(
+            result.conditions or result.outcome is EvaluationOutcome.SATISFIED
+            for result in rule_results
+        )
+
         if has_unsatisfied:
             status = EligibilityStatus.NOT_ELIGIBLE
             eligible = False
@@ -214,6 +275,13 @@ class EligibilityService:
             has_review_issue = True
         elif blocked_by_unverified:
             status = EligibilityStatus.BLOCKED_BY_UNVERIFIED_RULE
+            eligible = None
+            has_review_issue = True
+        elif has_conditional_results and not has_review_issue:
+            status = EligibilityStatus.CONDITIONAL
+            eligible = None
+        elif request.context.intent is RegistrationIntent.RETAKE_FOR_IMPROVEMENT:
+            status = EligibilityStatus.REQUIRES_ADVISOR_REVIEW
             eligible = None
             has_review_issue = True
         elif has_review_issue:
@@ -233,6 +301,7 @@ class EligibilityService:
             requires_human_review=has_review_issue,
             target_decision=target_decision,
             rule_results=tuple(rule_results),
+            conditions=conditions,
         )
 
     def _result(
@@ -247,6 +316,7 @@ class EligibilityService:
         target_decision: PolicyDecision | None,
         rule_results: tuple[RuleEvaluationResult, ...],
         warnings: tuple[ReasonCode, ...] = (),
+        conditions: tuple[FutureCondition, ...] = (),
     ) -> EligibilityResult:
         rule_set = request.rule_set
         provenance = _unique_provenance(
@@ -270,6 +340,8 @@ class EligibilityService:
             metadata=(
                 TraceMetadata("eligibility_status", status.value),
                 TraceMetadata("rule_set_status", rule_set.status.value),
+                TraceMetadata("intent", request.context.intent.value),
+                TraceMetadata("horizon", request.context.horizon.value),
             ),
         )
         trace = DecisionTrace(root)
@@ -308,6 +380,9 @@ class EligibilityService:
             rule_set_status=rule_set.status,
             metadata=metadata,
             rule_results=rule_results,
+            conditions=conditions,
+            intent=request.context.intent,
+            horizon=request.context.horizon,
         )
 
 
@@ -320,6 +395,117 @@ def _scope_reason_codes(
     if course.identity.program != student.program:
         reasons.append(ReasonCode.WRONG_PROGRAM)
     return _unique_reason_codes(tuple(reasons))
+
+
+def _eligibility_pass_status(
+    student: StudentState,
+    course: CourseIdentity,
+) -> FactStatus:
+    """Use v2 facts first, retaining one explicit legacy construction boundary."""
+
+    identity = course
+    if student.course_records or student.history_coverage is not None:
+        return student.pass_status(identity)
+    if identity in student.unknown_completion_status_courses:
+        return FactStatus.UNKNOWN
+    if identity in student.completed_courses:
+        return FactStatus.KNOWN_TRUE
+    return student.pass_status(identity)
+
+
+def _eligibility_registration_status(
+    student: StudentState,
+    course: CourseIdentity,
+) -> FactStatus:
+    identity = course
+    return student.registration_status(identity)
+
+
+def _intent_gate(
+    student: StudentState,
+    course: CourseIdentity,
+    intent: RegistrationIntent,
+    *,
+    pass_status: FactStatus,
+) -> tuple[EligibilityStatus, bool | None, tuple[ReasonCode, ...], bool] | None:
+    """Validate only intent/history compatibility, not registration policy."""
+
+    identity = course
+    if intent is RegistrationIntent.NORMAL:
+        return None
+
+    if intent is RegistrationIntent.RETAKE_FOR_IMPROVEMENT:
+        if pass_status is FactStatus.KNOWN_TRUE:
+            return (
+                EligibilityStatus.REQUIRES_ADVISOR_REVIEW,
+                None,
+                (
+                    ReasonCode.ADVISOR_REVIEW_REQUIRED,
+                    ReasonCode.EXCEPTION_REQUIRED,
+                ),
+                True,
+            )
+        if _coverage_is_complete_or_legacy(student):
+            return (
+                EligibilityStatus.NOT_ELIGIBLE,
+                False,
+                (ReasonCode.INTENT_MISMATCH,),
+                False,
+            )
+        return (
+            EligibilityStatus.HUMAN_REVIEW_REQUIRED,
+            None,
+            (ReasonCode.MISSING_REQUIRED_DATA,),
+            True,
+        )
+
+    failed_status = _failed_attempt_status(student, identity)  # type: ignore[arg-type]
+    if pass_status is FactStatus.KNOWN_TRUE:
+        return (
+            EligibilityStatus.NOT_ELIGIBLE,
+            False,
+            (ReasonCode.INTENT_MISMATCH,),
+            False,
+        )
+    if failed_status is FactStatus.KNOWN_TRUE:
+        return None
+    if failed_status is FactStatus.KNOWN_FALSE and _coverage_is_complete_or_legacy(
+        student
+    ):
+        return (
+            EligibilityStatus.NOT_ELIGIBLE,
+            False,
+            (ReasonCode.INTENT_MISMATCH,),
+            False,
+        )
+    return (
+        EligibilityStatus.HUMAN_REVIEW_REQUIRED,
+        None,
+        (ReasonCode.MISSING_REQUIRED_DATA,),
+        True,
+    )
+
+
+def _failed_attempt_status(student: StudentState, course: CourseIdentity) -> FactStatus:
+    identity = course
+    record = student.course_record(identity)
+    if record is not None:
+        return (
+            FactStatus.KNOWN_TRUE
+            if record.has_failed_attempt
+            else FactStatus.KNOWN_FALSE
+        )
+    if student.has_failed_attempt(identity):
+        return FactStatus.KNOWN_TRUE
+    if student.history_coverage is AcademicHistoryCoverage.COMPLETE:
+        return FactStatus.KNOWN_FALSE
+    if student.history_coverage is not None:
+        return FactStatus.UNKNOWN
+    return FactStatus.KNOWN_FALSE
+
+
+def _coverage_is_complete_or_legacy(student: StudentState) -> bool:
+    return student.history_coverage in (None, AcademicHistoryCoverage.COMPLETE)
 
 
 def _rule_scope_reason_codes(
@@ -434,6 +620,29 @@ def _not_registered_trace(
     )
 
 
+def _proposed_context_trace(
+    course: Course,
+    context: EligibilityContext,
+) -> DecisionTraceNode:
+    proposed_target = (
+        context.proposed_term.target_course
+        if context.proposed_term is not None
+        else None
+    )
+    return DecisionTraceNode(
+        node_id="proposed-term-context",
+        code=TraceCode.PROPOSED_TERM_CONTEXT,
+        node_type=TraceNodeType.REQUIREMENT_CHECK,
+        status=DecisionStatus.INDETERMINATE,
+        subject=course.identity,
+        expected_value=course.identity.course_id,
+        actual_value=(
+            proposed_target.course_id if proposed_target is not None else None
+        ),
+        reason_codes=(ReasonCode.CONCURRENT_CONTEXT_INVALID,),
+    )
+
+
 def _rule_set_availability_trace(
     rule_set: CourseEligibilityRuleSet,
 ) -> DecisionTraceNode:
@@ -533,6 +742,10 @@ def _eligibility_trace_status(status: EligibilityStatus) -> DecisionStatus:
         EligibilityStatus.CURRENTLY_REGISTERED,
     }:
         return DecisionStatus.FAILED
+    if status is EligibilityStatus.CONDITIONAL:
+        return DecisionStatus.CONDITIONAL
+    if status is EligibilityStatus.REQUIRES_ADVISOR_REVIEW:
+        return DecisionStatus.ADVISOR_REVIEW
     if status is EligibilityStatus.UNSUPPORTED:
         return DecisionStatus.UNSUPPORTED
     return DecisionStatus.INDETERMINATE

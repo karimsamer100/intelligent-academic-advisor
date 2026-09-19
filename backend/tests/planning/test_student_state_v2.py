@@ -423,3 +423,30 @@ def test_explicit_outcome_conflicting_with_legacy_flags_is_fatal() -> None:
         diagnostic.code.value == "CONTRADICTORY_RECORD" and diagnostic.fatal
         for diagnostic in result.diagnostics
     )
+
+
+def test_explicit_outcome_conflicting_with_false_legacy_flag_is_fatal() -> None:
+    course = _course("CSE141")
+    result = StudentStateBuilder().build(
+        StudentStateBuildInput(
+            student_id="student-001",
+            regulation=Regulation.R23,
+            program=Program("CAIE"),
+            course_attempts=(
+                _attempt(
+                    course,
+                    outcome=AttemptOutcome.PASSED,
+                    passed=False,
+                    credits_earned=3,
+                ),
+            ),
+            history_coverage=AcademicHistoryCoverage.COMPLETE,
+            registration_coverage=RegistrationCoverage.COMPLETE,
+        )
+    )
+
+    assert result.student_state is None
+    assert any(
+        diagnostic.code.value == "CONTRADICTORY_RECORD" and diagnostic.fatal
+        for diagnostic in result.diagnostics
+    )

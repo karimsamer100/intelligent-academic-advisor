@@ -12,6 +12,7 @@ from enum import StrEnum
 from typing import ClassVar
 
 from .course import CourseIdentity
+from .entry import EntryRequirementReference
 
 
 class ExpressionType(StrEnum):
@@ -23,6 +24,7 @@ class ExpressionType(StrEnum):
     COURSE_PASSED = "COURSE_PASSED"
     COURSE_COMPLETED = "COURSE_COMPLETED"
     COURSE_CURRENTLY_REGISTERED = "COURSE_CURRENTLY_REGISTERED"
+    COURSE_CONCURRENT = "COURSE_CONCURRENT"
     MIN_EARNED_CREDITS = "MIN_EARNED_CREDITS"
     MAX_EARNED_CREDITS = "MAX_EARNED_CREDITS"
     MIN_GPA = "MIN_GPA"
@@ -67,6 +69,18 @@ class CourseCurrentlyRegisteredExpression(RuleExpression):
     expression_type: ClassVar[ExpressionType] = (
         ExpressionType.COURSE_CURRENTLY_REGISTERED
     )
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.course, CourseIdentity):
+            raise TypeError("course must be a CourseIdentity")
+
+
+@dataclass(frozen=True, slots=True)
+class CourseConcurrentExpression(RuleExpression):
+    """Require the course to be proposed in the same term as the target."""
+
+    course: CourseIdentity
+    expression_type: ClassVar[ExpressionType] = ExpressionType.COURSE_CONCURRENT
 
     def __post_init__(self) -> None:
         if not isinstance(self.course, CourseIdentity):
@@ -140,6 +154,21 @@ class UnsupportedExpression(RuleExpression):
             self.external_reference, bool
         ):
             raise TypeError("external_reference must be a bool or None")
+
+
+@dataclass(frozen=True, slots=True)
+class EntryRequirementExpression(UnsupportedExpression):
+    """Opaque entry/foundation requirement, never a course-pass predicate."""
+
+    source_type: str = "ENTRY_REQUIREMENT"
+    reference: EntryRequirementReference | None = None
+
+    def __post_init__(self) -> None:
+        UnsupportedExpression.__post_init__(self)
+        if self.reference is None:
+            raise ValueError("reference must be an EntryRequirementReference")
+        if not isinstance(self.reference, EntryRequirementReference):
+            raise TypeError("reference must be an EntryRequirementReference")
 
 
 @dataclass(frozen=True, slots=True)

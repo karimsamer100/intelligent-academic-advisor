@@ -247,12 +247,16 @@ def _contradiction_diagnostics(
 ) -> tuple[StudentStateDiagnostic, ...]:
     diagnostics: list[StudentStateDiagnostic] = []
     for attempt in attempts:
-        terminal_flags = tuple(
-            field_name
-            for field_name in ("passed", "failed", "withdrawn")
-            if getattr(attempt, field_name) is True
-        )
-        if len(terminal_flags) > 1:
+        expected_flags = {
+            "passed": attempt.outcome is AttemptOutcome.PASSED,
+            "failed": attempt.outcome is AttemptOutcome.FAILED,
+            "withdrawn": attempt.outcome is AttemptOutcome.WITHDRAWN,
+        }
+        if any(
+            (value := getattr(attempt, field_name)) is not None
+            and value is not expected_flags[field_name]
+            for field_name in expected_flags
+        ):
             diagnostics.append(
                 StudentStateDiagnostic(
                     code=StudentStateDiagnosticCode.CONTRADICTORY_RECORD,
@@ -265,25 +269,6 @@ def _contradiction_diagnostics(
                     requires_human_review=True,
                 )
             )
-        elif len(terminal_flags) == 1:
-            expected_outcome = {
-                "passed": AttemptOutcome.PASSED,
-                "failed": AttemptOutcome.FAILED,
-                "withdrawn": AttemptOutcome.WITHDRAWN,
-            }[terminal_flags[0]]
-            if attempt.outcome is not expected_outcome:
-                diagnostics.append(
-                    StudentStateDiagnostic(
-                        code=StudentStateDiagnosticCode.CONTRADICTORY_RECORD,
-                        severity=DiagnosticSeverity.ERROR,
-                        record_type=StudentRecordType.COURSE_ATTEMPT,
-                        course=attempt.course,
-                        attempt_number=attempt.attempt_number,
-                        field="outcome",
-                        fatal=True,
-                        requires_human_review=True,
-                    )
-                )
         if attempt.purpose in (AttemptPurpose.REPEAT, AttemptPurpose.IMPROVEMENT) and (
             attempt.repeated is False
         ):

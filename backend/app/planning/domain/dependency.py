@@ -29,6 +29,7 @@ class DependencyRelationKind(StrEnum):
     ALTERNATIVE = "ALTERNATIVE"
     UNRESOLVED = "UNRESOLVED"
     EXTERNAL = "EXTERNAL"
+    CONCURRENT = "CONCURRENT"
 
 
 class DependencyDiagnosticKind(StrEnum):

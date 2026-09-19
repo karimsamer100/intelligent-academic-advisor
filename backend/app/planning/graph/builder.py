@@ -28,6 +28,7 @@ from ..domain.eligibility import CourseEligibilityRuleSet, RuleSetStatus
 from ..domain.expressions import (
     AndExpression,
     CourseCompletedExpression,
+    CourseConcurrentExpression,
     CourseCurrentlyRegisteredExpression,
     CoursePassedExpression,
     NotExpression,
@@ -48,6 +49,7 @@ class _ReferenceOccurrence:
     external: ExternalDependencyReference | None
     path: tuple[int, ...]
     positive: bool
+    relation_kind: DependencyRelationKind | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -451,6 +453,21 @@ def _analyze_expression(
             occurrences=(occurrence,),
         )
 
+    if isinstance(expression, CourseConcurrentExpression):
+        return _ExpressionAnalysis(
+            frozenset(),
+            frozenset(),
+            (
+                _ReferenceOccurrence(
+                    course=expression.course,
+                    external=None,
+                    path=path,
+                    positive=False,
+                    relation_kind=DependencyRelationKind.CONCURRENT,
+                ),
+            ),
+        )
+
     if isinstance(expression, CourseCurrentlyRegisteredExpression):
         return _ExpressionAnalysis(
             frozenset(),
@@ -531,7 +548,9 @@ def _reference_from_occurrence(
         and occurrence.course.program == target.program
     )
     positive = occurrence.positive and rule_scope_valid and in_scope
-    if positive:
+    if occurrence.relation_kind is DependencyRelationKind.CONCURRENT:
+        relation_kind = DependencyRelationKind.CONCURRENT
+    elif positive:
         relation_kind = (
             DependencyRelationKind.REQUIRED
             if occurrence.course in required_courses

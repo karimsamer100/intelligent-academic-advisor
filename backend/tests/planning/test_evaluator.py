@@ -420,6 +420,26 @@ def test_evaluator_keeps_child_traces_after_aggregate_outcome_is_known() -> None
     assert result.decision_trace.root.children[1].status is DecisionStatus.INDETERMINATE
 
 
+def test_failed_and_indeterminate_children_require_review() -> None:
+    result = RuleEvaluator(
+        ExecutionPolicy.development(), DatasetVersion("academic-dev-1")
+    ).evaluate(
+        _rule(
+            AndExpression(
+                (
+                    CoursePassedExpression(CourseIdentity.parse("R23:CAIE:CSE241")),
+                    MinGpaExpression(2.0),
+                )
+            )
+        ),
+        _student(passed_courses=frozenset(), gpa=None),
+    )
+
+    assert result.outcome is EvaluationOutcome.UNSATISFIED
+    assert result.requires_human_review is True
+    assert result.authoritative is False
+
+
 def test_unsupported_expression_is_explicitly_indeterminate_with_trace_metadata() -> (
     None
 ):

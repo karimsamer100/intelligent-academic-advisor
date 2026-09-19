@@ -8,13 +8,16 @@ from ...domain.course import CourseIdentity, Program, Regulation
 from ...domain.errors import PlanningErrorCode
 from ...domain.expressions import (
     AndExpression,
+    CourseConcurrentExpression,
     CoursePassedExpression,
+    EntryRequirementExpression,
     MinEarnedCreditsExpression,
     NotExpression,
     OrExpression,
     RuleExpression,
     UnsupportedExpression,
 )
+from ...domain.entry import EntryRequirementReference, RequirementApplicability
 from ...domain.reasons import ReasonCode
 from .academic_data_types import (
     AcademicDataDiagnostic,
@@ -144,6 +147,9 @@ def map_expression(
     if expression.source_type == "COURSE_PASSED":
         return _map_course_passed(expression, regulation, program, record_id)
 
+    if expression.source_type == "CONCURRENT_COURSE":
+        return _map_course_concurrent(expression, regulation, program, record_id)
+
     if expression.source_type == "MIN_EARNED_CREDITS":
         if isinstance(expression.value, bool) or not isinstance(
             expression.value, (int, float)
@@ -222,6 +228,52 @@ def _map_course_passed(
     return ExpressionMappingResult(CoursePassedExpression(course))
 
 
+def _map_course_concurrent(
+    expression: RawExpression,
+    regulation: Regulation,
+    program: Program,
+    record_id: str,
+) -> ExpressionMappingResult:
+    if expression.course_id is None:
+        return _unsupported_result(
+            expression,
+            record_id,
+            code=AcademicDataDiagnosticCode.INCOMPLETE_EXPRESSION,
+            planning_code=PlanningErrorCode.INVALID_REQUEST,
+            reason="CONCURRENT_COURSE requires a canonical course_id",
+        )
+    try:
+        course = CourseIdentity.parse(expression.course_id)
+    except ValueError:
+        return _unsupported_result(
+            expression,
+            record_id,
+            code=AcademicDataDiagnosticCode.MALFORMED_IDENTITY,
+            planning_code=PlanningErrorCode.INVALID_REQUEST,
+            reason="CONCURRENT_COURSE contains a malformed course identity",
+        )
+    if course.regulation is not regulation or course.program != program:
+        return _unsupported_result(
+            expression,
+            record_id,
+            code=AcademicDataDiagnosticCode.RULE_TARGET_MISMATCH,
+            planning_code=PlanningErrorCode.INVALID_REQUEST,
+            reason="CONCURRENT_COURSE course is outside the rule scope",
+        )
+    if (
+        expression.course_code is not None
+        and expression.course_code != course.course_code
+    ):
+        return _unsupported_result(
+            expression,
+            record_id,
+            code=AcademicDataDiagnosticCode.RULE_TARGET_MISMATCH,
+            planning_code=PlanningErrorCode.INVALID_REQUEST,
+            reason="course_code does not match course_id",
+        )
+    return ExpressionMappingResult(CourseConcurrentExpression(course))
+
+
 def _unsupported_result(
     expression: RawExpression,
     record_id: str,
@@ -230,8 +282,9 @@ def _unsupported_result(
     planning_code: PlanningErrorCode,
     reason: str,
 ) -> ExpressionMappingResult:
-    return ExpressionMappingResult(
-        expression=UnsupportedExpression(
+    unsupported_expression: RuleExpression
+    if expression.source_type == "ENTRY_REQUIREMENT":
+        unsupported_expression = EntryRequirementExpression(
             source_type=expression.source_type,
             course_id=expression.course_id,
             course_code=expression.course_code,
@@ -239,7 +292,28 @@ def _unsupported_result(
             condition_note=expression.condition_note,
             reason=expression.reason or reason,
             external_reference=expression.external_reference,
-        ),
+            reference=EntryRequirementReference(
+                code=(
+                    expression.code
+                    or expression.course_code
+                    or expression.condition_note
+                    or "UNSPECIFIED_ENTRY_REQUIREMENT"
+                ),
+                applicability=RequirementApplicability.UNKNOWN,
+            ),
+        )
+    else:
+        unsupported_expression = UnsupportedExpression(
+            source_type=expression.source_type,
+            course_id=expression.course_id,
+            course_code=expression.course_code,
+            code=expression.code,
+            condition_note=expression.condition_note,
+            reason=expression.reason or reason,
+            external_reference=expression.external_reference,
+        )
+    return ExpressionMappingResult(
+        expression=unsupported_expression,
         diagnostics=(
             _diagnostic(
                 code,

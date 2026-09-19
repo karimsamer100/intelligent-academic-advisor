@@ -13,7 +13,7 @@ from .academic_state import (
     FactStatus,
     RegistrationCoverage,
 )
-from .student_history import CourseAttempt, CurrentRegistration
+from .student_history import AttemptOutcome, CourseAttempt, CurrentRegistration
 
 
 @dataclass(frozen=True, slots=True)
@@ -266,6 +266,39 @@ class StudentState:
         if self.history_coverage is not None:
             return EffectiveCourseStatus.NOT_ATTEMPTED
         return EffectiveCourseStatus.NOT_ATTEMPTED
+
+    def has_failed_attempt(self, course: CourseIdentity) -> bool:
+        """Return whether a failed historical attempt is explicitly present."""
+
+        record = self.course_record(course)
+        if record is not None:
+            return record.has_failed_attempt
+        return course in self.failed_courses or any(
+            attempt.course == course and attempt.outcome is AttemptOutcome.FAILED
+            for attempt in self.course_attempts
+        )
+
+    def has_withdrawn_attempt(self, course: CourseIdentity) -> bool:
+        """Return whether a withdrawn historical attempt is explicitly present."""
+
+        record = self.course_record(course)
+        if record is not None:
+            return record.has_withdrawn_attempt
+        return course in self.withdrawn_courses or any(
+            attempt.course == course and attempt.outcome is AttemptOutcome.WITHDRAWN
+            for attempt in self.course_attempts
+        )
+
+    def has_incomplete_attempt(self, course: CourseIdentity) -> bool:
+        """Return whether an official incomplete attempt is explicitly present."""
+
+        record = self.course_record(course)
+        if record is not None:
+            return record.has_incomplete_attempt
+        return any(
+            attempt.course == course and attempt.outcome is AttemptOutcome.INCOMPLETE
+            for attempt in self.course_attempts
+        )
 
 
 # Re-export the v2 types from the established student-domain module.

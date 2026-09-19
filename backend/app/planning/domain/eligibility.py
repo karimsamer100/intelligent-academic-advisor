@@ -5,6 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from .conditions import FutureCondition
+from .context import (
+    EligibilityContext,
+    EvaluationHorizon,
+    ProposedTermContext,
+    RegistrationIntent,
+)
 from .course import Course, CourseIdentity
 from .evaluation import EvaluationOutcome, RuleEvaluationResult
 from .reasons import ReasonCode
@@ -29,6 +36,19 @@ class EligibilityStatus(StrEnum):
     ALREADY_COMPLETED = "ALREADY_COMPLETED"
     CURRENTLY_REGISTERED = "CURRENTLY_REGISTERED"
     BLOCKED_BY_UNVERIFIED_RULE = "BLOCKED_BY_UNVERIFIED_RULE"
+    HUMAN_REVIEW_REQUIRED = "HUMAN_REVIEW_REQUIRED"
+    UNSUPPORTED = "UNSUPPORTED"
+    CONDITIONAL = "CONDITIONAL"
+    REQUIRES_ADVISOR_REVIEW = "REQUIRES_ADVISOR_REVIEW"
+
+
+class EligibilityDecision(StrEnum):
+    """Canonical future-facing decision vocabulary."""
+
+    ELIGIBLE = "ELIGIBLE"
+    INELIGIBLE = "INELIGIBLE"
+    CONDITIONAL = "CONDITIONAL"
+    REQUIRES_ADVISOR_REVIEW = "REQUIRES_ADVISOR_REVIEW"
     HUMAN_REVIEW_REQUIRED = "HUMAN_REVIEW_REQUIRED"
     UNSUPPORTED = "UNSUPPORTED"
 
@@ -84,6 +104,7 @@ class EligibilityRequest:
     student: StudentState
     course: Course
     rule_set: CourseEligibilityRuleSet
+    context: EligibilityContext = EligibilityContext()
 
     def __post_init__(self) -> None:
         if not isinstance(self.student, StudentState):
@@ -92,6 +113,8 @@ class EligibilityRequest:
             raise TypeError("course must be a Course")
         if not isinstance(self.rule_set, CourseEligibilityRuleSet):
             raise TypeError("rule_set must be a CourseEligibilityRuleSet")
+        if not isinstance(self.context, EligibilityContext):
+            raise TypeError("context must be an EligibilityContext")
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +127,10 @@ class EligibilityResult:
     rule_set_status: RuleSetStatus
     metadata: ResultMetadata
     rule_results: tuple[RuleEvaluationResult, ...] = ()
+    conditions: tuple[FutureCondition, ...] = ()
+    decision: EligibilityDecision | None = None
+    intent: RegistrationIntent = RegistrationIntent.NORMAL
+    horizon: EvaluationHorizon = EvaluationHorizon.CURRENT
 
     def __post_init__(self) -> None:
         if not isinstance(self.target_course, CourseIdentity):
@@ -119,19 +146,37 @@ class EligibilityResult:
         if self.metadata.decision_trace is None:
             raise ValueError("eligibility metadata must include a decision trace")
 
+        expected_decision = _decision_for_status(self.status)
+        normalized_decision = self.decision or expected_decision
+        if not isinstance(normalized_decision, EligibilityDecision):
+            raise TypeError("decision must be an EligibilityDecision")
+        if self.decision is not None and normalized_decision is not expected_decision:
+            raise ValueError("decision is inconsistent with legacy status")
         expected_eligibility = {
-            EligibilityStatus.ELIGIBLE: True,
-            EligibilityStatus.NOT_ELIGIBLE: False,
-            EligibilityStatus.ALREADY_COMPLETED: False,
-            EligibilityStatus.CURRENTLY_REGISTERED: False,
-            EligibilityStatus.BLOCKED_BY_UNVERIFIED_RULE: None,
-            EligibilityStatus.HUMAN_REVIEW_REQUIRED: None,
-            EligibilityStatus.UNSUPPORTED: None,
-        }[self.status]
+            EligibilityDecision.ELIGIBLE: True,
+            EligibilityDecision.INELIGIBLE: False,
+            EligibilityDecision.CONDITIONAL: None,
+            EligibilityDecision.REQUIRES_ADVISOR_REVIEW: None,
+            EligibilityDecision.HUMAN_REVIEW_REQUIRED: None,
+            EligibilityDecision.UNSUPPORTED: None,
+        }[normalized_decision]
         if self.eligible is not expected_eligibility:
             raise ValueError(
-                f"eligible value {self.eligible!r} is inconsistent with {self.status.value}"
+                f"eligible value {self.eligible!r} is inconsistent with "
+                f"{normalized_decision.value}"
             )
+        if not isinstance(self.intent, RegistrationIntent):
+            raise TypeError("intent must be a RegistrationIntent")
+        if not isinstance(self.horizon, EvaluationHorizon):
+            raise TypeError("horizon must be an EvaluationHorizon")
+        normalized_conditions = tuple(self.conditions)
+        if not all(
+            isinstance(condition, FutureCondition)
+            for condition in normalized_conditions
+        ):
+            raise TypeError("conditions must contain FutureCondition values")
+        object.__setattr__(self, "decision", normalized_decision)
+        object.__setattr__(self, "conditions", normalized_conditions)
 
         normalized_results = tuple(self.rule_results)
         if not all(
@@ -205,7 +250,11 @@ class EligibilityResult:
         return {
             "target_course": self.target_course.course_id,
             "status": self.status.value,
+            "decision": self.decision.value,
             "eligible": self.eligible,
+            "intent": self.intent.value,
+            "horizon": self.horizon.value,
+            "conditions": [condition.to_dict() for condition in self.conditions],
             "rule_set_status": self.rule_set_status.value,
             "metadata": self.metadata.to_dict(),
             "rule_results": [result.to_dict() for result in self.rule_results],
@@ -216,3 +265,31 @@ def _unique_reason_codes(
     reason_codes: tuple[ReasonCode, ...],
 ) -> tuple[ReasonCode, ...]:
     return tuple(dict.fromkeys(reason_codes))
+
+
+def _decision_for_status(status: EligibilityStatus) -> EligibilityDecision:
+    return {
+        EligibilityStatus.ELIGIBLE: EligibilityDecision.ELIGIBLE,
+        EligibilityStatus.NOT_ELIGIBLE: EligibilityDecision.INELIGIBLE,
+        EligibilityStatus.ALREADY_COMPLETED: EligibilityDecision.INELIGIBLE,
+        EligibilityStatus.CURRENTLY_REGISTERED: EligibilityDecision.INELIGIBLE,
+        EligibilityStatus.BLOCKED_BY_UNVERIFIED_RULE: EligibilityDecision.HUMAN_REVIEW_REQUIRED,
+        EligibilityStatus.HUMAN_REVIEW_REQUIRED: EligibilityDecision.HUMAN_REVIEW_REQUIRED,
+        EligibilityStatus.UNSUPPORTED: EligibilityDecision.UNSUPPORTED,
+        EligibilityStatus.CONDITIONAL: EligibilityDecision.CONDITIONAL,
+        EligibilityStatus.REQUIRES_ADVISOR_REVIEW: EligibilityDecision.REQUIRES_ADVISOR_REVIEW,
+    }[status]
+
+
+__all__ = [
+    "CourseEligibilityRuleSet",
+    "EligibilityContext",
+    "EligibilityDecision",
+    "EligibilityRequest",
+    "EligibilityResult",
+    "EligibilityStatus",
+    "EvaluationHorizon",
+    "ProposedTermContext",
+    "RegistrationIntent",
+    "RuleSetStatus",
+]

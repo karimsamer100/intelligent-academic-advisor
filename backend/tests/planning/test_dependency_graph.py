@@ -23,6 +23,7 @@ from backend.app.planning.domain.eligibility import (
 )
 from backend.app.planning.domain.expressions import (
     AndExpression,
+    CourseConcurrentExpression,
     CoursePassedExpression,
     NotExpression,
     OrExpression,
@@ -122,6 +123,21 @@ def test_direct_course_dependency_is_required_and_queryable() -> None:
     assert result.graph.has_path(prerequisite, target) is True
     assert result.graph.ancestors(target) == (prerequisite,)
     assert result.graph.descendants(prerequisite) == (target,)
+
+
+def test_concurrent_reference_is_preserved_but_not_a_prior_pass_edge() -> None:
+    prerequisite = _identity("CSE392")
+    target = _identity("CSE493")
+
+    result = _build(
+        (_course(prerequisite), _course(target)),
+        (_rule_set(target, CourseConcurrentExpression(prerequisite)),),
+    )
+
+    reference = result.graph.direct_dependencies(target)[0]
+    assert reference.relation_kind is DependencyRelationKind.CONCURRENT
+    assert reference.traversable is False
+    assert result.graph.has_path(prerequisite, target) is False
 
 
 def test_and_expression_preserves_constraint_and_two_required_references() -> None:

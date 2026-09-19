@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from .conditions import FutureCondition
 from .lifecycle import ApprovalStatus, VerificationStatus
 from .provenance import Provenance
 from .reasons import ReasonCode
@@ -27,6 +28,7 @@ class RuleEvaluationResult:
     rule_id: str
     outcome: EvaluationOutcome
     metadata: ResultMetadata
+    conditions: tuple[FutureCondition, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.rule_id, str) or not self.rule_id.strip():
@@ -37,6 +39,10 @@ class RuleEvaluationResult:
             raise TypeError("metadata must be a ResultMetadata")
         if self.metadata.decision_trace is None:
             raise ValueError("rule evaluation metadata must include a decision trace")
+        conditions = tuple(self.conditions)
+        if not all(isinstance(condition, FutureCondition) for condition in conditions):
+            raise TypeError("conditions must contain FutureCondition values")
+        object.__setattr__(self, "conditions", conditions)
 
     @property
     def authoritative(self) -> bool:
@@ -77,5 +83,6 @@ class RuleEvaluationResult:
         return {
             "rule_id": self.rule_id,
             "outcome": self.outcome.value,
+            "conditions": [condition.to_dict() for condition in self.conditions],
             "metadata": self.metadata.to_dict(),
         }

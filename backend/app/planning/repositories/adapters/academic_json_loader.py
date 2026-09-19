@@ -81,10 +81,49 @@ class RawAcademicRuleMetadata:
 
 
 @dataclass(frozen=True, slots=True)
+class RawProgramRequirementRecord:
+    requirement_id: str
+    regulation: int
+    program: str
+    requirement_type: str
+    requirement_group: str
+    required_courses: tuple[str, ...]
+    required_credit_hours: int | float | None
+    min_value: int | float | None
+    min_courses: int | None
+    elective_pool_id: str | None
+    source_id: str
+    source_page: int | str | None
+    verification_status: str | None
+    approval_status: str
+    conflict_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class RawElectivePoolRecord:
+    pool_id: str
+    regulation: int
+    program: str
+    pool_name: str
+    pool_type: str
+    allowed_courses: tuple[str, ...]
+    allowed_course_codes: tuple[str, ...]
+    required_number_of_courses: int | None
+    required_credit_hours: int | float | None
+    source_id: str
+    source_page: int | str | None
+    verification_status: str | None
+    approval_status: str
+    conflict_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class LoadedAcademicRecords:
     courses: tuple[RawCourseRecord, ...]
     prerequisites: tuple[RawPrerequisiteRecord, ...]
     academic_rules: tuple[RawAcademicRuleMetadata, ...]
+    program_requirements: tuple[RawProgramRequirementRecord, ...]
+    elective_pools: tuple[RawElectivePoolRecord, ...]
     source_ids: frozenset[str]
     corequisites_loaded: bool
     corequisite_count: int
@@ -107,6 +146,12 @@ def load_academic_records(
     academic_rules = _load_academic_rule_metadata(
         source_root / "academic_rules.json", diagnostics
     )
+    program_requirements = _load_program_requirements(
+        source_root / "program_requirements.json", diagnostics
+    )
+    elective_pools = _load_elective_pools(
+        source_root / "elective_pools.json", diagnostics
+    )
     dataset_version = _load_manifest(
         manifest_path or source_root / "dataset_manifest.json",
         diagnostics,
@@ -115,6 +160,8 @@ def load_academic_records(
         courses=tuple(courses),
         prerequisites=tuple(prerequisites),
         academic_rules=tuple(academic_rules),
+        program_requirements=tuple(program_requirements),
+        elective_pools=tuple(elective_pools),
         source_ids=frozenset(source_ids),
         corequisites_loaded=corequisites_loaded,
         corequisite_count=corequisite_count,
@@ -396,6 +443,187 @@ def _load_academic_rule_metadata(
                 approval_status=approval_status,
                 conflict_ids=conflict_ids,
                 critical_for_planner=critical_for_planner,
+            )
+        )
+    return records
+
+
+def _load_program_requirements(
+    path: Path,
+    diagnostics: list[AcademicDataDiagnostic],
+) -> list[RawProgramRequirementRecord]:
+    values = _read_array(path, diagnostics)
+    records: list[RawProgramRequirementRecord] = []
+    for index, value in enumerate(values):
+        record_id = f"program-requirement[{index}]"
+        if not isinstance(value, dict):
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                    record_id=record_id,
+                    field="record",
+                )
+            )
+            continue
+        requirement_id = _required_string(
+            value, "requirement_id", diagnostics, record_id=record_id
+        )
+        regulation = _required_integer(
+            value, "regulation", diagnostics, record_id=record_id
+        )
+        program = _required_string(value, "program", diagnostics, record_id=record_id)
+        requirement_type = _required_string(
+            value, "requirement_type", diagnostics, record_id=record_id
+        )
+        requirement_group = _required_string(
+            value, "requirement_group", diagnostics, record_id=record_id
+        )
+        source_id = _required_string(
+            value, "source_id", diagnostics, record_id=record_id
+        )
+        approval_status = _required_string(
+            value, "approval_status", diagnostics, record_id=record_id
+        )
+        if None in (
+            requirement_id,
+            regulation,
+            program,
+            requirement_type,
+            requirement_group,
+            source_id,
+            approval_status,
+        ):
+            continue
+        required_courses = _string_tuple(
+            value.get("required_courses"),
+            diagnostics,
+            record_id=requirement_id,
+            field="required_courses",
+        )
+        required_credit_hours = _optional_number_field(
+            value.get("required_credit_hours"),
+            diagnostics,
+            record_id=requirement_id,
+            field="required_credit_hours",
+        )
+        min_value = _optional_number_field(
+            value.get("min_value"),
+            diagnostics,
+            record_id=requirement_id,
+            field="min_value",
+        )
+        min_courses = _optional_integer_field(
+            value.get("min_courses"),
+            diagnostics,
+            record_id=requirement_id,
+            field="min_courses",
+        )
+        elective_pool_id = _optional_string(
+            value, "elective_pool_id", diagnostics, requirement_id
+        )
+        records.append(
+            RawProgramRequirementRecord(
+                requirement_id=requirement_id,
+                regulation=regulation,
+                program=program,
+                requirement_type=requirement_type,
+                requirement_group=requirement_group,
+                required_courses=required_courses,
+                required_credit_hours=required_credit_hours,
+                min_value=min_value,
+                min_courses=min_courses,
+                elective_pool_id=elective_pool_id,
+                source_id=source_id,
+                source_page=_source_page(value, diagnostics, requirement_id),
+                verification_status=_optional_string(
+                    value, "verification_status", diagnostics, requirement_id
+                ),
+                approval_status=approval_status,
+                conflict_ids=_conflict_ids(value, diagnostics, requirement_id),
+            )
+        )
+    return records
+
+
+def _load_elective_pools(
+    path: Path,
+    diagnostics: list[AcademicDataDiagnostic],
+) -> list[RawElectivePoolRecord]:
+    values = _read_array(path, diagnostics)
+    records: list[RawElectivePoolRecord] = []
+    for index, value in enumerate(values):
+        record_id = f"elective-pool[{index}]"
+        if not isinstance(value, dict):
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                    record_id=record_id,
+                    field="record",
+                )
+            )
+            continue
+        pool_id = _required_string(value, "pool_id", diagnostics, record_id=record_id)
+        regulation = _required_integer(
+            value, "regulation", diagnostics, record_id=record_id
+        )
+        program = _required_string(value, "program", diagnostics, record_id=record_id)
+        pool_name = _required_string(
+            value, "pool_name", diagnostics, record_id=record_id
+        )
+        source_id = _required_string(
+            value, "source_id", diagnostics, record_id=record_id
+        )
+        approval_status = _required_string(
+            value, "approval_status", diagnostics, record_id=record_id
+        )
+        if None in (
+            pool_id,
+            regulation,
+            program,
+            pool_name,
+            source_id,
+            approval_status,
+        ):
+            continue
+        pool_type = _optional_string(value, "pool_type", diagnostics, pool_id)
+        records.append(
+            RawElectivePoolRecord(
+                pool_id=pool_id,
+                regulation=regulation,
+                program=program,
+                pool_name=pool_name,
+                pool_type=pool_type or "UNKNOWN",
+                allowed_courses=_string_tuple(
+                    value.get("allowed_courses"),
+                    diagnostics,
+                    record_id=pool_id,
+                    field="allowed_courses",
+                ),
+                allowed_course_codes=_string_tuple(
+                    value.get("allowed_course_codes"),
+                    diagnostics,
+                    record_id=pool_id,
+                    field="allowed_course_codes",
+                ),
+                required_number_of_courses=_optional_integer_field(
+                    value.get("required_number_of_courses"),
+                    diagnostics,
+                    record_id=pool_id,
+                    field="required_number_of_courses",
+                ),
+                required_credit_hours=_optional_number_field(
+                    value.get("required_credit_hours"),
+                    diagnostics,
+                    record_id=pool_id,
+                    field="required_credit_hours",
+                ),
+                source_id=source_id,
+                source_page=_source_page(value, diagnostics, pool_id),
+                verification_status=_optional_string(
+                    value, "verification_status", diagnostics, pool_id
+                ),
+                approval_status=approval_status,
+                conflict_ids=_conflict_ids(value, diagnostics, pool_id),
             )
         )
     return records
@@ -709,6 +937,86 @@ def _optional_scalar(
         )
     )
     return None
+
+
+def _string_tuple(
+    value: object,
+    diagnostics: list[AcademicDataDiagnostic],
+    *,
+    record_id: str,
+    field: str,
+) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list) or not all(
+        isinstance(item, str) and item.strip() for item in value
+    ):
+        diagnostics.append(
+            _diagnostic(
+                AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                record_id=record_id,
+                field=field,
+            )
+        )
+        return ()
+    return tuple(dict.fromkeys(value))
+
+
+def _optional_number_field(
+    value: object,
+    diagnostics: list[AcademicDataDiagnostic],
+    *,
+    record_id: str,
+    field: str,
+) -> int | float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        diagnostics.append(
+            _diagnostic(
+                AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                record_id=record_id,
+                field=field,
+            )
+        )
+        return None
+    if not math.isfinite(value):
+        diagnostics.append(
+            _diagnostic(
+                AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                record_id=record_id,
+                field=field,
+            )
+        )
+        return None
+    return value
+
+
+def _optional_integer_field(
+    value: object,
+    diagnostics: list[AcademicDataDiagnostic],
+    *,
+    record_id: str,
+    field: str,
+) -> int | None:
+    number = _optional_number_field(
+        value,
+        diagnostics,
+        record_id=record_id,
+        field=field,
+    )
+    if number is None:
+        return None
+    if isinstance(number, float) and not number.is_integer():
+        diagnostics.append(
+            _diagnostic(
+                AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                record_id=record_id,
+                field=field,
+            )
+        )
+        return None
+    return int(number)
 
 
 def _source_page(

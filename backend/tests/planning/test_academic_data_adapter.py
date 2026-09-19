@@ -15,6 +15,7 @@ from backend.app.planning.domain.evaluation import EvaluationOutcome
 from backend.app.planning.domain.expressions import (
     AndExpression,
     CoursePassedExpression,
+    CourseConcurrentExpression,
     UnsupportedExpression,
 )
 from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
@@ -232,6 +233,28 @@ def test_cse486_preserves_blocked_conflicted_and_unresolved_prerequisite() -> No
     )
 
 
+def test_cse493_does_not_synthesize_concurrent_prerequisite_from_review_evidence() -> (
+    None
+):
+    adapter = _load_normalized()
+    target = CourseIdentity.parse("R23:CAIE:CSE493")
+
+    lookup = adapter.get_eligibility_rules(target)
+
+    assert lookup.value is not None
+    assert lookup.value.status is RuleSetStatus.INCOMPLETE
+    assert len(lookup.value.rules) == 1
+    expression = lookup.value.rules[0].expression
+    assert isinstance(expression, CoursePassedExpression)
+    assert not isinstance(expression, CourseConcurrentExpression)
+    assert lookup.value.rules[0].approval_status is ApprovalStatus.BLOCKED
+    assert any(
+        diagnostic.code is AcademicDataDiagnosticCode.CONFLICT_PRESENT
+        and "CF-2023-014" in diagnostic.conflict_ids
+        for diagnostic in lookup.diagnostics
+    )
+
+
 def test_conditional_and_entry_prerequisites_remain_unsupported() -> None:
     adapter = _load_normalized()
 
@@ -256,6 +279,9 @@ def test_conditional_and_entry_prerequisites_remain_unsupported() -> None:
         entry_requirement.value.rules[0].expression.source_type == "ENTRY_REQUIREMENT"
     )
     assert ReasonCode.UNSUPPORTED_RULE in entry_requirement.value.reason_codes
+    assert (
+        ReasonCode.ENTRY_REQUIREMENT_UNRESOLVED in entry_requirement.value.reason_codes
+    )
 
 
 def test_missing_prerequisite_row_is_incomplete_not_complete_empty() -> None:

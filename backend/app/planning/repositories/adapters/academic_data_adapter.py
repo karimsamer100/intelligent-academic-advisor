@@ -2,16 +2,19 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from ...domain.course import Course, CourseIdentity, Program, Regulation
+from ...domain.electives import ElectivePool
+from ...domain.expressions import EntryRequirementExpression
 from ...domain.eligibility import CourseEligibilityRuleSet, RuleSetStatus
 from ...domain.errors import PlanningErrorCode
 from ...domain.lifecycle import ApprovalStatus, VerificationStatus
 from ...domain.provenance import Provenance
 from ...domain.reasons import ReasonCode
 from ...domain.rules import AcademicRule
+from ...domain.requirements import ProgramRequirement
 from ...domain.version import DatasetVersion
 from ...policy import ExecutionMode
 from .academic_data_types import (
@@ -30,6 +33,7 @@ from .academic_json_loader import (
     RawPrerequisiteRecord,
     load_academic_records,
 )
+from .academic_requirement_mapper import map_elective_pool, map_program_requirement
 from .eligibility_coverage import inspect_eligibility_coverage
 
 
@@ -43,6 +47,8 @@ class JsonAcademicDataAdapter:
     _course_provenance: tuple[tuple[CourseIdentity, Provenance], ...]
     _prerequisites: tuple[RawPrerequisiteRecord, ...]
     _academic_rules: tuple[RawAcademicRuleMetadata, ...]
+    _program_requirements: tuple[ProgramRequirement, ...]
+    _elective_pools: tuple[ElectivePool, ...]
     _source_ids: frozenset[str]
     _diagnostics: tuple[AcademicDataDiagnostic, ...]
     _corequisites_loaded: bool
@@ -166,6 +172,27 @@ class JsonAcademicDataAdapter:
             course_map[identity] = course
             provenance_map[identity] = provenance
 
+        mapped_requirements: list[ProgramRequirement] = []
+        for raw in sorted(
+            records.program_requirements,
+            key=lambda item: item.requirement_id,
+        ):
+            mapped = map_program_requirement(raw, source_ids=records.source_ids)
+            diagnostics.extend(mapped.diagnostics)
+            if mapped.value is not None:
+                mapped_requirements.append(mapped.value)
+
+        mapped_pools: list[ElectivePool] = []
+        for raw in sorted(records.elective_pools, key=lambda item: item.pool_id):
+            mapped = map_elective_pool(
+                raw,
+                source_ids=records.source_ids,
+                course_index=course_map,
+            )
+            diagnostics.extend(mapped.diagnostics)
+            if mapped.value is not None:
+                mapped_pools.append(mapped.value)
+
         return cls(
             source_mode=source_mode,
             dataset_version=records.dataset_version,
@@ -182,6 +209,15 @@ class JsonAcademicDataAdapter:
             ),
             _academic_rules=tuple(
                 sorted(records.academic_rules, key=lambda item: item.rule_id)
+            ),
+            _program_requirements=tuple(
+                sorted(
+                    mapped_requirements,
+                    key=lambda requirement: requirement.requirement_id,
+                )
+            ),
+            _elective_pools=tuple(
+                sorted(mapped_pools, key=lambda pool: pool.pool_id.identifier)
             ),
             _source_ids=records.source_ids,
             _diagnostics=_sorted_diagnostics(diagnostics),
@@ -206,6 +242,38 @@ class JsonAcademicDataAdapter:
     @property
     def corequisite_count(self) -> int:
         return self._corequisite_count
+
+    def list_requirements(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+    ) -> tuple[ProgramRequirement, ...]:
+        if not isinstance(regulation, Regulation):
+            raise TypeError("regulation must be a Regulation")
+        if not isinstance(program, Program):
+            raise TypeError("program must be a Program")
+        return tuple(
+            requirement
+            for requirement in self._program_requirements
+            if requirement.regulation is regulation and requirement.program == program
+        )
+
+    def list_elective_pools(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+    ) -> tuple[ElectivePool, ...]:
+        if not isinstance(regulation, Regulation):
+            raise TypeError("regulation must be a Regulation")
+        if not isinstance(program, Program):
+            raise TypeError("program must be a Program")
+        return tuple(
+            pool
+            for pool in self._elective_pools
+            if pool.pool_id.regulation is regulation and pool.pool_id.program == program
+        )
 
     def get_course(
         self,
@@ -546,6 +614,13 @@ class JsonAcademicDataAdapter:
         expression = mapped_expression.expression
         if expression is None:
             return None, tuple(diagnostics), tuple(dict.fromkeys(reasons)), True
+        if isinstance(expression, EntryRequirementExpression):
+            assert expression.reference is not None
+            reasons.append(ReasonCode.ENTRY_REQUIREMENT_UNRESOLVED)
+            expression = replace(
+                expression,
+                reference=replace(expression.reference, provenance=provenance),
+            )
         return (
             AcademicRule(
                 rule_id=raw.prerequisite_rule_id,

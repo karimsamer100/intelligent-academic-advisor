@@ -6,8 +6,8 @@ reason codes, structured rule expressions, deterministic rule evaluation,
 decision traces, result metadata, domain outcomes, and repository boundaries.
 
 It does not own FastAPI or HTTP, ORM/PostgreSQL access, JSON loading outside
-the narrow Academic Data adapter boundary, PDF extraction, RAG, LLM behavior, frontend concerns, or complete course
-eligibility, degree audit, or semester planning.
+the narrow Academic Data adapter boundary, PDF extraction, RAG, LLM behavior,
+frontend concerns, Degree Audit, or semester planning.
 
 ## Core contracts
 
@@ -113,20 +113,33 @@ codes use the exact mixed-case form `R23:CAIE:ASUx31` (also `ASUx11` and
 `CourseIdentity`.
 
 The current evaluator supports `COURSE_PASSED`, `COURSE_COMPLETED`,
-`COURSE_CURRENTLY_REGISTERED`, `MIN_EARNED_CREDITS`, `MAX_EARNED_CREDITS`,
-`MIN_GPA`, and `MAX_GPA`. GPA thresholds are numeric comparisons only; no GPA
-scale is assumed. Academic level, academic standing, term type, grade-order
-comparisons, requirement groups, electives, and advanced co-requisite
-semantics remain intentionally deferred until their domain context exists.
+`COURSE_CURRENTLY_REGISTERED`, `COURSE_CONCURRENT`, `MIN_EARNED_CREDITS`,
+`MAX_EARNED_CREDITS`, `MIN_GPA`, and `MAX_GPA`. GPA thresholds are numeric
+comparisons only; no GPA scale is assumed. `COURSE_CONCURRENT` is evaluated
+only against an explicit target-aware projected-term context; current
+registration never satisfies it. Unsupported entry, conditional, and
+unresolved source concepts remain indeterminate. Academic level, academic
+standing, term type, grade-order comparisons, requirement groups, electives,
+and semester-level co-requisite semantics remain intentionally deferred until
+their domain context exists.
 
 Repository protocols expose domain-oriented read boundaries only; adapters are
 outside this package.
 
 ## Eligibility orchestration
 
-`EligibilityService` answers whether a supplied target course is currently
-academically takeable from already-loaded `StudentState`, `Course`, and
-`CourseEligibilityRuleSet` objects. It owns no repositories, persistence,
+`EligibilityService` answers whether a supplied target course is academically
+takeable from already-loaded `StudentState`, `Course`, and
+`CourseEligibilityRuleSet` objects. `EligibilityContext` keeps registration
+intent (`NORMAL`, `RETAKE_AFTER_FAILURE`, or `RETAKE_FOR_IMPROVEMENT`) separate
+from evaluation horizon (`CURRENT` or `PROJECTED`). The canonical decision
+vocabulary is `ELIGIBLE`, `INELIGIBLE`, `CONDITIONAL`,
+`REQUIRES_ADVISOR_REVIEW`, `HUMAN_REVIEW_REQUIRED`, and `UNSUPPORTED`; the
+legacy status and `eligible: bool | None` projection remain during migration.
+Projected results carry immutable machine-readable future conditions such as
+`CourseMustBePassedCondition`, never natural-language promises. Retake intent
+does not authorize improvement registration; known passed improvement requests
+remain advisor-review outcomes. The service owns no repositories, persistence,
 framework, JSON loading, semester planning, or natural-language explanation.
 
 `CourseEligibilityRuleSet.target_course` is the binding between a selected rule
@@ -147,8 +160,9 @@ semester-level co-requisite semantics must not be silently ignored.
 ## Academic Data adapter boundary
 
 `repositories/adapters/` contains the narrow JSON consumer for the current
-Academic Data Foundation. It maps only dataset metadata, courses, and direct
-prerequisite expressions into Planning types. `AcademicEligibilityDataSource`
+Academic Data Foundation. It maps dataset metadata, courses, direct
+prerequisite expressions, the supported typed subset of program requirements,
+and elective pools into Planning types. `AcademicEligibilityDataSource`
 is the small typed boundary that a future PostgreSQL-backed source can replace.
 Raw JSON records never reach `EligibilityService` or `RuleEvaluator`.
 The adapter selects records before constructing a
@@ -166,10 +180,17 @@ Known elective-slot records are diagnosed as unsupported entities and are not
 indexed as `Course` values. Direct prerequisite trees are preserved without
 flattening. Source nodes such as conditional course requirements, opaque entry
 requirements, and unresolved conditions become immutable
-`UnsupportedExpression` nodes; the evaluator returns `INDETERMINATE` rather
-than dropping them. A missing formal no-prerequisite signal, an unavailable
-corequisite artifact, or an eligibility-relevant global rule outside this
-mapping slice keeps the supplied rule set `INCOMPLETE`.
+`UnsupportedExpression` nodes; entry references are additionally represented
+by an opaque `EntryRequirementReference` with `RequirementApplicability`
+unknown until an authoritative applicability model exists. The evaluator
+returns `INDETERMINATE` rather than dropping them. A missing formal
+no-prerequisite signal, an unavailable corequisite artifact, or an
+eligibility-relevant global rule outside this mapping slice keeps the supplied
+rule set `INCOMPLETE`. `ALL_FOE` scope is not expanded into a specific program
+without an authoritative applicability mapping, so unresolved scope remains a
+reviewable coverage gap. The adapter does not synthesize the absent Regulation-23
+101-CH gate or `ASUx11` record, and it does not turn blocked 18/21-CH source
+records into current authority.
 
 The result uses `eligible: bool | None`: `True` and `False` are definitive
 answers, while `None` means the academic truth is unresolved. `ResultMetadata`
@@ -178,6 +199,27 @@ approval/verification state, reasons, provenance, and every meaningful rule
 trace. Target-course lifecycle safety is assessed through the same
 `ExecutionPolicy` used by `RuleEvaluator`; development results remain
 non-authoritative.
+
+## Program requirements foundation
+
+`ProgramRequirement` is a governed wrapper around an optional immutable typed
+definition. Definitions cover required course completion, zero-credit courses,
+course counts from elective pools, concentration minimums, elective slots,
+earned-credit thresholds, minimum GPA, field training, and total program
+credits. Metadata-only legacy records remain non-evaluable until a typed
+definition is available. `RequirementStage` distinguishes a registration gate
+such as an explicit 101-CH fixture from the 144-CH program-completion total.
+
+`ElectivePoolId`, `ElectiveSlotId`, and `ConcentrationId` are scoped
+requirements identities and are deliberately not `CourseIdentity` values.
+Slots are not fake courses; a slot may bind to an explicit pool or remain
+unresolved. These contracts do not perform Degree Audit matching, GPA
+calculation, course offering checks, or semester validation.
+
+The deterministic Planning Engine is LLM-independent. A future orchestrator
+may translate user language into these typed requests and ask an LLM to
+explain structured results, but prompts, chat messages, model confidence, and
+natural-language advice do not belong in this package.
 
 ## Dependency graph
 
