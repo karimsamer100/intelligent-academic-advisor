@@ -8,6 +8,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from .course import CourseIdentity
+from .context import RegistrationIntent
 from .student_history import (
     AttemptOutcome,
     AttemptPurpose,
@@ -25,6 +26,14 @@ class FactStatus(StrEnum):
     KNOWN_TRUE = "KNOWN_TRUE"
     KNOWN_FALSE = "KNOWN_FALSE"
     UNKNOWN = "UNKNOWN"
+
+
+class AcademicStateLayer(StrEnum):
+    """Origin of facts exposed by a student-state view."""
+
+    OBSERVED = "OBSERVED"
+    PROJECTED = "PROJECTED"
+    HYPOTHETICAL = "HYPOTHETICAL"
 
 
 class AcademicHistoryCoverage(StrEnum):
@@ -53,6 +62,55 @@ class EffectiveCourseStatus(StrEnum):
     INCOMPLETE = "INCOMPLETE"
     IN_PROGRESS = "IN_PROGRESS"
     UNKNOWN = "UNKNOWN"
+
+
+@dataclass(frozen=True, slots=True)
+class HypotheticalAcademicOutcome:
+    """A non-persistent projected or scenario outcome for one course.
+
+    This is deliberately separate from :class:`CourseAttempt`: future facts
+    must never be mistaken for imported transcript history.
+    """
+
+    course: CourseIdentity
+    outcome: AttemptOutcome
+    purpose: AttemptPurpose = AttemptPurpose.UNKNOWN
+    sequence: int = 1
+    earned_credit_hours: int | float | None = None
+    intent: RegistrationIntent = RegistrationIntent.NORMAL
+    layer: AcademicStateLayer = AcademicStateLayer.HYPOTHETICAL
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.course, CourseIdentity):
+            raise TypeError("course must be a CourseIdentity")
+        if not isinstance(self.outcome, AttemptOutcome):
+            raise TypeError("outcome must be an AttemptOutcome")
+        if not isinstance(self.purpose, AttemptPurpose):
+            raise TypeError("purpose must be an AttemptPurpose")
+        if isinstance(self.sequence, bool) or not isinstance(self.sequence, int):
+            raise TypeError("sequence must be an integer")
+        if self.sequence < 1:
+            raise ValueError("sequence must be at least 1")
+        if self.earned_credit_hours is not None:
+            _validate_optional_number(
+                self.earned_credit_hours,
+                "earned_credit_hours",
+            )
+        if not isinstance(self.intent, RegistrationIntent):
+            raise TypeError("intent must be a RegistrationIntent")
+        if self.layer is AcademicStateLayer.OBSERVED:
+            raise ValueError("hypothetical outcomes cannot be OBSERVED")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "course": self.course.course_id,
+            "outcome": self.outcome.value,
+            "purpose": self.purpose.value,
+            "sequence": self.sequence,
+            "earned_credit_hours": self.earned_credit_hours,
+            "intent": self.intent.value,
+            "layer": self.layer.value,
+        }
 
 
 @dataclass(frozen=True, slots=True)

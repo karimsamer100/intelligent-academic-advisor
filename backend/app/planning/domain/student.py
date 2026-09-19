@@ -7,13 +7,20 @@ from dataclasses import dataclass
 
 from .course import CourseIdentity, Program, Regulation
 from .academic_state import (
+    AcademicStateLayer,
     AcademicHistoryCoverage,
     CourseAcademicRecord,
     EffectiveCourseStatus,
     FactStatus,
+    HypotheticalAcademicOutcome,
     RegistrationCoverage,
 )
-from .student_history import AttemptOutcome, CourseAttempt, CurrentRegistration
+from .student_history import (
+    AttemptOutcome,
+    AttemptPurpose,
+    CourseAttempt,
+    CurrentRegistration,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +62,9 @@ class StudentState:
     course_records: tuple[CourseAcademicRecord, ...] = ()
     history_coverage: AcademicHistoryCoverage | None = None
     registration_coverage: RegistrationCoverage | None = None
+    fact_layer: AcademicStateLayer = AcademicStateLayer.OBSERVED
+    projected_outcomes: tuple[HypotheticalAcademicOutcome, ...] = ()
+    projection_assumptions: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.student_id, str) or not self.student_id.strip():
@@ -143,6 +153,21 @@ class StudentState:
             raise TypeError(
                 "registration_coverage must be a RegistrationCoverage or None"
             )
+        if not isinstance(self.fact_layer, AcademicStateLayer):
+            raise TypeError("fact_layer must be an AcademicStateLayer")
+        projected_outcomes = tuple(self.projected_outcomes)
+        if not all(
+            isinstance(outcome, HypotheticalAcademicOutcome)
+            for outcome in projected_outcomes
+        ):
+            raise TypeError(
+                "projected_outcomes must contain HypotheticalAcademicOutcome values"
+            )
+        assumptions = tuple(self.projection_assumptions)
+        if not all(isinstance(item, str) and item.strip() for item in assumptions):
+            raise TypeError("projection_assumptions must contain non-empty strings")
+        if self.fact_layer is AcademicStateLayer.OBSERVED and projected_outcomes:
+            raise ValueError("observed state cannot contain projected outcomes")
         if passed_courses is not None and unknown_pass_courses & passed_courses:
             raise ValueError(
                 "unknown_pass_status_courses cannot contain known passed courses"
@@ -170,6 +195,24 @@ class StudentState:
             "course_records",
             tuple(sorted(course_records, key=lambda record: str(record.course))),
         )
+        object.__setattr__(
+            self,
+            "projected_outcomes",
+            tuple(
+                sorted(
+                    projected_outcomes,
+                    key=lambda item: (
+                        item.sequence,
+                        item.course.course_id,
+                        item.outcome.value,
+                        item.purpose.value,
+                    ),
+                )
+            ),
+        )
+        object.__setattr__(
+            self, "projection_assumptions", tuple(sorted(set(assumptions)))
+        )
 
     def course_record(self, course: CourseIdentity) -> CourseAcademicRecord | None:
         """Return the canonical per-course record when one was supplied."""
@@ -191,8 +234,26 @@ class StudentState:
             attempt for attempt in self.course_attempts if attempt.course == course
         )
 
+    def projected_outcomes_for(
+        self, course: CourseIdentity
+    ) -> tuple[HypotheticalAcademicOutcome, ...]:
+        """Return ephemeral projected/scenario outcomes for one course."""
+
+        if not isinstance(course, CourseIdentity):
+            raise TypeError("course must be a CourseIdentity")
+        return tuple(item for item in self.projected_outcomes if item.course == course)
+
     def pass_status(self, course: CourseIdentity) -> FactStatus:
         """Return course-scoped pass truth without conflating unknown and false."""
+
+        observed_status = self._observed_pass_status(course)
+        projected = self.projected_outcomes_for(course)
+        if projected:
+            return _projected_pass_status(observed_status, projected)
+        return observed_status
+
+    def _observed_pass_status(self, course: CourseIdentity) -> FactStatus:
+        """Return pass truth from observed records and compatibility views only."""
 
         record = self.course_record(course)
         if record is not None:
@@ -216,7 +277,11 @@ class StudentState:
         """Compatibility view for successful/pass truth in v2-built state."""
 
         record = self.course_record(course)
-        if record is not None or self.history_coverage is not None:
+        if (
+            record is not None
+            or self.history_coverage is not None
+            or self.projected_outcomes
+        ):
             return self.pass_status(course)
         if course in self.unknown_completion_status_courses:
             return FactStatus.UNKNOWN
@@ -245,7 +310,9 @@ class StudentState:
 
         record = self.course_record(course)
         if record is not None:
-            return record.effective_status
+            observed_status = record.effective_status
+        else:
+            observed_status = None
         registration_status = self.registration_status(course)
         pass_status = self.pass_status(course)
         if (
@@ -259,6 +326,17 @@ class StudentState:
             return EffectiveCourseStatus.UNKNOWN
         if pass_status is FactStatus.UNKNOWN:
             return EffectiveCourseStatus.UNKNOWN
+        projected = self.projected_outcomes_for(course)
+        if projected:
+            latest = projected[-1].outcome
+            if latest is AttemptOutcome.FAILED:
+                return EffectiveCourseStatus.FAILED
+            if latest is AttemptOutcome.WITHDRAWN:
+                return EffectiveCourseStatus.WITHDRAWN
+            if latest is AttemptOutcome.INCOMPLETE:
+                return EffectiveCourseStatus.INCOMPLETE
+        if observed_status is not None:
+            return observed_status
         if course in self.failed_courses:
             return EffectiveCourseStatus.FAILED
         if course in self.withdrawn_courses:
@@ -271,42 +349,65 @@ class StudentState:
         """Return whether a failed historical attempt is explicitly present."""
 
         record = self.course_record(course)
-        if record is not None:
-            return record.has_failed_attempt
-        return course in self.failed_courses or any(
-            attempt.course == course and attempt.outcome is AttemptOutcome.FAILED
-            for attempt in self.course_attempts
+        observed = (
+            record.has_failed_attempt
+            if record is not None
+            else course in self.failed_courses
+            or any(
+                attempt.course == course and attempt.outcome is AttemptOutcome.FAILED
+                for attempt in self.course_attempts
+            )
+        )
+        return observed or any(
+            item.outcome is AttemptOutcome.FAILED
+            for item in self.projected_outcomes_for(course)
         )
 
     def has_withdrawn_attempt(self, course: CourseIdentity) -> bool:
         """Return whether a withdrawn historical attempt is explicitly present."""
 
         record = self.course_record(course)
-        if record is not None:
-            return record.has_withdrawn_attempt
-        return course in self.withdrawn_courses or any(
-            attempt.course == course and attempt.outcome is AttemptOutcome.WITHDRAWN
-            for attempt in self.course_attempts
+        observed = (
+            record.has_withdrawn_attempt
+            if record is not None
+            else course in self.withdrawn_courses
+            or any(
+                attempt.course == course and attempt.outcome is AttemptOutcome.WITHDRAWN
+                for attempt in self.course_attempts
+            )
+        )
+        return observed or any(
+            item.outcome is AttemptOutcome.WITHDRAWN
+            for item in self.projected_outcomes_for(course)
         )
 
     def has_incomplete_attempt(self, course: CourseIdentity) -> bool:
         """Return whether an official incomplete attempt is explicitly present."""
 
         record = self.course_record(course)
-        if record is not None:
-            return record.has_incomplete_attempt
-        return any(
-            attempt.course == course and attempt.outcome is AttemptOutcome.INCOMPLETE
-            for attempt in self.course_attempts
+        observed = (
+            record.has_incomplete_attempt
+            if record is not None
+            else any(
+                attempt.course == course
+                and attempt.outcome is AttemptOutcome.INCOMPLETE
+                for attempt in self.course_attempts
+            )
+        )
+        return observed or any(
+            item.outcome is AttemptOutcome.INCOMPLETE
+            for item in self.projected_outcomes_for(course)
         )
 
 
 # Re-export the v2 types from the established student-domain module.
 __all__ = [
     "AcademicHistoryCoverage",
+    "AcademicStateLayer",
     "CourseAcademicRecord",
     "EffectiveCourseStatus",
     "FactStatus",
+    "HypotheticalAcademicOutcome",
     "RegistrationCoverage",
     "StudentState",
 ]
@@ -336,3 +437,39 @@ def _validate_optional_number(
 ) -> None:
     if value is not None:
         _validate_number(value, name, nonnegative=nonnegative)
+
+
+def _projected_pass_status(
+    observed: FactStatus,
+    outcomes: tuple[HypotheticalAcademicOutcome, ...],
+) -> FactStatus:
+    """Apply only explicit projected outcomes using conservative repeat rules."""
+
+    status = observed
+    for item in outcomes:
+        if status is FactStatus.UNKNOWN:
+            return FactStatus.UNKNOWN
+        if item.outcome is AttemptOutcome.PASSED:
+            status = FactStatus.KNOWN_TRUE
+        elif item.outcome is AttemptOutcome.FAILED:
+            if (
+                status is FactStatus.KNOWN_TRUE
+                and item.purpose is AttemptPurpose.IMPROVEMENT
+            ):
+                status = FactStatus.KNOWN_FALSE
+            elif status is FactStatus.KNOWN_TRUE:
+                return FactStatus.UNKNOWN
+            else:
+                status = FactStatus.KNOWN_FALSE
+        elif item.outcome in (
+            AttemptOutcome.WITHDRAWN,
+            AttemptOutcome.INCOMPLETE,
+        ):
+            if (
+                status is FactStatus.KNOWN_TRUE
+                and item.purpose is AttemptPurpose.IMPROVEMENT
+            ):
+                return FactStatus.UNKNOWN
+        else:
+            return FactStatus.UNKNOWN
+    return status

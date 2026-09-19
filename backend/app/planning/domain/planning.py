@@ -41,6 +41,7 @@ class PlanningCoverage:
     offering: PlanningCoverageStatus = PlanningCoverageStatus.UNAVAILABLE
     timetable: PlanningCoverageStatus = PlanningCoverageStatus.UNAVAILABLE
     search: PlanningCoverageStatus = PlanningCoverageStatus.COMPLETE
+    projection: PlanningCoverageStatus = PlanningCoverageStatus.COMPLETE
 
     def __post_init__(self) -> None:
         for name in (
@@ -51,13 +52,14 @@ class PlanningCoverage:
             "offering",
             "timetable",
             "search",
+            "projection",
         ):
             if not isinstance(getattr(self, name), PlanningCoverageStatus):
                 raise TypeError(f"{name} must be a PlanningCoverageStatus")
 
     @property
     def overall(self) -> PlanningCoverageStatus:
-        values = (
+        inputs = (
             self.academic_requirements,
             self.candidate_generation,
             self.eligibility_rules,
@@ -66,7 +68,10 @@ class PlanningCoverage:
             self.timetable,
             self.search,
         )
-        if all(value is PlanningCoverageStatus.UNAVAILABLE for value in values):
+        values = (*inputs, self.projection)
+        if all(value is PlanningCoverageStatus.UNAVAILABLE for value in inputs):
+            if self.projection is PlanningCoverageStatus.INCOMPLETE:
+                return PlanningCoverageStatus.INCOMPLETE
             return PlanningCoverageStatus.UNAVAILABLE
         if any(value is not PlanningCoverageStatus.COMPLETE for value in values):
             return PlanningCoverageStatus.INCOMPLETE
@@ -81,14 +86,17 @@ class PlanningCoverage:
         the selected course set is academically valid.
         """
 
-        values = (
+        inputs = (
             self.academic_requirements,
             self.candidate_generation,
             self.eligibility_rules,
             self.dependency,
             self.search,
         )
-        if all(value is PlanningCoverageStatus.UNAVAILABLE for value in values):
+        values = (*inputs, self.projection)
+        if all(value is PlanningCoverageStatus.UNAVAILABLE for value in inputs):
+            if self.projection is PlanningCoverageStatus.INCOMPLETE:
+                return PlanningCoverageStatus.INCOMPLETE
             return PlanningCoverageStatus.UNAVAILABLE
         if any(value is not PlanningCoverageStatus.COMPLETE for value in values):
             return PlanningCoverageStatus.INCOMPLETE
@@ -103,6 +111,7 @@ class PlanningCoverage:
             "offering": self.offering.value,
             "timetable": self.timetable.value,
             "search": self.search.value,
+            "projection": self.projection.value,
             "overall": self.overall.value,
             "academic_overall": self.academic_overall.value,
         }
@@ -281,6 +290,7 @@ class PlanExclusionCode(StrEnum):
     DUPLICATE = "DUPLICATE"
     CONDITIONAL_NOT_NEEDED = "CONDITIONAL_NOT_NEEDED"
     SEARCH_LIMIT = "SEARCH_LIMIT"
+    SCENARIO_EXCLUDED = "SCENARIO_EXCLUDED"
 
 
 class PlanDiagnosticCode(StrEnum):
@@ -293,6 +303,9 @@ class PlanDiagnosticCode(StrEnum):
     UNSUPPORTED = "UNSUPPORTED"
     OFFERING_UNAVAILABLE = "OFFERING_UNAVAILABLE"
     TIMETABLE_UNAVAILABLE = "TIMETABLE_UNAVAILABLE"
+    NO_PROGRESS = "NO_PROGRESS"
+    HORIZON_REACHED = "HORIZON_REACHED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
 
 
 @dataclass(frozen=True, slots=True)
@@ -483,6 +496,7 @@ class SingleSemesterPlanningRequest:
     preferences: PlanningPreferences = field(default_factory=PlanningPreferences)
     search_policy: PlanningSearchPolicy = field(default_factory=PlanningSearchPolicy)
     term_id: str | None = None
+    excluded_courses: tuple[CourseIdentity, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.student, StudentState):
@@ -510,6 +524,22 @@ class SingleSemesterPlanningRequest:
             not isinstance(self.term_id, str) or not self.term_id.strip()
         ):
             raise ValueError("term_id must be non-empty when provided")
+        excluded = tuple(self.excluded_courses)
+        if not all(isinstance(item, CourseIdentity) for item in excluded):
+            raise TypeError("excluded_courses must contain CourseIdentity values")
+        if len(excluded) != len(set(excluded)):
+            raise ValueError("excluded_courses must be unique")
+        if any(
+            item.regulation is not self.student.regulation
+            or item.program != self.student.program
+            for item in excluded
+        ):
+            raise ValueError("excluded course scope must match student scope")
+        object.__setattr__(
+            self,
+            "excluded_courses",
+            tuple(sorted(excluded, key=lambda item: item.course_id)),
+        )
 
     @property
     def horizon(self) -> EvaluationHorizon:
@@ -528,6 +558,7 @@ class SingleSemesterPlanningRequest:
             "load_policy": self.load_policy.policy_id,
             "preferences": self.preferences.to_dict(),
             "search_policy": self.search_policy.to_dict(),
+            "excluded_courses": [item.course_id for item in self.excluded_courses],
         }
 
 

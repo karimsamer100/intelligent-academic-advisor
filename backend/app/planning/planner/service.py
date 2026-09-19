@@ -92,7 +92,9 @@ class SingleSemesterPlanner:
         )
         ranking = self.priority_ranker.rank(candidate_result)
         considered, search_limited = _bounded_items(
-            ranking, request.search_policy.max_candidates_considered
+            ranking,
+            request.search_policy.max_candidates_considered,
+            excluded_courses=request.excluded_courses,
         )
 
         safe_items = tuple(
@@ -329,10 +331,17 @@ class SingleSemesterPlanner:
 
 
 def _bounded_items(
-    ranking: PriorityRankingResult, maximum: int
+    ranking: PriorityRankingResult,
+    maximum: int,
+    *,
+    excluded_courses: tuple[object, ...] = (),
 ) -> tuple[tuple[RankedCandidate, ...], bool]:
-    values = ranking.items[:maximum]
-    return values, len(ranking.items) > len(values)
+    excluded = set(excluded_courses)
+    available = tuple(
+        item for item in ranking.items if item.candidate.identity not in excluded
+    )
+    values = available[:maximum]
+    return values, len(available) > len(values)
 
 
 def _discovery_request(
@@ -588,6 +597,7 @@ def _coverage_for(
             if search_limited
             else PlanningCoverageStatus.COMPLETE
         ),
+        projection=PlanningCoverageStatus.COMPLETE,
     )
 
 
@@ -606,6 +616,16 @@ def _exclusions(
             identity,
             PlanExclusionCode.ACADEMICALLY_INELIGIBLE,
             reason_codes=(ReasonCode.MISSING_PREREQUISITE,),
+        )
+    candidate_by_id = {item.identity: item for item in candidate_result.candidates}
+    for identity in request.excluded_courses:
+        if identity in selected_ids:
+            continue
+        exclusions[identity] = PlanExclusion(
+            identity,
+            PlanExclusionCode.SCENARIO_EXCLUDED,
+            candidate_by_id.get(identity),
+            reason_codes=(ReasonCode.SCENARIO_EXCLUSION,),
         )
     considered_ids = {item.candidate.identity for item in considered}
     for item in considered:
@@ -634,6 +654,7 @@ def _exclusions(
             if (
                 item.identity not in considered_ids
                 and item.identity not in selected_ids
+                and item.identity not in request.excluded_courses
             ):
                 exclusions[item.identity] = PlanExclusion(
                     item.identity,
