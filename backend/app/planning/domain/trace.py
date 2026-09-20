@@ -83,6 +83,9 @@ class TraceCode(StrEnum):
     OFFERING_COVERAGE = "OFFERING_COVERAGE"
     TIMETABLE_COVERAGE = "TIMETABLE_COVERAGE"
     WHAT_IF = "WHAT_IF"
+    UEL_PROGRESS = "UEL_PROGRESS"
+    UEL_MAPPING = "UEL_MAPPING"
+    UEL_RISK = "UEL_RISK"
 
 
 @dataclass(frozen=True, slots=True)

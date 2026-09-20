@@ -94,8 +94,16 @@ class PriorityRankingService:
             provenance=tuple(
                 provenance
                 for item in ranked
-                if item.candidate.metadata is not None
-                for provenance in item.candidate.metadata.provenance
+                for provenance in (
+                    (
+                        *(
+                            item.candidate.metadata.provenance
+                            if item.candidate.metadata is not None
+                            else ()
+                        ),
+                        *item.candidate.uel_provenance,
+                    )
+                )
             ),
             decision_trace=trace,
             requires_human_review=review,
@@ -135,6 +143,11 @@ def _factors_for(candidate: CandidateCourse) -> PriorityFactors:
         unlock_count=len(candidate.unlocks),
         concentration_contribution=1 if concentration else 0,
         elective_contribution=1 if elective else 0,
+        external_progression_risk=(
+            1
+            if CandidateReasonCode.UEL_PROGRESSION_RISK in candidate.reason_codes
+            else 0
+        ),
     )
 
 
@@ -147,6 +160,7 @@ def _priority_trace(candidate, factors, rank):
             status=DecisionStatus.SATISFIED,
             subject=candidate.identity,
             actual_value=rank,
+            provenance=candidate.uel_provenance,
             metadata=tuple(
                 TraceMetadata(key, value)
                 for key, value in factors.to_dict().items()

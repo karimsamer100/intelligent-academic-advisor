@@ -22,6 +22,7 @@ from .projection import ProjectionPolicy
 from .results import ResultMetadata
 from .semester import SemesterLoadPolicy, TermType
 from .student import StudentState
+from .uel import UELProgressEvaluationResult
 from .academic_state import HypotheticalAcademicOutcome
 from .trace import DecisionTrace
 
@@ -298,6 +299,7 @@ class MultiSemesterPlanResult:
     coverage: PlanningCoverage
     metadata: ResultMetadata
     trace: DecisionTrace
+    uel_evaluation: UELProgressEvaluationResult | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.status, MultiSemesterPlanStatus):
@@ -329,6 +331,12 @@ class MultiSemesterPlanResult:
             raise TypeError("metadata must be ResultMetadata")
         if not isinstance(self.trace, DecisionTrace):
             raise TypeError("trace must be a DecisionTrace")
+        if self.uel_evaluation is not None and not isinstance(
+            self.uel_evaluation, UELProgressEvaluationResult
+        ):
+            raise TypeError(
+                "uel_evaluation must be a UELProgressEvaluationResult or None"
+            )
         object.__setattr__(self, "steps", steps)
         object.__setattr__(self, "conditions", _unique_conditions(conditions))
         object.__setattr__(self, "review_items", review_items)
@@ -365,6 +373,9 @@ class MultiSemesterPlanResult:
             "registration_ready": self.registration_ready,
             "metadata": self.metadata.to_dict(),
             "trace": self.trace.to_dict(),
+            "uel_evaluation": (
+                self.uel_evaluation.to_dict() if self.uel_evaluation else None
+            ),
         }
 
 

@@ -18,6 +18,12 @@ from .planning import PlanningPreferences
 from .results import ResultMetadata
 from .student_history import AttemptOutcome, AttemptPurpose
 from .trace import DecisionTrace
+from .uel import (
+    UELModuleId,
+    UELModuleResult,
+    UELModuleStatus,
+    UELRiskDelta,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,11 +133,45 @@ class PlanningHorizonScenario(ScenarioDefinition):
         }
 
 
+@dataclass(frozen=True, slots=True)
+class UELModuleOutcomeScenario(ScenarioDefinition):
+    """Supply one explicit UEL outcome without changing ASU course history."""
+
+    module: UELModuleId
+    status: UELModuleStatus
+    requires_human_review: bool = False
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.module, UELModuleId):
+            raise TypeError("module must be a UELModuleId")
+        if not isinstance(self.status, UELModuleStatus):
+            raise TypeError("status must be a UELModuleStatus")
+        if not isinstance(self.requires_human_review, bool):
+            raise TypeError("requires_human_review must be a bool")
+
+    def to_module_result(self) -> UELModuleResult:
+        return UELModuleResult(
+            module=self.module,
+            status=self.status,
+            explicit_result=True,
+            requires_human_review=self.requires_human_review,
+        )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "type": "UEL_MODULE_OUTCOME",
+            "module": self.module.module_id,
+            "status": self.status.value,
+            "requires_human_review": self.requires_human_review,
+        }
+
+
 ScenarioOperation = (
     CourseOutcomeScenario
     | ExcludeCourseScenario
     | PlanningPreferenceScenario
     | PlanningHorizonScenario
+    | UELModuleOutcomeScenario
 )
 
 
@@ -171,6 +211,7 @@ class WhatIfDelta:
     path_length_delta: int = 0
     new_conditions: tuple[FutureCondition, ...] = ()
     new_review_items: tuple[str, ...] = ()
+    uel_risk_changes: tuple[UELRiskDelta, ...] = ()
 
     def __post_init__(self) -> None:
         for name in ("baseline_status", "scenario_status"):
@@ -221,6 +262,14 @@ class WhatIfDelta:
                 )
             ),
         )
+        risk_changes = tuple(self.uel_risk_changes)
+        if not all(isinstance(item, UELRiskDelta) for item in risk_changes):
+            raise TypeError("uel_risk_changes must contain UELRiskDelta values")
+        object.__setattr__(
+            self,
+            "uel_risk_changes",
+            tuple(sorted(risk_changes, key=lambda item: item.module.module_id)),
+        )
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -234,6 +283,7 @@ class WhatIfDelta:
             "path_length_delta": self.path_length_delta,
             "new_conditions": [item.to_dict() for item in self.new_conditions],
             "new_review_items": list(self.new_review_items),
+            "uel_risk_changes": [item.to_dict() for item in self.uel_risk_changes],
         }
 
 
@@ -280,6 +330,7 @@ __all__ = [
     "ExcludeCourseScenario",
     "PlanningHorizonScenario",
     "PlanningPreferenceScenario",
+    "UELModuleOutcomeScenario",
     "ScenarioDefinition",
     "ScenarioOperation",
     "WhatIfDelta",

@@ -21,6 +21,13 @@ from ...domain.requirements import (
     RequirementStage,
     requirement_stage as _requirement_stage,
 )
+from ...domain.uel import (
+    UELMapping,
+    UELMappingSet,
+    UELModuleDefinition,
+    UELModuleId,
+    UELProgressCoverage,
+)
 from ...domain.version import DatasetVersion
 from ...policy import ExecutionMode
 from .academic_data_types import (
@@ -59,6 +66,9 @@ class JsonAcademicDataAdapter:
     _diagnostics: tuple[AcademicDataDiagnostic, ...]
     _corequisites_loaded: bool
     _corequisite_count: int
+    _uel_modules: tuple[UELModuleDefinition, ...] = ()
+    _uel_mappings: UELMappingSet = UELMappingSet()
+    _uel_module_coverage: UELProgressCoverage = UELProgressCoverage.UNAVAILABLE
 
     @classmethod
     def load(
@@ -199,6 +209,14 @@ class JsonAcademicDataAdapter:
             if mapped.value is not None:
                 mapped_pools.append(mapped.value)
 
+        uel_modules, uel_mappings, uel_module_coverage, uel_diagnostics = (
+            _map_uel_records(
+                records,
+                source_ids=records.source_ids,
+            )
+        )
+        diagnostics.extend(uel_diagnostics)
+
         return cls(
             source_mode=source_mode,
             dataset_version=records.dataset_version,
@@ -229,6 +247,9 @@ class JsonAcademicDataAdapter:
             _diagnostics=_sorted_diagnostics(diagnostics),
             _corequisites_loaded=records.corequisites_loaded,
             _corequisite_count=records.corequisite_count,
+            _uel_modules=uel_modules,
+            _uel_mappings=uel_mappings,
+            _uel_module_coverage=uel_module_coverage,
         )
 
     @property
@@ -248,6 +269,53 @@ class JsonAcademicDataAdapter:
     @property
     def corequisite_count(self) -> int:
         return self._corequisite_count
+
+    @property
+    def uel_module_count(self) -> int:
+        """Number of typed UEL module definitions loaded from the snapshot."""
+
+        return len(self._uel_modules)
+
+    @property
+    def uel_module_coverage(self) -> UELProgressCoverage:
+        return self._uel_module_coverage
+
+    def list_uel_modules(
+        self,
+        *,
+        regulation: Regulation,
+    ) -> tuple[UELModuleDefinition, ...]:
+        if not isinstance(regulation, Regulation):
+            raise TypeError("regulation must be a Regulation")
+        return tuple(
+            item for item in self._uel_modules if item.module.regulation is regulation
+        )
+
+    def get_uel_mapping_set(
+        self,
+        *,
+        regulation: Regulation,
+        program: Program,
+    ) -> UELMappingSet:
+        """Return scoped UEL mappings without upgrading source authority."""
+
+        if not isinstance(regulation, Regulation):
+            raise TypeError("regulation must be a Regulation")
+        if not isinstance(program, Program):
+            raise TypeError("program must be a Program")
+        mappings = tuple(
+            item
+            for item in self._uel_mappings.mappings
+            if item.module.regulation is regulation and item.course.program == program
+        )
+        modules = tuple(
+            item for item in self._uel_modules if item.module.regulation is regulation
+        )
+        return UELMappingSet(
+            mappings=mappings,
+            coverage=self._uel_mappings.coverage,
+            modules=modules,
+        )
 
     def list_requirements(
         self,
@@ -720,6 +788,190 @@ def _parse_course_identity(
         )
         return None
     return identity
+
+
+def _map_uel_records(
+    records: LoadedAcademicRecords,
+    *,
+    source_ids: frozenset[str],
+) -> tuple[
+    tuple[UELModuleDefinition, ...],
+    UELMappingSet,
+    UELProgressCoverage,
+    tuple[AcademicDataDiagnostic, ...],
+]:
+    diagnostics: list[AcademicDataDiagnostic] = []
+    modules: dict[UELModuleId, UELModuleDefinition] = {}
+    invalid_modules = False
+    for raw in sorted(records.uel_modules, key=lambda item: item.uel_module_id):
+        try:
+            module = UELModuleId.parse(raw.uel_module_id)
+            expected_regulation = Regulation.from_year(raw.regulation)
+            approval_status = ApprovalStatus.from_raw(raw.approval_status)
+            verification_status = (
+                VerificationStatus.from_raw(raw.verification_status)
+                if raw.verification_status is not None
+                else None
+            )
+            if (
+                module.regulation is not expected_regulation
+                or module.module_code != raw.module_code
+                or raw.source_id not in source_ids
+                or verification_status is None
+            ):
+                raise ValueError("UEL module identity/source metadata mismatch")
+            provenance = Provenance(
+                rule_id=raw.uel_module_id,
+                source_id=raw.source_id,
+                source_page=raw.source_page,
+                approval_status=approval_status,
+                verification_status=verification_status,
+            )
+            mapped = UELModuleDefinition(
+                module=module,
+                module_name=raw.module_name,
+                credits=raw.credits,
+                provenance=provenance,
+            )
+        except (TypeError, ValueError):
+            invalid_modules = True
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                    planning_code=PlanningErrorCode.INVALID_REQUEST,
+                    record_id=raw.uel_module_id,
+                    source_id=raw.source_id,
+                    source_type="uel_module",
+                    requires_human_review=True,
+                )
+            )
+            continue
+        if module in modules:
+            invalid_modules = True
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.DUPLICATE_RECORD,
+                    planning_code=PlanningErrorCode.INVALID_REQUEST,
+                    record_id=raw.uel_module_id,
+                    source_type="uel_module",
+                    requires_human_review=True,
+                )
+            )
+            continue
+        if raw.conflict_ids:
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.CONFLICT_PRESENT,
+                    planning_code=PlanningErrorCode.CONFLICTED_RULE,
+                    reason_codes=(ReasonCode.CONFLICTED_RULE,),
+                    record_id=raw.uel_module_id,
+                    source_id=raw.source_id,
+                    source_type="uel_module",
+                    conflict_ids=raw.conflict_ids,
+                    requires_human_review=True,
+                )
+            )
+        modules[module] = mapped
+
+    mapped: dict[str, UELMapping] = {}
+    invalid_mappings = False
+    for raw in sorted(records.uel_mappings, key=lambda item: item.mapping_id):
+        try:
+            module = UELModuleId.parse(raw.uel_module_id)
+            expected_regulation = Regulation.from_year(raw.regulation)
+            course = CourseIdentity.parse(raw.asu_course_id)
+            approval_status = ApprovalStatus.from_raw(raw.approval_status)
+            verification_status = (
+                VerificationStatus.from_raw(raw.verification_status)
+                if raw.verification_status is not None
+                else None
+            )
+            if (
+                module.regulation is not expected_regulation
+                or course.regulation is not expected_regulation
+                or str(course.program) != raw.asu_program
+                or raw.source_id not in source_ids
+                or verification_status is None
+            ):
+                raise ValueError("UEL mapping identity/source metadata mismatch")
+            provenance = Provenance(
+                rule_id=raw.mapping_id,
+                source_id=raw.source_id,
+                source_page=raw.source_page,
+                approval_status=approval_status,
+                verification_status=verification_status,
+            )
+            mapping = UELMapping(
+                mapping_id=raw.mapping_id,
+                module=module,
+                course=course,
+                mapping_type=raw.mapping_type,
+                weight_percent=raw.weight_percent,
+                provenance=provenance,
+            )
+        except (TypeError, ValueError):
+            invalid_mappings = True
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                    planning_code=PlanningErrorCode.INVALID_REQUEST,
+                    record_id=raw.mapping_id,
+                    source_id=raw.source_id,
+                    source_type="uel_mapping",
+                    requires_human_review=True,
+                )
+            )
+            continue
+        if raw.mapping_id in mapped:
+            invalid_mappings = True
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.DUPLICATE_RECORD,
+                    planning_code=PlanningErrorCode.INVALID_REQUEST,
+                    record_id=raw.mapping_id,
+                    source_type="uel_mapping",
+                    requires_human_review=True,
+                )
+            )
+            continue
+        if raw.conflict_ids:
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.CONFLICT_PRESENT,
+                    planning_code=PlanningErrorCode.CONFLICTED_RULE,
+                    reason_codes=(ReasonCode.CONFLICTED_RULE,),
+                    record_id=raw.mapping_id,
+                    course_id=course,
+                    source_id=raw.source_id,
+                    source_type="uel_mapping",
+                    conflict_ids=raw.conflict_ids,
+                    requires_human_review=True,
+                )
+            )
+        mapped[raw.mapping_id] = mapping
+
+    if not records.uel_mappings_available:
+        mapping_coverage = UELProgressCoverage.UNAVAILABLE
+    elif invalid_mappings:
+        mapping_coverage = UELProgressCoverage.PARTIAL
+    else:
+        mapping_coverage = UELProgressCoverage.COMPLETE
+    if not records.uel_modules_available:
+        module_coverage = UELProgressCoverage.UNAVAILABLE
+    elif invalid_modules:
+        module_coverage = UELProgressCoverage.PARTIAL
+    else:
+        module_coverage = UELProgressCoverage.COMPLETE
+    return (
+        tuple(sorted(modules.values(), key=lambda item: str(item.module))),
+        UELMappingSet(
+            mappings=tuple(mapped.values()),
+            coverage=mapping_coverage,
+            modules=tuple(modules.values()),
+        ),
+        module_coverage,
+        tuple(diagnostics),
+    )
 
 
 def _map_course(

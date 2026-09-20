@@ -52,6 +52,7 @@ from ..domain.trace import (
     TraceMetadata,
     TraceNodeType,
 )
+from ..domain.uel import UELRiskLevel
 from ..domain.version import DatasetVersion
 from ..eligibility.service import EligibilityService
 from ..policy import ExecutionMode
@@ -63,6 +64,9 @@ class _CandidateDraft:
     requirement_ids: set[str] = field(default_factory=set)
     unlocks: set[object] = field(default_factory=set)
     concentration_ids: set[object] = field(default_factory=set)
+    uel_module_ids: set[object] = field(default_factory=set)
+    uel_risk_level: UELRiskLevel | None = None
+    uel_provenance: set[object] = field(default_factory=set)
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,7 +104,15 @@ class CandidateGenerator:
         dependency_gap = False
 
         def add(
-            identity, reason, *, requirement_id=None, unlock=None, concentration=None
+            identity,
+            reason,
+            *,
+            requirement_id=None,
+            unlock=None,
+            concentration=None,
+            uel_module=None,
+            uel_risk_level=None,
+            uel_provenance=(),
         ):
             nonlocal catalog_gap
             if identity not in courses:
@@ -114,6 +126,14 @@ class CandidateGenerator:
                 draft.unlocks.add(unlock)
             if concentration is not None:
                 draft.concentration_ids.add(concentration)
+            if uel_module is not None:
+                draft.uel_module_ids.add(uel_module)
+            if uel_risk_level is not None and (
+                draft.uel_risk_level is None
+                or _uel_risk_rank(uel_risk_level) > _uel_risk_rank(draft.uel_risk_level)
+            ):
+                draft.uel_risk_level = uel_risk_level
+            draft.uel_provenance.update(uel_provenance)
 
         if request.requirement_set is not None:
             for requirement in request.requirement_set.requirements:
@@ -257,6 +277,44 @@ class CandidateGenerator:
                 if request.student.pass_status(intent.course) is FactStatus.KNOWN_TRUE:
                     add(intent.course, CandidateReasonCode.RETAKE_FOR_IMPROVEMENT)
 
+        if request.uel_evaluation is not None:
+            for risk in request.uel_evaluation.risks:
+                if risk.level is UELRiskLevel.NONE:
+                    continue
+                reason = (
+                    CandidateReasonCode.UEL_PROGRESSION_RISK
+                    if risk.level
+                    in {
+                        UELRiskLevel.PROGRESSION_RISK,
+                        UELRiskLevel.HUMAN_REVIEW_REQUIRED,
+                    }
+                    else CandidateReasonCode.UEL_MODULE_OUTSTANDING
+                )
+                for identity in risk.mapped_courses:
+                    if request.student.pass_status(identity) is FactStatus.KNOWN_TRUE:
+                        continue
+                    module_result = request.uel_evaluation.progress.result_for(
+                        risk.module
+                    )
+                    if (
+                        module_result is not None
+                        and module_result.status.name == "OUTSTANDING"
+                    ):
+                        add(
+                            identity,
+                            CandidateReasonCode.UEL_MODULE_OUTSTANDING,
+                            uel_module=risk.module,
+                            uel_risk_level=risk.level,
+                            uel_provenance=risk.provenance,
+                        )
+                    add(
+                        identity,
+                        reason,
+                        uel_module=risk.module,
+                        uel_risk_level=risk.level,
+                        uel_provenance=risk.provenance,
+                    )
+
         candidates: list[CandidateCourse] = []
         excluded: list[object] = []
         for identity in sorted(drafts, key=lambda item: item.course_id):
@@ -301,6 +359,11 @@ class CandidateGenerator:
             if availability is None:
                 excluded.append(identity)
                 continue
+            if draft.uel_risk_level in {
+                UELRiskLevel.UNKNOWN,
+                UELRiskLevel.HUMAN_REVIEW_REQUIRED,
+            }:
+                availability = CandidateAvailability.REVIEW_REQUIRED
             reasons = set(draft.reasons)
             if len(draft.unlocks) > 1:
                 reasons.add(CandidateReasonCode.UNLOCKS_MULTIPLE_COURSES)
@@ -312,8 +375,16 @@ class CandidateGenerator:
                 requirement_ids=tuple(draft.requirement_ids),
                 unlocks=tuple(draft.unlocks),
                 concentration_ids=tuple(draft.concentration_ids),
+                uel_module_ids=tuple(draft.uel_module_ids),
+                uel_risk_level=draft.uel_risk_level,
+                uel_provenance=tuple(draft.uel_provenance),
                 metadata=eligibility.metadata,
-                trace=_candidate_trace(identity, availability, eligibility),
+                trace=_candidate_trace(
+                    identity,
+                    availability,
+                    eligibility,
+                    uel_provenance=tuple(draft.uel_provenance),
+                ),
             )
             candidates.append(candidate)
 
@@ -337,9 +408,13 @@ class CandidateGenerator:
             if candidate.eligibility is not None
             for reason in candidate.eligibility.reason_codes
         )
-        review = status is not CandidateGenerationStatus.COMPLETE or any(
-            item.availability is CandidateAvailability.REVIEW_REQUIRED
-            for item in candidates
+        review = (
+            status is not CandidateGenerationStatus.COMPLETE
+            or source_coverage.uel is not CandidateGenerationStatus.COMPLETE
+            or any(
+                item.availability is CandidateAvailability.REVIEW_REQUIRED
+                for item in candidates
+            )
         )
         authoritative = (
             policy.mode is ExecutionMode.AUTHORITATIVE
@@ -491,6 +566,10 @@ def _coverage_for(
         dependency = CandidateGenerationStatus.COMPLETE
     if requirements_gap and requirements is CandidateGenerationStatus.COMPLETE:
         requirements = CandidateGenerationStatus.INCOMPLETE
+    if request.uel_evaluation is None:
+        uel = supplied.uel
+    else:
+        uel = CandidateGenerationStatus(request.uel_evaluation.coverage.overall.value)
     return CandidateSourceCoverage(
         catalog=catalog,
         requirements=requirements,
@@ -500,10 +579,21 @@ def _coverage_for(
             if dependency_gap and dependency is CandidateGenerationStatus.COMPLETE
             else dependency
         ),
+        uel=uel,
     )
 
 
-def _candidate_trace(identity, availability, eligibility):
+def _uel_risk_rank(level: UELRiskLevel) -> int:
+    return {
+        UELRiskLevel.NONE: 0,
+        UELRiskLevel.ATTENTION: 1,
+        UELRiskLevel.UNKNOWN: 2,
+        UELRiskLevel.PROGRESSION_RISK: 3,
+        UELRiskLevel.HUMAN_REVIEW_REQUIRED: 4,
+    }[level]
+
+
+def _candidate_trace(identity, availability, eligibility, *, uel_provenance=()):
     status = {
         CandidateAvailability.AVAILABLE: DecisionStatus.SATISFIED,
         CandidateAvailability.CONDITIONAL: DecisionStatus.CONDITIONAL,
@@ -522,6 +612,7 @@ def _candidate_trace(identity, availability, eligibility):
             expected_value="ACADEMICALLY_RELEVANT",
             actual_value=availability.value,
             reason_codes=eligibility.reason_codes,
+            provenance=uel_provenance,
             children=children,
         )
     )

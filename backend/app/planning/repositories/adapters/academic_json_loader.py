@@ -118,6 +118,37 @@ class RawElectivePoolRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class RawUELModuleRecord:
+    uel_module_id: str
+    regulation: int
+    asu_program: str
+    module_code: str
+    module_name: str
+    credits: int | float
+    source_id: str
+    source_page: int | str | None
+    verification_status: str | None
+    approval_status: str
+    conflict_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class RawUELMappingRecord:
+    mapping_id: str
+    regulation: int
+    uel_module_id: str
+    asu_program: str
+    asu_course_id: str
+    mapping_type: str
+    weight_percent: int | float | None
+    source_id: str
+    source_page: int | str | None
+    verification_status: str | None
+    approval_status: str
+    conflict_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class LoadedAcademicRecords:
     courses: tuple[RawCourseRecord, ...]
     prerequisites: tuple[RawPrerequisiteRecord, ...]
@@ -129,6 +160,10 @@ class LoadedAcademicRecords:
     corequisite_count: int
     dataset_version: DatasetVersion | None
     diagnostics: tuple[AcademicDataDiagnostic, ...]
+    uel_modules: tuple[RawUELModuleRecord, ...] = ()
+    uel_mappings: tuple[RawUELMappingRecord, ...] = ()
+    uel_modules_available: bool = False
+    uel_mappings_available: bool = False
 
 
 def load_academic_records(
@@ -152,6 +187,12 @@ def load_academic_records(
     elective_pools = _load_elective_pools(
         source_root / "elective_pools.json", diagnostics
     )
+    uel_modules, uel_modules_available = _load_uel_modules(
+        source_root / "uel_modules.json", diagnostics
+    )
+    uel_mappings, uel_mappings_available = _load_uel_mappings(
+        source_root / "uel_asu_mapping.json", diagnostics
+    )
     dataset_version = _load_manifest(
         manifest_path or source_root / "dataset_manifest.json",
         diagnostics,
@@ -167,6 +208,10 @@ def load_academic_records(
         corequisite_count=corequisite_count,
         dataset_version=dataset_version,
         diagnostics=_sorted_diagnostics(diagnostics),
+        uel_modules=tuple(uel_modules),
+        uel_mappings=tuple(uel_mappings),
+        uel_modules_available=uel_modules_available,
+        uel_mappings_available=uel_mappings_available,
     )
 
 
@@ -629,6 +674,155 @@ def _load_elective_pools(
     return records
 
 
+def _load_uel_modules(
+    path: Path,
+    diagnostics: list[AcademicDataDiagnostic],
+) -> tuple[list[RawUELModuleRecord], bool]:
+    values, available = _read_optional_array(path, diagnostics)
+    records: list[RawUELModuleRecord] = []
+    for index, value in enumerate(values):
+        record_id = f"uel-module[{index}]"
+        if not isinstance(value, dict):
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                    record_id=record_id,
+                    field="record",
+                )
+            )
+            continue
+        uel_module_id = _required_string(
+            value, "uel_module_id", diagnostics, record_id=record_id
+        )
+        regulation = _required_integer(
+            value, "regulation", diagnostics, record_id=record_id
+        )
+        asu_program = _required_string(
+            value, "asu_program", diagnostics, record_id=record_id
+        )
+        module_code = _required_string(
+            value, "module_code", diagnostics, record_id=record_id
+        )
+        module_name = _required_string(
+            value, "module_name", diagnostics, record_id=record_id
+        )
+        credits = _required_number(value, "credits", diagnostics, record_id=record_id)
+        source_id = _required_string(
+            value, "source_id", diagnostics, record_id=record_id
+        )
+        approval_status = _required_string(
+            value, "approval_status", diagnostics, record_id=record_id
+        )
+        if None in (
+            uel_module_id,
+            regulation,
+            asu_program,
+            module_code,
+            module_name,
+            credits,
+            source_id,
+            approval_status,
+        ):
+            continue
+        records.append(
+            RawUELModuleRecord(
+                uel_module_id=uel_module_id,
+                regulation=regulation,
+                asu_program=asu_program,
+                module_code=module_code,
+                module_name=module_name,
+                credits=credits,
+                source_id=source_id,
+                source_page=_source_page(value, diagnostics, record_id),
+                verification_status=_optional_string(
+                    value, "verification_status", diagnostics, record_id
+                ),
+                approval_status=approval_status,
+                conflict_ids=_conflict_ids(value, diagnostics, record_id),
+            )
+        )
+    return records, available
+
+
+def _load_uel_mappings(
+    path: Path,
+    diagnostics: list[AcademicDataDiagnostic],
+) -> tuple[list[RawUELMappingRecord], bool]:
+    values, available = _read_optional_array(path, diagnostics)
+    records: list[RawUELMappingRecord] = []
+    for index, value in enumerate(values):
+        record_id = f"uel-mapping[{index}]"
+        if not isinstance(value, dict):
+            diagnostics.append(
+                _diagnostic(
+                    AcademicDataDiagnosticCode.SCHEMA_INVALID,
+                    record_id=record_id,
+                    field="record",
+                )
+            )
+            continue
+        mapping_id = _required_string(
+            value, "mapping_id", diagnostics, record_id=record_id
+        )
+        regulation = _required_integer(
+            value, "regulation", diagnostics, record_id=record_id
+        )
+        uel_module_id = _required_string(
+            value, "uel_module_id", diagnostics, record_id=record_id
+        )
+        asu_program = _required_string(
+            value, "asu_program", diagnostics, record_id=record_id
+        )
+        asu_course_id = _required_string(
+            value, "asu_course_id", diagnostics, record_id=record_id
+        )
+        mapping_type = _required_string(
+            value, "mapping_type", diagnostics, record_id=record_id
+        )
+        weight_percent = _optional_number_field(
+            value.get("weight_percent"),
+            diagnostics,
+            record_id=record_id,
+            field="weight_percent",
+        )
+        source_id = _required_string(
+            value, "source_id", diagnostics, record_id=record_id
+        )
+        approval_status = _required_string(
+            value, "approval_status", diagnostics, record_id=record_id
+        )
+        if None in (
+            mapping_id,
+            regulation,
+            uel_module_id,
+            asu_program,
+            asu_course_id,
+            mapping_type,
+            source_id,
+            approval_status,
+        ):
+            continue
+        records.append(
+            RawUELMappingRecord(
+                mapping_id=mapping_id,
+                regulation=regulation,
+                uel_module_id=uel_module_id,
+                asu_program=asu_program,
+                asu_course_id=asu_course_id,
+                mapping_type=mapping_type,
+                weight_percent=weight_percent,
+                source_id=source_id,
+                source_page=_source_page(value, diagnostics, record_id),
+                verification_status=_optional_string(
+                    value, "verification_status", diagnostics, record_id
+                ),
+                approval_status=approval_status,
+                conflict_ids=_conflict_ids(value, diagnostics, record_id),
+            )
+        )
+    return records, available
+
+
 def _load_manifest(
     path: Path,
     diagnostics: list[AcademicDataDiagnostic],
@@ -800,6 +994,17 @@ def _read_array(
         )
         return []
     return value
+
+
+def _read_optional_array(
+    path: Path,
+    diagnostics: list[AcademicDataDiagnostic],
+) -> tuple[list[object], bool]:
+    """Read an optional capability artifact without masking malformed files."""
+
+    if not path.is_file():
+        return [], False
+    return _read_array(path, diagnostics), True
 
 
 def _required_string(

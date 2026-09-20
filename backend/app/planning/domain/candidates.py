@@ -16,8 +16,10 @@ from .eligibility import (
 )
 from .requirements import ProgramRequirementSet
 from .results import ResultMetadata
+from .provenance import Provenance
 from .student import StudentState
 from .trace import DecisionTrace
+from .uel import UELModuleId, UELProgressEvaluationResult, UELRiskLevel
 
 
 class CandidateAvailability(StrEnum):
@@ -38,6 +40,8 @@ class CandidateReasonCode(StrEnum):
     PROJECTED_NEXT_STEP = "PROJECTED_NEXT_STEP"
     RETAKE_AFTER_FAILURE = "RETAKE_AFTER_FAILURE"
     RETAKE_FOR_IMPROVEMENT = "RETAKE_FOR_IMPROVEMENT"
+    UEL_MODULE_OUTSTANDING = "UEL_MODULE_OUTSTANDING"
+    UEL_PROGRESSION_RISK = "UEL_PROGRESSION_RISK"
 
 
 class CandidateGenerationStatus(StrEnum):
@@ -93,6 +97,7 @@ class CandidateSourceCoverage:
     requirements: CandidateGenerationStatus = CandidateGenerationStatus.UNAVAILABLE
     eligibility_rules: CandidateGenerationStatus = CandidateGenerationStatus.UNAVAILABLE
     dependency_graph: CandidateGenerationStatus = CandidateGenerationStatus.UNAVAILABLE
+    uel: CandidateGenerationStatus = CandidateGenerationStatus.UNAVAILABLE
 
     def __post_init__(self) -> None:
         for name in (
@@ -100,6 +105,7 @@ class CandidateSourceCoverage:
             "requirements",
             "eligibility_rules",
             "dependency_graph",
+            "uel",
         ):
             if not isinstance(getattr(self, name), CandidateGenerationStatus):
                 raise TypeError(f"{name} must be a CandidateGenerationStatus")
@@ -124,7 +130,9 @@ class CandidateSourceCoverage:
             "requirements": self.requirements.value,
             "eligibility_rules": self.eligibility_rules.value,
             "dependency_graph": self.dependency_graph.value,
+            "uel": self.uel.value,
             "overall": self.overall.value,
+            "uel_awareness": self.uel.value,
         }
 
 
@@ -145,6 +153,7 @@ class CandidateGenerationRequest:
     source_coverage: CandidateSourceCoverage = field(
         default_factory=CandidateSourceCoverage
     )
+    uel_evaluation: UELProgressEvaluationResult | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.student, StudentState):
@@ -182,6 +191,12 @@ class CandidateGenerationRequest:
             raise TypeError("context must be a CandidateGenerationContext")
         if not isinstance(self.source_coverage, CandidateSourceCoverage):
             raise TypeError("source_coverage must be CandidateSourceCoverage")
+        if self.uel_evaluation is not None and not isinstance(
+            self.uel_evaluation, UELProgressEvaluationResult
+        ):
+            raise TypeError(
+                "uel_evaluation must be a UELProgressEvaluationResult or None"
+            )
         for item in courses:
             if (
                 item.identity.regulation is not self.student.regulation
@@ -238,6 +253,9 @@ class CandidateCourse:
     requirement_ids: tuple[str, ...] = ()
     unlocks: tuple[CourseIdentity, ...] = ()
     concentration_ids: tuple[ConcentrationId, ...] = ()
+    uel_module_ids: tuple[UELModuleId, ...] = ()
+    uel_risk_level: UELRiskLevel | None = None
+    uel_provenance: tuple[Provenance, ...] = ()
     metadata: ResultMetadata | None = None
     trace: DecisionTrace | None = None
 
@@ -281,6 +299,24 @@ class CandidateCourse:
             "concentration_ids",
             tuple(sorted(set(values), key=lambda item: item.identifier)),
         )
+        uel_modules = tuple(self.uel_module_ids)
+        if not all(isinstance(item, UELModuleId) for item in uel_modules):
+            raise TypeError("uel_module_ids must contain UELModuleId values")
+        object.__setattr__(
+            self, "uel_module_ids", tuple(sorted(set(uel_modules), key=str))
+        )
+        if self.uel_risk_level is not None and not isinstance(
+            self.uel_risk_level, UELRiskLevel
+        ):
+            raise TypeError("uel_risk_level must be a UELRiskLevel or None")
+        uel_provenance = tuple(self.uel_provenance)
+        if not all(isinstance(item, Provenance) for item in uel_provenance):
+            raise TypeError("uel_provenance must contain Provenance values")
+        object.__setattr__(
+            self,
+            "uel_provenance",
+            tuple(dict.fromkeys(uel_provenance)),
+        )
         object.__setattr__(
             self, "reason_codes", tuple(sorted(reasons, key=lambda item: item.value))
         )
@@ -298,6 +334,11 @@ class CandidateCourse:
             "requirement_ids": list(self.requirement_ids),
             "unlocks": [item.course_id for item in self.unlocks],
             "concentration_ids": [item.identifier for item in self.concentration_ids],
+            "uel_module_ids": [item.module_id for item in self.uel_module_ids],
+            "uel_risk_level": (
+                self.uel_risk_level.value if self.uel_risk_level is not None else None
+            ),
+            "uel_provenance": [item.to_dict() for item in self.uel_provenance],
             "metadata": self.metadata.to_dict() if self.metadata else None,
             "trace": self.trace.to_dict() if self.trace else None,
         }

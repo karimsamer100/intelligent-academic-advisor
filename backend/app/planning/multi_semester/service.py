@@ -224,7 +224,9 @@ class MultiSemesterPlanner:
             for item in step.plan.review_items
             if item not in diagnostics
         )
-        final_coverage = _merge_coverage(coverage, _audit_coverage(final_audit))
+        final_coverage = _merge_coverage(
+            coverage, _audit_coverage(final_audit, uel=coverage.uel)
+        )
         trace = _multi_trace(request, steps, final_coverage, status, stop_reason)
         metadata = _result_metadata(
             self,
@@ -247,6 +249,7 @@ class MultiSemesterPlanner:
             coverage=final_coverage,
             metadata=metadata,
             trace=trace,
+            uel_evaluation=request.candidate_request.uel_evaluation,
         )
 
     def _audit(
@@ -376,6 +379,11 @@ def _initial_coverage(request: MultiSemesterPlanningRequest) -> PlanningCoverage
         if requirements is not None
         else PlanningCoverageStatus.UNAVAILABLE
     )
+    uel_status = convert(source.uel)
+    if request.candidate_request.uel_evaluation is not None:
+        uel_status = PlanningCoverageStatus(
+            request.candidate_request.uel_evaluation.coverage.overall.value
+        )
     return PlanningCoverage(
         academic_requirements=requirement_status,
         candidate_generation=convert(source.overall),
@@ -385,10 +393,15 @@ def _initial_coverage(request: MultiSemesterPlanningRequest) -> PlanningCoverage
         timetable=PlanningCoverageStatus.UNAVAILABLE,
         search=PlanningCoverageStatus.COMPLETE,
         projection=PlanningCoverageStatus.COMPLETE,
+        uel=uel_status,
     )
 
 
-def _audit_coverage(audit: DegreeAuditResult | None) -> PlanningCoverage:
+def _audit_coverage(
+    audit: DegreeAuditResult | None,
+    *,
+    uel: PlanningCoverageStatus = PlanningCoverageStatus.UNAVAILABLE,
+) -> PlanningCoverage:
     if audit is None:
         status = PlanningCoverageStatus.UNAVAILABLE
     else:
@@ -402,6 +415,7 @@ def _audit_coverage(audit: DegreeAuditResult | None) -> PlanningCoverage:
         timetable=PlanningCoverageStatus.UNAVAILABLE,
         search=PlanningCoverageStatus.UNAVAILABLE,
         projection=PlanningCoverageStatus.COMPLETE,
+        uel=uel,
     )
 
 
@@ -439,6 +453,7 @@ def _merge_coverage(
         timetable=merge(left.timetable, right.timetable),
         search=merge(left.search, right.search),
         projection=merge(left.projection, right.projection),
+        uel=merge(left.uel, right.uel),
     )
 
 
@@ -454,6 +469,7 @@ def _with_projection_uncertainty(
         timetable=coverage.timetable,
         search=coverage.search,
         projection=PlanningCoverageStatus.INCOMPLETE,
+        uel=coverage.uel,
     )
 
 

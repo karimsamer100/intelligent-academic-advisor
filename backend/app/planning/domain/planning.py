@@ -42,6 +42,7 @@ class PlanningCoverage:
     timetable: PlanningCoverageStatus = PlanningCoverageStatus.UNAVAILABLE
     search: PlanningCoverageStatus = PlanningCoverageStatus.COMPLETE
     projection: PlanningCoverageStatus = PlanningCoverageStatus.COMPLETE
+    uel: PlanningCoverageStatus = PlanningCoverageStatus.UNAVAILABLE
 
     def __post_init__(self) -> None:
         for name in (
@@ -53,6 +54,7 @@ class PlanningCoverage:
             "timetable",
             "search",
             "projection",
+            "uel",
         ):
             if not isinstance(getattr(self, name), PlanningCoverageStatus):
                 raise TypeError(f"{name} must be a PlanningCoverageStatus")
@@ -69,6 +71,7 @@ class PlanningCoverage:
             self.search,
         )
         values = (*inputs, self.projection)
+        values = (*values, self.uel)
         if all(value is PlanningCoverageStatus.UNAVAILABLE for value in inputs):
             if self.projection is PlanningCoverageStatus.INCOMPLETE:
                 return PlanningCoverageStatus.INCOMPLETE
@@ -112,6 +115,8 @@ class PlanningCoverage:
             "timetable": self.timetable.value,
             "search": self.search.value,
             "projection": self.projection.value,
+            "uel": self.uel.value,
+            "uel_awareness": self.uel.value,
             "overall": self.overall.value,
             "academic_overall": self.academic_overall.value,
         }

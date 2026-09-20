@@ -598,6 +598,7 @@ def _coverage_for(
             else PlanningCoverageStatus.COMPLETE
         ),
         projection=PlanningCoverageStatus.COMPLETE,
+        uel=convert(source.uel),
     )
 
 

@@ -19,6 +19,7 @@ class PriorityFactors:
     unlock_count: int
     concentration_contribution: int
     elective_contribution: int
+    external_progression_risk: int = 0
 
     def __post_init__(self) -> None:
         for name in (
@@ -28,18 +29,20 @@ class PriorityFactors:
             "unlock_count",
             "concentration_contribution",
             "elective_contribution",
+            "external_progression_risk",
         ):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value < 0:
                 raise ValueError(f"{name} must be a non-negative integer")
 
-    def sort_key(self) -> tuple[int, int, int, int, int, int]:
+    def sort_key(self) -> tuple[int, int, int, int, int, int, int]:
         """Return the deterministic ordering key used by the ranking service."""
 
         return (
             self.eligibility_rank,
             self.requirement_rank,
             self.blocker_rank,
+            -self.external_progression_risk,
             -self.unlock_count,
             -self.concentration_contribution,
             -self.elective_contribution,
@@ -53,6 +56,7 @@ class PriorityFactors:
             "unlock_count": self.unlock_count,
             "concentration_contribution": self.concentration_contribution,
             "elective_contribution": self.elective_contribution,
+            "external_progression_risk": self.external_progression_risk,
         }
 
 

@@ -16,6 +16,7 @@ from ..domain.scenario import (
     ExcludeCourseScenario,
     PlanningHorizonScenario,
     PlanningPreferenceScenario,
+    UELModuleOutcomeScenario,
     ScenarioOperation,
     WhatIfDelta,
     WhatIfPlanningRequest,
@@ -30,8 +31,16 @@ from ..domain.trace import (
     TraceNodeType,
 )
 from ..domain.student import StudentState
+from ..domain.uel import (
+    UELRiskDelta,
+    UELRiskLevel,
+    UELStudentProgress,
+    UELProgressEvaluationResult,
+)
+from ..policy import ExecutionPolicy
 from ..projection.service import HypotheticalStateTransitionService
 from ..multi_semester.service import MultiSemesterPlanner
+from ..uel.service import UELProgressService
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,6 +51,7 @@ class WhatIfEvaluationService:
     transition_service: HypotheticalStateTransitionService = (
         HypotheticalStateTransitionService()
     )
+    uel_progress_service: UELProgressService | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.planner, MultiSemesterPlanner):
@@ -50,6 +60,10 @@ class WhatIfEvaluationService:
             raise TypeError(
                 "transition_service must be a HypotheticalStateTransitionService"
             )
+        if self.uel_progress_service is not None and not isinstance(
+            self.uel_progress_service, UELProgressService
+        ):
+            raise TypeError("uel_progress_service must be a UELProgressService or None")
 
     def evaluate(self, request: WhatIfPlanningRequest) -> WhatIfResult:
         if not isinstance(request, WhatIfPlanningRequest):
@@ -90,7 +104,7 @@ class WhatIfEvaluationService:
                 sequence=sequence,
             )
             projected = self.transition_service.apply(current, (outcome,))
-            return _replace_student(request, projected.student_state)
+            return self._replace_student(request, projected.student_state)
 
         if isinstance(scenario, ExcludeCourseScenario):
             excluded = tuple(
@@ -116,7 +130,66 @@ class WhatIfEvaluationService:
                 ),
             )
 
+        if isinstance(scenario, UELModuleOutcomeScenario):
+            evaluation = request.candidate_request.uel_evaluation
+            if evaluation is None:
+                raise ValueError(
+                    "UELModuleOutcomeScenario requires a baseline UEL evaluation"
+                )
+            results = {item.module: item for item in evaluation.progress.module_results}
+            results[scenario.module] = scenario.to_module_result()
+            progress = UELStudentProgress(
+                module_results=tuple(results.values()),
+                known_modules=(*evaluation.progress.known_modules, scenario.module),
+                coverage=evaluation.progress.coverage,
+            )
+            service = self._uel_service_for(evaluation)
+            updated = service.evaluate(
+                student=request.initial_student,
+                progress=progress,
+                mappings=evaluation.mappings,
+            )
+            return replace(
+                request,
+                candidate_request=replace(
+                    request.candidate_request,
+                    uel_evaluation=updated,
+                ),
+            )
+
         raise TypeError(f"unsupported scenario operation at index {operation_index}")
+
+    def _replace_student(
+        self,
+        request: MultiSemesterPlanningRequest,
+        student: StudentState,
+    ) -> MultiSemesterPlanningRequest:
+        candidate_request = replace(request.candidate_request, student=student)
+        evaluation = candidate_request.uel_evaluation
+        if evaluation is not None:
+            candidate_request = replace(
+                candidate_request,
+                uel_evaluation=self._uel_service_for(evaluation).evaluate(
+                    student=student,
+                    progress=evaluation.progress,
+                    mappings=evaluation.mappings,
+                ),
+            )
+        return replace(
+            request,
+            initial_student=student,
+            candidate_request=candidate_request,
+        )
+
+    def _uel_service_for(
+        self, evaluation: UELProgressEvaluationResult
+    ) -> UELProgressService:
+        if self.uel_progress_service is not None:
+            return self.uel_progress_service
+        return UELProgressService(
+            evaluation.metadata.dataset_version,
+            ExecutionPolicy(evaluation.metadata.execution_mode),
+        )
 
 
 def _replace_student(
@@ -188,7 +261,31 @@ def _delta(
         path_length_delta=len(scenario.steps) - len(baseline.steps),
         new_conditions=tuple(new_conditions),
         new_review_items=tuple(scenario_reviews - baseline_reviews),
+        uel_risk_changes=_uel_risk_changes(baseline, scenario),
     )
+
+
+def _uel_risk_changes(
+    baseline: MultiSemesterPlanResult,
+    scenario: MultiSemesterPlanResult,
+) -> tuple[UELRiskDelta, ...]:
+    baseline_risks = (
+        {item.module: item.level for item in baseline.uel_evaluation.risks}
+        if baseline.uel_evaluation is not None
+        else {}
+    )
+    scenario_risks = (
+        {item.module: item.level for item in scenario.uel_evaluation.risks}
+        if scenario.uel_evaluation is not None
+        else {}
+    )
+    result = []
+    for module in sorted(set(baseline_risks) | set(scenario_risks), key=str):
+        before = baseline_risks.get(module, UELRiskLevel.NONE)
+        after = scenario_risks.get(module, UELRiskLevel.NONE)
+        if before is not after:
+            result.append(UELRiskDelta(module, before, after))
+    return tuple(result)
 
 
 def _selected_courses(result: MultiSemesterPlanResult) -> set:
