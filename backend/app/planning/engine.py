@@ -25,6 +25,7 @@ from .domain.planning import (
     SingleSemesterPlanResult,
     SingleSemesterPlanningRequest,
 )
+from .domain.program_progress import ProgramProgress
 from .domain.ranking import PriorityRankingResult
 from .domain.scenario import WhatIfPlanningRequest, WhatIfResult
 from .domain.semester import (
@@ -103,6 +104,11 @@ class PlanningEngine:
         return self._require(self.degree_audit_service, "degree_audit_service").audit(
             request
         )
+
+    def program_progress(self, request: DegreeAuditRequest) -> ProgramProgress:
+        """Expose the audit's structured progress without duplicating evaluation."""
+
+        return self.audit(request).progress
 
     def validate_semester(
         self, request: SemesterValidationRequest

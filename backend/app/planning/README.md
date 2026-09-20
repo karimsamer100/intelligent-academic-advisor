@@ -7,7 +7,7 @@ decision traces, result metadata, domain outcomes, and repository boundaries.
 
 It does not own FastAPI or HTTP, ORM/PostgreSQL access, JSON loading outside
 the narrow Academic Data adapter boundary, PDF extraction, RAG, LLM behavior,
-frontend concerns, or semester planning. Degree Audit consumes the typed
+frontend concerns. Degree Audit consumes the typed
 contracts in this package but does not provide official graduation clearance.
 
 ## Core contracts
@@ -250,8 +250,8 @@ requirement-set contract because the normalized package has no authoritative
 requirement-coverage signal. It does not synthesize the absent 101-CH record
 or `ASUx11`, and blocked/conflicted elective data remains unsafe for
 authoritative audit results. Degree Audit is the current student-specific
-requirement-matching layer; semester validation, planning, and official
-administrative clearance remain later components.
+requirement-matching layer; semester validation and planning consume its
+typed results, while official administrative clearance remains external.
 
 ## Semester validation
 
@@ -281,11 +281,12 @@ offering availability.
 
 `PriorityRankingService` orders candidates with deterministic lexicographic
 `PriorityFactors`: eligibility category, requirement/blocker role, unlock
-impact, concentration contribution, and elective contribution, followed by
+impact, concentration contribution, elective contribution, and—when governed
+UEL mapping and result evidence exists—external progression risk, followed by
 canonical course identity. The factors are serialized with every ranked item;
-there is no opaque weighted score and no personalization or UEL policy yet.
-These results are typed inputs for a future planner or LLM explanation layer,
-not conversational recommendations.
+there is no opaque weighted score and no UEL-derived academic eligibility.
+These results are typed inputs for a planner or LLM explanation layer, not
+conversational recommendations.
 
 The deterministic Planning Engine is LLM-independent. A future orchestrator
 may translate user language into these typed requests and ask an LLM to
@@ -328,9 +329,8 @@ policy-neutral, so authoritative consumers still apply `ExecutionPolicy`.
 
 The graph does not require `StudentState`, evaluate eligibility, perform
 student-specific audit evaluation, calculate planning scores, validate
-semesters, or own repositories/adapters. Degree Audit now consumes the graph
-and requirement contracts separately; semester validation and semester-aware
-planning remain later components.
+semesters, or own repositories/adapters. Degree Audit, semester validation,
+and planning consume the graph and requirement contracts separately.
 
 ## Single-semester planning
 
@@ -357,3 +357,101 @@ currently `UNAVAILABLE`, so an academically valid plan remains explicitly
 conditions and advisor-review paths are never silently promoted to ordinary
 validity. The result contains no prompts, chat data, or LLM decisions; a
 future orchestrator may serialize these typed fields for explanation.
+
+## Multi-semester projection and What-If
+
+`MultiSemesterPlanner` is a bounded forward orchestrator. For each planning
+term it audits the current projected state, regenerates candidates, reranks
+them, invokes `SingleSemesterPlanner`, validates the accepted semester, and
+then applies an explicit `ProjectionPolicy`. The default policy assumes that
+selected courses are passed for planning purposes only; it never mutates the
+observed `StudentState` or persists hypothetical attempts. Projected facts
+are marked separately from observed and hypothetical facts, and projected
+credit totals remain unknown when governed course credit data is unsafe.
+
+The planner stops on modeled requirement satisfaction, horizon exhaustion,
+no feasible progress, review-only continuation, or insufficient data. It
+does not claim official graduation or global path optimality. Search horizons,
+branch counts, and alternative counts are bounded engineering controls and
+are disclosed in structured coverage/diagnostic metadata. Conditions,
+review items, audit results, traces, and projection assumptions are retained
+per semester.
+
+`WhatIfEvaluationService` applies typed operations such as course outcomes,
+course exclusion, planning-preference changes, planning-horizon changes, and
+explicit UEL outcomes. It reruns the same planning services and returns
+structured baseline/scenario deltas. It does not patch compatibility sets,
+turn a delayed course into a failure, or change observed truth. Scenario
+objects contain no prompts, chat messages, or model output.
+
+## UEL boundary
+
+UEL modules use scoped `UELModuleId` values and are not `CourseIdentity`
+values. `UELMappingSet` relates ASU courses to modules, while
+`UELStudentProgress` stores explicit module outcomes under its own coverage.
+An explicit UEL result wins; an ASU pass, ASU grade, or mapping alone never
+infers a UEL result. ASU Degree Audit and UEL progress/risk are separate
+results and may legitimately disagree.
+
+`UELProgressService` reports module status, mapping evidence, coverage, and
+structured progression risk. A governed outstanding/failed module may add a
+typed candidate/ranking factor, but UEL risk cannot make an ASU-ineligible
+course eligible and does not use an opaque numeric weight. Board, advisor,
+financial, timing, and mark-calculation semantics remain human-review or
+external integrations. Incomplete or development-only UEL data is exposed
+as non-authoritative awareness coverage rather than invalidating unrelated
+ASU academic results.
+
+## PlanningEngine facade and integration boundary
+
+`PlanningEngine` is the stable typed application entry point. It delegates
+eligibility, audit, program progress, semester validation, candidate
+generation, ranking, single-semester planning, multi-semester planning,
+What-If evaluation, and UEL progress to their specialized services. The
+facade contains no academic rule logic and accepts no raw dictionaries,
+transcript text, HTTP models, prompts, or chat messages.
+
+The intended integration boundary is:
+
+```
+official academic export -> importer/adapter -> canonical StudentState,
+AcademicSnapshot, program facts, and UEL facts -> PlanningEngine
+```
+
+Future FastAPI, PostgreSQL, RAG, and LLM orchestration layers may serialize
+the typed request/result contracts. An LLM may explain reason codes,
+conditions, traces, coverage, blockers, and registration readiness, but it
+must not recompute eligibility, audit, load, UEL, or planning decisions.
+
+Offering and timetable providers are capability boundaries only. Their
+coverage is currently `UNAVAILABLE`; an academically coherent plan therefore
+has `registration_ready=False` and makes no claim that a course is offered or
+conflict-free. No section, timetable, or offering data is fabricated.
+
+## V1 safety, limitations, and external blockers
+
+All public results are immutable typed values with stable enum values,
+canonical IDs, deterministic ordering, structured reason codes, provenance,
+coverage, lifecycle metadata, and `DecisionTrace` where evaluation occurs.
+`COMPLETE`, `PARTIAL`, and `UNAVAILABLE` retain their source-specific
+absence semantics. Authoritative execution fails closed on blocked,
+conflicted, unapproved, unsupported, or incomplete critical data;
+development execution can exercise governed fixtures but remains explicitly
+non-authoritative.
+
+Planning Engine v1 deliberately does not verify or promote Academic Data,
+resolve source conflicts, ingest course offerings or section timetables,
+calculate or project GPA/UEL marks, decide board/advisor exceptions, apply
+financial UEL rules, parse SIS exports, expose FastAPI routes, persist to a
+database, call RAG/LLM systems, or provide a frontend. Current external
+blockers include the CSE493 concurrency conflict, absent authoritative
+101-CH and normalized ASUx11 records, blocked elective/concentration data,
+unresolved `ALL_FOE` applicability, incomplete requirement coverage, lack of
+a verified dataset manifest, missing normalized load-policy records, missing
+offering/timetable data, and incomplete authoritative UEL governance.
+
+Single- and multi-semester search are bounded deterministic engineering
+procedures, not exhaustive global optimization. If a limit or incomplete
+coverage affects a result, the result exposes that limitation. Academic
+validity is therefore distinct from registration readiness and from official
+graduation clearance.

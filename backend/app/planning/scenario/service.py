@@ -30,7 +30,9 @@ from ..domain.trace import (
     TraceMetadata,
     TraceNodeType,
 )
+from ..domain.context import RegistrationIntent
 from ..domain.student import StudentState
+from ..domain.student_history import AttemptOutcome
 from ..domain.uel import (
     UELRiskDelta,
     UELRiskLevel,
@@ -104,7 +106,21 @@ class WhatIfEvaluationService:
                 sequence=sequence,
             )
             projected = self.transition_service.apply(current, (outcome,))
-            return self._replace_student(request, projected.student_state)
+            updated = self._replace_student(request, projected.student_state)
+            if (
+                scenario.outcome is not AttemptOutcome.PASSED
+                and scenario.intent is RegistrationIntent.NORMAL
+            ):
+                updated = replace(
+                    updated,
+                    excluded_courses=tuple(
+                        sorted(
+                            {*updated.excluded_courses, scenario.course},
+                            key=lambda item: item.course_id,
+                        )
+                    ),
+                )
+            return updated
 
         if isinstance(scenario, ExcludeCourseScenario):
             excluded = tuple(

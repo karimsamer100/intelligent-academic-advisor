@@ -152,7 +152,9 @@ class MultiSemesterPlanner:
                 )
                 break
 
-            outcomes = _projection_outcomes(plan, term, request.projection_policy)
+            outcomes = _projection_outcomes(
+                current, plan, term, request.projection_policy
+            )
             transition = self.transition_service.apply(
                 current,
                 outcomes,
@@ -292,10 +294,18 @@ def _candidate_request_for(
     )
 
 
-def _projection_outcomes(plan, term: PlanningTerm, policy: ProjectionPolicy):
+def _projection_outcomes(
+    current: StudentState,
+    plan,
+    term: PlanningTerm,
+    policy: ProjectionPolicy,
+):
     if policy is not ProjectionPolicy.ASSUME_SELECTED_COURSES_PASSED:
         return ()
     outcomes = []
+    sequence_offset = max(
+        (item.sequence for item in current.projected_outcomes), default=0
+    )
     for selected in plan.selected_courses:
         purpose = {
             RegistrationIntent.NORMAL: AttemptPurpose.INITIAL,
@@ -307,7 +317,7 @@ def _projection_outcomes(plan, term: PlanningTerm, policy: ProjectionPolicy):
                 course=selected.identity,
                 outcome=AttemptOutcome.PASSED,
                 purpose=purpose,
-                sequence=term.index,
+                sequence=sequence_offset + term.index,
                 earned_credit_hours=selected.candidate.course.credit_hours,
                 intent=selected.registration_intent,
                 layer=AcademicStateLayer.PROJECTED,
