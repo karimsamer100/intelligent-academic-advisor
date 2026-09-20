@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from backend.app.planning.domain.course import Program, Regulation
-from backend.app.planning.domain.course import CourseIdentity
-from backend.app.planning.domain.electives import ElectivePoolType
-from backend.app.planning.domain.audit import DegreeAuditRequest, DegreeAuditStatus
-from backend.app.planning.domain.academic_state import (
+from app.planning.domain.course import Program, Regulation
+from app.planning.domain.course import CourseIdentity
+from app.planning.domain.electives import ElectivePoolType
+from app.planning.domain.audit import DegreeAuditRequest, DegreeAuditStatus
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.audit.service import DegreeAuditService
-from backend.app.planning.domain.requirements import (
+from app.planning.domain.student import StudentState
+from app.planning.domain.version import DatasetVersion
+from app.planning.audit.service import DegreeAuditService
+from app.planning.domain.requirements import (
     ConcentrationRequirement,
     CourseCountFromPoolRequirement,
     EarnedCreditThresholdRequirement,
@@ -21,20 +21,20 @@ from backend.app.planning.domain.requirements import (
     MinimumGPARequirement,
     TotalProgramCreditsRequirement,
 )
-from backend.app.planning.repositories.adapters.academic_data_adapter import (
+from app.planning.repositories.adapters.academic_data_adapter import (
     JsonAcademicDataAdapter,
 )
-from backend.app.planning.repositories.adapters.academic_data_types import (
+from app.planning.repositories.adapters.academic_data_types import (
     AcademicDataConfig,
     AcademicDataSourceMode,
 )
-from backend.app.planning.policy import ExecutionPolicy
+from app.planning.policy import ExecutionPolicy
 
 
-def _adapter() -> JsonAcademicDataAdapter:
+def _adapter(academic_data_root: Path) -> JsonAcademicDataAdapter:
     result = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
         )
     )
@@ -42,8 +42,10 @@ def _adapter() -> JsonAcademicDataAdapter:
     return result.value
 
 
-def test_normalized_program_requirements_map_to_typed_definitions() -> None:
-    requirements = _adapter().list_requirements(
+def test_normalized_program_requirements_map_to_typed_definitions(
+    academic_data_root: Path,
+) -> None:
+    requirements = _adapter(academic_data_root).list_requirements(
         regulation=Regulation.R23,
         program=Program("CAIE"),
     )
@@ -61,8 +63,10 @@ def test_normalized_program_requirements_map_to_typed_definitions() -> None:
     assert by_id["REQ23-009"].approval_status.value == "BLOCKED"
 
 
-def test_normalized_elective_pools_remain_scoped_and_lifecycle_aware() -> None:
-    pools = _adapter().list_elective_pools(
+def test_normalized_elective_pools_remain_scoped_and_lifecycle_aware(
+    academic_data_root: Path,
+) -> None:
+    pools = _adapter(academic_data_root).list_elective_pools(
         regulation=Regulation.R23,
         program=Program("CAIE"),
     )
@@ -90,8 +94,10 @@ def test_normalized_elective_pools_remain_scoped_and_lifecycle_aware() -> None:
     }
 
 
-def test_adapter_does_not_synthesize_absent_101_gate_or_asux11_course() -> None:
-    adapter = _adapter()
+def test_adapter_does_not_synthesize_absent_101_gate_or_asux11_course(
+    academic_data_root: Path,
+) -> None:
+    adapter = _adapter(academic_data_root)
     requirements = adapter.list_requirements(
         regulation=Regulation.R23,
         program=Program("CAIE"),
@@ -105,8 +111,10 @@ def test_adapter_does_not_synthesize_absent_101_gate_or_asux11_course() -> None:
     assert adapter.get_course(CourseIdentity.parse("R23:CAIE:ASUx11")).value is None
 
 
-def test_real_blocked_requirement_data_cannot_produce_authoritative_audit() -> None:
-    adapter = _adapter()
+def test_real_blocked_requirement_data_cannot_produce_authoritative_audit(
+    academic_data_root: Path,
+) -> None:
+    adapter = _adapter(academic_data_root)
     requirement_set = adapter.get_requirement_set(
         regulation=Regulation.R23,
         program=Program("CAIE"),

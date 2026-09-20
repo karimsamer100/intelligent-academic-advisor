@@ -1,5 +1,5 @@
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.uel import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.uel import (
     UELMapping,
     UELMappingSet,
     UELModuleId,
@@ -9,15 +9,15 @@ from backend.app.planning.domain.uel import (
     UELProgressCoverage,
     UELStudentProgress,
 )
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.domain.provenance import Provenance
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.rules.evaluator import RuleEvaluator
-from backend.app.planning.uel.service import UELProgressService
-from backend.app.planning.engine import PlanningEngine
+from app.planning.domain.version import DatasetVersion
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.student import StudentState
+from app.planning.eligibility.service import EligibilityService
+from app.planning.policy import ExecutionPolicy
+from app.planning.rules.evaluator import RuleEvaluator
+from app.planning.uel.service import UELProgressService
+from app.planning.engine import PlanningEngine
 
 
 def test_engine_delegates_uel_progress_without_recomputing_academic_truth() -> None:

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from backend.app.planning.candidates.service import CandidateGenerator
-from backend.app.planning.domain.academic_state import (
+from app.planning.candidates.service import CandidateGenerator
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.context import EvaluationHorizon, RegistrationIntent
-from backend.app.planning.domain.candidates import (
+from app.planning.domain.context import EvaluationHorizon, RegistrationIntent
+from app.planning.domain.candidates import (
     CandidateAvailability,
     CandidateGenerationRequest,
     CandidateGenerationStatus,
@@ -15,17 +15,17 @@ from backend.app.planning.domain.candidates import (
     CandidateIntent,
     CandidateSourceCoverage,
 )
-from backend.app.planning.domain.course import (
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     RuleSetStatus,
 )
-from backend.app.planning.domain.dependency import (
+from app.planning.domain.dependency import (
     DependencyConstraint,
     DependencyCoverageStatus,
     DependencyDefinition,
@@ -35,7 +35,7 @@ from backend.app.planning.domain.dependency import (
     DependencyReference,
     DependencyRelationKind,
 )
-from backend.app.planning.domain.electives import (
+from app.planning.domain.electives import (
     Concentration,
     ConcentrationId,
     ElectivePool,
@@ -43,9 +43,9 @@ from backend.app.planning.domain.electives import (
     ElectivePoolType,
     ElectiveSlotId,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.expressions import CoursePassedExpression
-from backend.app.planning.domain.requirements import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.expressions import CoursePassedExpression
+from app.planning.domain.requirements import (
     ConcentrationRequirement,
     CourseCompletionRequirement,
     CourseCountFromPoolRequirement,
@@ -55,12 +55,12 @@ from backend.app.planning.domain.requirements import (
     RequirementSetStatus,
     ZeroCreditCourseRequirement,
 )
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.rules.evaluator import RuleEvaluator
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.student import StudentState
+from app.planning.domain.version import DatasetVersion
+from app.planning.eligibility.service import EligibilityService
+from app.planning.policy import ExecutionPolicy
+from app.planning.rules.evaluator import RuleEvaluator
 
 
 R23 = Regulation.R23

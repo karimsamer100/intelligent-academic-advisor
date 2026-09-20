@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from backend.app.planning.domain.course import (
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     EligibilityContext,
     EligibilityDecision,
@@ -16,24 +16,24 @@ from backend.app.planning.domain.eligibility import (
     RegistrationIntent,
     RuleSetStatus,
 )
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.expressions import (
     CourseConcurrentExpression,
     CoursePassedExpression,
     OrExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.student import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.student import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
     StudentState,
 )
-from backend.app.planning.domain.conditions import CourseMustBePassedCondition
-from backend.app.planning.domain.conditions import AllConditions, AnyConditions
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.rules.evaluator import RuleEvaluator
+from app.planning.domain.conditions import CourseMustBePassedCondition
+from app.planning.domain.conditions import AllConditions, AnyConditions
+from app.planning.domain.version import DatasetVersion
+from app.planning.eligibility.service import EligibilityService
+from app.planning.policy import ExecutionPolicy
+from app.planning.rules.evaluator import RuleEvaluator
 
 
 TARGET = CourseIdentity.parse("R23:CAIE:CSE493")

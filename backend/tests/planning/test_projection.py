@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from backend.app.planning.domain.academic_state import (
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.context import RegistrationIntent
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.student_history import AttemptOutcome, AttemptPurpose
-from backend.app.planning.projection.service import HypotheticalStateTransitionService
-from backend.app.planning.domain.projection import (
+from app.planning.domain.context import RegistrationIntent
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.student import StudentState
+from app.planning.domain.student_history import AttemptOutcome, AttemptPurpose
+from app.planning.projection.service import HypotheticalStateTransitionService
+from app.planning.domain.projection import (
     AcademicStateLayer,
     HypotheticalAcademicOutcome,
     ProjectionPolicy,

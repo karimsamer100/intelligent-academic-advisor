@@ -1,11 +1,11 @@
 import pytest
 
-from backend.app.planning.domain.errors import (
+from app.planning.domain.errors import (
     DomainIssue,
     PlanningDomainError,
     PlanningErrorCode,
 )
-from backend.app.planning.domain.reasons import ReasonCode
+from app.planning.domain.reasons import ReasonCode
 
 
 def test_academic_uncertainty_is_a_structured_domain_issue() -> None:

@@ -1,6 +1,6 @@
 import pytest
 
-from backend.app.planning.domain.version import DatasetVersion
+from app.planning.domain.version import DatasetVersion
 
 
 def test_dataset_version_metadata_is_immutable_and_serializable() -> None:

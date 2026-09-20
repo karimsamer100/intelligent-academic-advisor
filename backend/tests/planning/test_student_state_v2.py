@@ -2,36 +2,36 @@ from __future__ import annotations
 
 import pytest
 
-from backend.app.planning.builders.student_state_builder import (
+from app.planning.builders.student_state_builder import (
     StudentStateBuildInput,
     StudentStateBuilder,
 )
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.evaluation import EvaluationOutcome
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.evaluation import EvaluationOutcome
+from app.planning.domain.expressions import (
     CourseCompletedExpression,
     CourseCurrentlyRegisteredExpression,
     CoursePassedExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.reasons import ReasonCode
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.student import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.reasons import ReasonCode
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.student import (
     AcademicHistoryCoverage,
     EffectiveCourseStatus,
     FactStatus,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.student_history import (
+from app.planning.domain.student_history import (
     AcademicSnapshot,
     AttemptOutcome,
     AttemptPurpose,
     CourseAttempt,
     CurrentRegistration,
 )
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.rules.evaluator import RuleEvaluator
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionPolicy
+from app.planning.rules.evaluator import RuleEvaluator
 
 
 def _course(code: str) -> CourseIdentity:

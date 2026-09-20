@@ -1,8 +1,8 @@
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.expressions import CoursePassedExpression
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.provenance import Provenance
-from backend.app.planning.domain.rules import AcademicRule
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.expressions import CoursePassedExpression
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.rules import AcademicRule
 
 
 def test_academic_rule_keeps_expression_separate_from_governance_metadata() -> None:

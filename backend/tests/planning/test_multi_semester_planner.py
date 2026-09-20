@@ -1,50 +1,50 @@
 from __future__ import annotations
 
-from backend.app.planning.candidates.service import CandidateGenerator
-from backend.app.planning.domain.academic_state import (
+from app.planning.candidates.service import CandidateGenerator
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.candidates import (
+from app.planning.domain.candidates import (
     CandidateGenerationContext,
     CandidateGenerationRequest,
     CandidateGenerationStatus,
     CandidateSourceCoverage,
 )
-from backend.app.planning.domain.context import EvaluationHorizon
-from backend.app.planning.domain.course import (
+from app.planning.domain.context import EvaluationHorizon
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     RuleSetStatus,
 )
-from backend.app.planning.domain.expressions import CoursePassedExpression
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.multi_semester import (
+from app.planning.domain.expressions import CoursePassedExpression
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.multi_semester import (
     MultiSemesterPlanStatus,
     MultiSemesterPlanningRequest,
 )
-from backend.app.planning.domain.requirements import (
+from app.planning.domain.requirements import (
     CourseCompletionRequirement,
     ProgramRequirement,
     ProgramRequirementSet,
     RequirementSetStatus,
 )
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.semester import LoadBand, SemesterLoadPolicy
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.multi_semester.service import MultiSemesterPlanner
-from backend.app.planning.planner.service import SingleSemesterPlanner
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.ranking.service import PriorityRankingService
-from backend.app.planning.rules.evaluator import RuleEvaluator
-from backend.app.planning.semester.service import SemesterValidator
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.semester import LoadBand, SemesterLoadPolicy
+from app.planning.domain.student import StudentState
+from app.planning.domain.version import DatasetVersion
+from app.planning.eligibility.service import EligibilityService
+from app.planning.multi_semester.service import MultiSemesterPlanner
+from app.planning.planner.service import SingleSemesterPlanner
+from app.planning.policy import ExecutionPolicy
+from app.planning.ranking.service import PriorityRankingService
+from app.planning.rules.evaluator import RuleEvaluator
+from app.planning.semester.service import SemesterValidator
 
 
 R23 = Regulation.R23

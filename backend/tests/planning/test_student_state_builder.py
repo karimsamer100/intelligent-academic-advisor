@@ -2,24 +2,24 @@ from __future__ import annotations
 
 import inspect
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.student_diagnostics import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.student_diagnostics import (
     DiagnosticSeverity,
     DuplicateKind,
     StudentRecordType,
     StudentStateDiagnosticCode,
 )
-from backend.app.planning.domain.reasons import ReasonCode
-from backend.app.planning.domain.student_history import (
+from app.planning.domain.reasons import ReasonCode
+from app.planning.domain.student_history import (
     AcademicSnapshot,
     CourseAttempt,
     CurrentRegistration,
 )
-from backend.app.planning.domain.student import (
+from app.planning.domain.student import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.builders.student_state_builder import (
+from app.planning.builders.student_state_builder import (
     StudentStateBuildInput,
     StudentStateBuilder,
 )

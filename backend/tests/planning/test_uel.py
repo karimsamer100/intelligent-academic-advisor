@@ -3,23 +3,23 @@ from dataclasses import replace
 
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.candidates import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.candidates import (
     CandidateAvailability,
     CandidateGenerationRequest,
     CandidateReasonCode,
 )
-from backend.app.planning.domain.course import Course
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.course import Course
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     RuleSetStatus,
 )
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.rules.evaluator import RuleEvaluator
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.provenance import Provenance
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.uel import (
+from app.planning.eligibility.service import EligibilityService
+from app.planning.rules.evaluator import RuleEvaluator
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.student import StudentState
+from app.planning.domain.uel import (
     UELMapping,
     UELMappingSet,
     UELModuleId,
@@ -28,15 +28,15 @@ from backend.app.planning.domain.uel import (
     UELProgressCoverage,
     UELStudentProgress,
 )
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.domain.scenario import (
+from app.planning.domain.version import DatasetVersion
+from app.planning.domain.scenario import (
     UELModuleOutcomeScenario,
     WhatIfPlanningRequest,
 )
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.uel.service import UELProgressService
-from backend.app.planning.candidates.service import CandidateGenerator
-from backend.app.planning.ranking.service import PriorityRankingService
+from app.planning.policy import ExecutionPolicy
+from app.planning.uel.service import UELProgressService
+from app.planning.candidates.service import CandidateGenerator
+from app.planning.ranking.service import PriorityRankingService
 
 
 def _provenance(*, approved: bool = True) -> Provenance:
@@ -244,18 +244,20 @@ def test_unsafe_mapping_cannot_be_authoritative() -> None:
     assert evaluation.risks[0].level.value == "HUMAN_REVIEW_REQUIRED"
 
 
-def test_real_normalized_uel_mappings_are_exposed_without_upgrading_tier() -> None:
-    from backend.app.planning.repositories.adapters.academic_data_adapter import (
+def test_real_normalized_uel_mappings_are_exposed_without_upgrading_tier(
+    academic_data_root: Path,
+) -> None:
+    from app.planning.repositories.adapters.academic_data_adapter import (
         JsonAcademicDataAdapter,
     )
-    from backend.app.planning.repositories.adapters.academic_data_types import (
+    from app.planning.repositories.adapters.academic_data_types import (
         AcademicDataConfig,
         AcademicDataSourceMode,
     )
 
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
         )
     )
@@ -351,7 +353,7 @@ def test_uel_progression_risk_is_an_explicit_priority_factor() -> None:
 
 
 def test_multi_semester_preserves_uel_awareness_without_projecting_uel_pass() -> None:
-    from backend.tests.planning.test_multi_semester_planner import (
+    from tests.planning.test_multi_semester_planner import (
         planner,
         request,
         requirement,
@@ -399,7 +401,7 @@ def test_multi_semester_preserves_uel_awareness_without_projecting_uel_pass() ->
 
 
 def test_uel_outcome_what_if_changes_uel_risk_without_changing_asu_history() -> None:
-    from backend.tests.planning.test_multi_semester_planner import (
+    from tests.planning.test_multi_semester_planner import (
         planner,
         request,
         requirement,
@@ -441,7 +443,7 @@ def test_uel_outcome_what_if_changes_uel_risk_without_changing_asu_history() -> 
     )
     result = (
         __import__(
-            "backend.app.planning.scenario.service",
+            "app.planning.scenario.service",
             fromlist=["WhatIfEvaluationService"],
         )
         .WhatIfEvaluationService(planner())

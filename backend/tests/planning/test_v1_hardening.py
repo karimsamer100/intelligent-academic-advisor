@@ -5,66 +5,66 @@ import json
 
 import pytest
 
-from backend.app.planning.audit.service import DegreeAuditService
-from backend.app.planning.builders.student_state_builder import (
+from app.planning.audit.service import DegreeAuditService
+from app.planning.builders.student_state_builder import (
     StudentStateBuildInput,
     StudentStateBuilder,
 )
-from backend.app.planning.candidates.service import CandidateGenerator
-from backend.app.planning.domain.academic_state import (
+from app.planning.candidates.service import CandidateGenerator
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.audit import DegreeAuditRequest
-from backend.app.planning.domain.candidates import (
+from app.planning.domain.audit import DegreeAuditRequest
+from app.planning.domain.candidates import (
     CandidateGenerationContext,
     CandidateGenerationRequest,
     CandidateGenerationStatus,
     CandidateSourceCoverage,
 )
-from backend.app.planning.domain.context import EvaluationHorizon
-from backend.app.planning.domain.course import (
+from app.planning.domain.context import EvaluationHorizon
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     EligibilityContext,
     EligibilityDecision,
     EligibilityRequest,
     RuleSetStatus,
 )
-from backend.app.planning.domain.electives import (
+from app.planning.domain.electives import (
     Concentration,
     ConcentrationId,
     ElectivePool,
     ElectivePoolId,
     ElectivePoolType,
 )
-from backend.app.planning.domain.evaluation import EvaluationOutcome
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.evaluation import EvaluationOutcome
+from app.planning.domain.expressions import (
     CourseConcurrentExpression,
     CoursePassedExpression,
     OrExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.multi_semester import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.multi_semester import (
     MultiSemesterPlanStatus,
     MultiSemesterPlanningRequest,
 )
-from backend.app.planning.domain.planning import (
+from app.planning.domain.planning import (
     PlanningCoverageStatus,
     PlanningSearchPolicy,
     SingleSemesterPlanningRequest,
 )
-from backend.app.planning.domain.program_facts import (
+from app.planning.domain.program_facts import (
     FieldTrainingRecord,
     ProgramFactCoverage,
     StudentProgramFacts,
 )
-from backend.app.planning.domain.requirements import (
+from app.planning.domain.requirements import (
     ConcentrationRequirement,
     CourseCompletionRequirement,
     CourseCountFromPoolRequirement,
@@ -77,22 +77,22 @@ from backend.app.planning.domain.requirements import (
     TotalProgramCreditsRequirement,
     ZeroCreditCourseRequirement,
 )
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.scenario import (
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.scenario import (
     CourseOutcomeScenario,
     WhatIfPlanningRequest,
 )
-from backend.app.planning.domain.semester import (
+from app.planning.domain.semester import (
     SemesterLoadPolicy,
     TermType,
 )
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.student_history import (
+from app.planning.domain.student import StudentState
+from app.planning.domain.student_history import (
     AttemptOutcome,
     AttemptPurpose,
     CourseAttempt,
 )
-from backend.app.planning.domain.uel import (
+from app.planning.domain.uel import (
     UELMapping,
     UELMappingSet,
     UELModuleId,
@@ -101,17 +101,17 @@ from backend.app.planning.domain.uel import (
     UELProgressCoverage,
     UELStudentProgress,
 )
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.engine import PlanningEngine
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.multi_semester.service import MultiSemesterPlanner
-from backend.app.planning.planner.service import SingleSemesterPlanner
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.ranking.service import PriorityRankingService
-from backend.app.planning.rules.evaluator import RuleEvaluator
-from backend.app.planning.scenario.service import WhatIfEvaluationService
-from backend.app.planning.semester.service import SemesterValidator
-from backend.app.planning.uel.service import UELProgressService
+from app.planning.domain.version import DatasetVersion
+from app.planning.engine import PlanningEngine
+from app.planning.eligibility.service import EligibilityService
+from app.planning.multi_semester.service import MultiSemesterPlanner
+from app.planning.planner.service import SingleSemesterPlanner
+from app.planning.policy import ExecutionPolicy
+from app.planning.ranking.service import PriorityRankingService
+from app.planning.rules.evaluator import RuleEvaluator
+from app.planning.scenario.service import WhatIfEvaluationService
+from app.planning.semester.service import SemesterValidator
+from app.planning.uel.service import UELProgressService
 
 
 R23 = Regulation.R23
@@ -404,7 +404,7 @@ def test_projected_prerequisite_condition_survives_candidate_and_plan() -> None:
     candidates = CandidateGenerator(eligibility, VERSION).generate(request)
     plan = single.plan(
         __import__(
-            "backend.app.planning.domain.planning",
+            "app.planning.domain.planning",
             fromlist=["SingleSemesterPlanningRequest"],
         ).SingleSemesterPlanningRequest(
             student=state,
@@ -441,7 +441,7 @@ def test_concurrent_fixture_requires_target_aware_same_term_context() -> None:
             rule_set=rule,
             context=EligibilityContext(
                 proposed_term=__import__(
-                    "backend.app.planning.domain.context",
+                    "app.planning.domain.context",
                     fromlist=["ProposedTermContext"],
                 ).ProposedTermContext(
                     target_course=target.identity,
@@ -457,7 +457,7 @@ def test_concurrent_fixture_requires_target_aware_same_term_context() -> None:
             rule_set=rule,
             context=EligibilityContext(
                 proposed_term=__import__(
-                    "backend.app.planning.domain.context",
+                    "app.planning.domain.context",
                     fromlist=["ProposedTermContext"],
                 ).ProposedTermContext(
                     target_course=target.identity, proposed_courses=(target.identity,)
@@ -483,7 +483,7 @@ def test_stage_separation_keeps_101_gate_out_of_144_completion_audit() -> None:
     state = student(earned=101)
     result = audit.audit(
         __import__(
-            "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+            "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
         ).DegreeAuditRequest(
             student=state,
             requirement_set=requirement_set((gate, total)),
@@ -496,7 +496,7 @@ def test_stage_separation_keeps_101_gate_out_of_144_completion_audit() -> None:
     )
     gate_audit = audit.audit(
         __import__(
-            "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+            "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
         ).DegreeAuditRequest(
             student=state,
             requirement_set=requirement_set((gate, total)),
@@ -546,7 +546,7 @@ def test_technical_elective_and_concentration_golden_fixture() -> None:
     _, audit, _, _ = services()
     result = audit.audit(
         __import__(
-            "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+            "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
         ).DegreeAuditRequest(
             student=student(passed=passed, earned=21),
             requirement_set=requirement_set(requirements),
@@ -569,7 +569,7 @@ def test_zero_credit_and_field_training_require_explicit_facts() -> None:
     _, audit, _, _ = services()
     missing = audit.audit(
         __import__(
-            "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+            "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
         ).DegreeAuditRequest(
             student=student(earned=144),
             requirement_set=requirement_set((zero_requirement, training_requirement)),
@@ -578,7 +578,7 @@ def test_zero_credit_and_field_training_require_explicit_facts() -> None:
     )
     complete = audit.audit(
         __import__(
-            "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+            "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
         ).DegreeAuditRequest(
             student=student(passed=(zero,), earned=144),
             requirement_set=requirement_set((zero_requirement, training_requirement)),
@@ -715,7 +715,7 @@ def test_incomplete_requirement_set_never_claims_full_success() -> None:
     _, audit, _, _ = services()
     result = audit.audit(
         __import__(
-            "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+            "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
         ).DegreeAuditRequest(
             student=student(passed=(identity,)),
             requirement_set=requirement_set(
@@ -734,7 +734,7 @@ def test_facade_exposes_program_progress_and_stable_json_contracts() -> None:
     identity = cid("CSE341")
     _, audit, single, multi = services()
     request = __import__(
-        "backend.app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
+        "app.planning.domain.audit", fromlist=["DegreeAuditRequest"]
     ).DegreeAuditRequest(
         student=student(passed=(identity,)),
         requirement_set=requirement_set(
@@ -846,7 +846,7 @@ def test_search_limit_is_disclosed_and_deterministic() -> None:
     )
     _, _, single, _ = services()
     request = __import__(
-        "backend.app.planning.domain.planning",
+        "app.planning.domain.planning",
         fromlist=["SingleSemesterPlanningRequest"],
     ).SingleSemesterPlanningRequest(
         student=student(),

@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity
-from backend.app.planning.domain.provenance import Provenance
-from backend.app.planning.domain.reasons import ReasonCode
-from backend.app.planning.domain.trace import (
+from app.planning.domain.course import CourseIdentity
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.reasons import ReasonCode
+from app.planning.domain.trace import (
     DecisionStatus,
     DecisionTrace,
     DecisionTraceNode,

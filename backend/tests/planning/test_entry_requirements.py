@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from backend.app.planning.domain.entry import (
+from app.planning.domain.entry import (
     EntryRequirementReference,
     RequirementApplicability,
 )
-from backend.app.planning.domain.expressions import EntryRequirementExpression
-from backend.app.planning.domain.course import Program, Regulation
-from backend.app.planning.domain.expressions import CourseConcurrentExpression
-from backend.app.planning.domain.expressions import UnsupportedExpression
-from backend.app.planning.repositories.adapters.academic_expression_mapper import (
+from app.planning.domain.expressions import EntryRequirementExpression
+from app.planning.domain.course import Program, Regulation
+from app.planning.domain.expressions import CourseConcurrentExpression
+from app.planning.domain.expressions import UnsupportedExpression
+from app.planning.repositories.adapters.academic_expression_mapper import (
     map_expression,
 )
-from backend.app.planning.repositories.adapters.academic_json_loader import (
+from app.planning.repositories.adapters.academic_json_loader import (
     RawExpression,
 )
 

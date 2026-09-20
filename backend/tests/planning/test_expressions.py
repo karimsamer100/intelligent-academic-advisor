@@ -2,8 +2,8 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.course import CourseIdentity
+from app.planning.domain.expressions import (
     AndExpression,
     CourseCompletedExpression,
     CourseCurrentlyRegisteredExpression,

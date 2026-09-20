@@ -2,33 +2,33 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.dependency import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.dependency import (
     DependencyCoverageStatus,
     DependencyGraphDiagnosticCode,
     DependencyGraphScope,
     DependencyRelationKind,
 )
-from backend.app.planning.domain.eligibility import RuleSetStatus
-from backend.app.planning.domain.expressions import AndExpression, UnsupportedExpression
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.graph.builder import DependencyGraphBuilder
-from backend.app.planning.repositories.adapters.academic_data_adapter import (
+from app.planning.domain.eligibility import RuleSetStatus
+from app.planning.domain.expressions import AndExpression, UnsupportedExpression
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.graph.builder import DependencyGraphBuilder
+from app.planning.repositories.adapters.academic_data_adapter import (
     JsonAcademicDataAdapter,
 )
-from backend.app.planning.repositories.adapters.academic_data_source import (
+from app.planning.repositories.adapters.academic_data_source import (
     AcademicEligibilityDataSource,
 )
-from backend.app.planning.repositories.adapters.academic_data_types import (
+from app.planning.repositories.adapters.academic_data_types import (
     AcademicDataConfig,
     AcademicDataSourceMode,
 )
 
 
-def _adapter() -> JsonAcademicDataAdapter:
+def _adapter(academic_data_root: Path) -> JsonAcademicDataAdapter:
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
         )
     )
@@ -56,8 +56,10 @@ def _build_for(adapter: JsonAcademicDataAdapter, *course_ids: str):
     )
 
 
-def test_adapter_lists_only_typed_courses_in_deterministic_scope_order() -> None:
-    adapter = _adapter()
+def test_adapter_lists_only_typed_courses_in_deterministic_scope_order(
+    academic_data_root: Path,
+) -> None:
+    adapter = _adapter(academic_data_root)
 
     courses = adapter.list_courses(
         regulation=Regulation.R18,
@@ -70,11 +72,11 @@ def test_adapter_lists_only_typed_courses_in_deterministic_scope_order() -> None
     assert all(identity.startswith("R18:CESS:") for identity in identities)
 
 
-def test_real_cse112_has_complete_direct_dependency_coverage_but_incomplete_eligibility_coverage() -> (
-    None
-):
+def test_real_cse112_has_complete_direct_dependency_coverage_but_incomplete_eligibility_coverage(
+    academic_data_root: Path,
+) -> None:
     result = _build_for(
-        _adapter(),
+        _adapter(academic_data_root),
         "R18:CESS:CSE111",
         "R18:CESS:CSE131",
         "R18:CESS:CSE112",
@@ -103,9 +105,11 @@ def test_real_cse112_has_complete_direct_dependency_coverage_but_incomplete_elig
     )
 
 
-def test_real_multi_hop_chain_is_reachable_in_both_directions() -> None:
+def test_real_multi_hop_chain_is_reachable_in_both_directions(
+    academic_data_root: Path,
+) -> None:
     result = _build_for(
-        _adapter(),
+        _adapter(academic_data_root),
         "R18:CESS:CSE131",
         "R18:CESS:CSE334",
         "R18:CESS:CSE232",
@@ -128,9 +132,11 @@ def test_real_multi_hop_chain_is_reachable_in_both_directions() -> None:
     )
 
 
-def test_real_cse486_preserves_known_dependency_and_unresolved_child() -> None:
+def test_real_cse486_preserves_known_dependency_and_unresolved_child(
+    academic_data_root: Path,
+) -> None:
     result = _build_for(
-        _adapter(),
+        _adapter(academic_data_root),
         "R23:CAIE:PHM113",
         "R23:CAIE:CSE486",
     )
@@ -160,8 +166,10 @@ def test_real_cse486_preserves_known_dependency_and_unresolved_child() -> None:
     )
 
 
-def test_real_conditional_prerequisites_remain_external_not_course_edges() -> None:
-    result = _build_for(_adapter(), "R23:CAIE:PHM111")
+def test_real_conditional_prerequisites_remain_external_not_course_edges(
+    academic_data_root: Path,
+) -> None:
+    result = _build_for(_adapter(academic_data_root), "R23:CAIE:PHM111")
     target = _identity("R23:CAIE:PHM111")
     definition = result.graph.definition_for(target)
 
@@ -178,8 +186,10 @@ def test_real_conditional_prerequisites_remain_external_not_course_edges() -> No
     )
 
 
-def test_real_entry_requirement_does_not_create_a_course_dependency() -> None:
-    result = _build_for(_adapter(), "R18:CESS:MDP081")
+def test_real_entry_requirement_does_not_create_a_course_dependency(
+    academic_data_root: Path,
+) -> None:
+    result = _build_for(_adapter(academic_data_root), "R18:CESS:MDP081")
     target = _identity("R18:CESS:MDP081")
 
     assert result.graph.direct_dependencies(target) == ()
@@ -188,5 +198,7 @@ def test_real_entry_requirement_does_not_create_a_course_dependency() -> None:
     assert not isinstance(external, CourseIdentity)
 
 
-def test_adapter_implements_the_extended_typed_source_boundary() -> None:
-    assert isinstance(_adapter(), AcademicEligibilityDataSource)
+def test_adapter_implements_the_extended_typed_source_boundary(
+    academic_data_root: Path,
+) -> None:
+    assert isinstance(_adapter(academic_data_root), AcademicEligibilityDataSource)

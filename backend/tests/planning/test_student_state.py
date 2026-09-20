@@ -1,8 +1,8 @@
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.student_history import CourseAttempt
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.student import StudentState
+from app.planning.domain.student_history import CourseAttempt
 
 
 def test_student_state_keeps_passed_courses_separate_from_completed_courses() -> None:

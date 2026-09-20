@@ -1,9 +1,9 @@
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.provenance import Provenance
-from backend.app.planning.domain.reasons import ReasonCode
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.reasons import ReasonCode
 
 
 def test_valid_canonical_course_identity() -> None:

@@ -4,36 +4,36 @@ import inspect
 
 import pytest
 
-from backend.app.planning.domain.course import (
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     EligibilityRequest,
     EligibilityStatus,
     RuleSetStatus,
 )
-from backend.app.planning.domain.evaluation import EvaluationOutcome
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.evaluation import EvaluationOutcome
+from app.planning.domain.expressions import (
     AndExpression,
     CoursePassedExpression,
     MinEarnedCreditsExpression,
     MinGpaExpression,
     OrExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.provenance import Provenance
-from backend.app.planning.domain.reasons import ReasonCode
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.trace import DecisionStatus, TraceCode
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.rules.evaluator import RuleEvaluator
-from backend.app.planning.eligibility.service import EligibilityService
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.reasons import ReasonCode
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.student import StudentState
+from app.planning.domain.trace import DecisionStatus, TraceCode
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionPolicy
+from app.planning.rules.evaluator import RuleEvaluator
+from app.planning.eligibility.service import EligibilityService
 
 
 TARGET = CourseIdentity.parse("R23:CAIE:CSE341")

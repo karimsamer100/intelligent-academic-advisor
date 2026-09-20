@@ -1,7 +1,7 @@
 # Local Intelligent Academic Advisor - Backend Foundation
 
 FastAPI + PostgreSQL (pgvector) + SQLAlchemy 2.x + Alembic, runnable with Docker Compose.
-This is infrastructure only: no academic rules, no RAG internals, no Planning Engine, no LLM, no frontend.
+The backend includes the deterministic, framework-independent Planning Engine and exposes it to backend application code through a thin `PlanningService` adapter. Concrete RAG retrieval, HTTP planning routes, LLM orchestration, and the frontend remain separate integration work.
 
 ## Quick start (Docker)
 
@@ -27,11 +27,11 @@ curl localhost:8000/api/v1/ready
 ## Tests
 
 ```bash
-docker compose exec backend pytest
+docker compose exec -e REQUIRE_DB_TESTS=1 backend pytest -q
 ```
 
-Tests marked `integration` (real PostgreSQL + pgvector) are **skipped** if the database is unreachable.
-Set `REQUIRE_DB_TESTS=1` to make that a failure instead (recommended in CI).
+This is the canonical full-suite command from the backend container. It collects Backend tests, Planning tests, and PostgreSQL/pgvector integration tests in the same `backend/` application-root context.
+Tests marked `integration` (real PostgreSQL + pgvector) are **skipped** if the database is unreachable. Set `REQUIRE_DB_TESTS=1` to make that a failure instead (recommended in CI).
 
 ## Running without Docker
 
@@ -74,22 +74,24 @@ backend/app/
   core/            config.py (only place env vars are read), logging.py, middleware.py, exceptions.py
   db/              base.py (declarative base), session.py (engine + request-scoped session), models/
   schemas/         common.py (errors, health), rag.py (shared RAG contract + metadata)
-  services/        health_service.py, rag_service.py, planning_service.py (empty placeholder)
+  services/        health_service.py, rag_service.py, planning_service.py (thin Planning Engine adapter)
   repositories/    health_repository.py
   rag/             interface.py (Retriever protocol), provider.py (wiring point)
-  planning/ llm/ orchestration/   empty on purpose
+  planning/        deterministic, framework-independent Planning Engine
+  llm/ orchestration/              reserved integration boundaries
 ```
 
 ### Plugging in RAG later
 
 Implement `app.rag.interface.Retriever` (one method: `search(RAGRequest) -> Sequence[RAGResult]`)
-and return it from `app.rag.provider.get_retriever()`. Nothing else in the backend changes.
+and return it from `app.rag.provider.get_retriever()`. The concrete retriever is still pending integration; nothing else in the backend changes.
 `RAGService` already enforces `top_k`; embeddings and vector search stay entirely inside the RAG module.
 
-### Plugging in the Planning Engine later
+### Planning Engine integration boundary
 
-Add the engine under `app/planning/`, expose it through `PlanningService`, and add routes that call the service.
-No academic rules live in the backend today.
+`app.services.planning_service.PlanningService` is a thin dependency-injected adapter over the public `app.planning.engine.PlanningEngine` facade. It delegates typed eligibility, audit, semester validation, candidate/ranking, single- and multi-semester planning, What-If, and UEL operations without duplicating academic logic.
+
+Planning remains deterministic and independent of FastAPI, SQLAlchemy, PostgreSQL, RAG, and LLMs. HTTP planning routes and orchestration are not implemented yet; future API/tool layers should call `PlanningService` with the existing typed Planning contracts.
 
 ## Conventions
 

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from backend.app.planning.domain.planning import LoadPreference
-from backend.app.planning.domain.projection import AcademicStateLayer
-from backend.app.planning.domain.scenario import (
+from app.planning.domain.planning import LoadPreference
+from app.planning.domain.projection import AcademicStateLayer
+from app.planning.domain.scenario import (
     CourseOutcomeScenario,
     ExcludeCourseScenario,
     PlanningPreferenceScenario,
     WhatIfPlanningRequest,
 )
-from backend.app.planning.domain.student_history import AttemptOutcome, AttemptPurpose
-from backend.app.planning.scenario.service import WhatIfEvaluationService
+from app.planning.domain.student_history import AttemptOutcome, AttemptPurpose
+from app.planning.scenario.service import WhatIfEvaluationService
 
-from backend.tests.planning.test_multi_semester_planner import (
+from tests.planning.test_multi_semester_planner import (
     cid,
     course,
     planner,

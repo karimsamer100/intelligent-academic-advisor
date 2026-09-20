@@ -1,17 +1,17 @@
-from backend.app.planning.domain.evaluation import (
+from app.planning.domain.evaluation import (
     EvaluationOutcome,
     RuleEvaluationResult,
 )
-from backend.app.planning.domain.results import ResultMetadata
-from backend.app.planning.domain.trace import (
+from app.planning.domain.results import ResultMetadata
+from app.planning.domain.trace import (
     DecisionStatus,
     DecisionTrace,
     DecisionTraceNode,
     TraceCode,
     TraceNodeType,
 )
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.policy import ExecutionMode
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionMode
 
 
 def test_rule_evaluation_result_composes_metadata_and_trace() -> None:

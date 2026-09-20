@@ -1,8 +1,8 @@
 import pytest
 
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.reasons import ReasonCode
-from backend.app.planning.policy import ExecutionMode, ExecutionPolicy, PolicyDecision
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.reasons import ReasonCode
+from app.planning.policy import ExecutionMode, ExecutionPolicy, PolicyDecision
 
 
 def test_authoritative_policy_accepts_approved_source_verified_critical_data() -> None:

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.electives import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.electives import (
     ConcentrationId,
     ElectivePoolId,
     ElectiveSlotId,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.requirements import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.requirements import (
     ConcentrationRequirement,
     CourseCompletionRequirement,
     CourseCountFromPoolRequirement,
@@ -20,7 +20,7 @@ from backend.app.planning.domain.requirements import (
     TotalProgramCreditsRequirement,
     ZeroCreditCourseRequirement,
 )
-from backend.app.planning.domain.provenance import Provenance
+from app.planning.domain.provenance import Provenance
 
 
 R23 = Regulation.R23

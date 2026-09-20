@@ -5,44 +5,46 @@ from pathlib import Path
 
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.eligibility import (
     EligibilityRequest,
     EligibilityStatus,
     RuleSetStatus,
 )
-from backend.app.planning.domain.evaluation import EvaluationOutcome
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.evaluation import EvaluationOutcome
+from app.planning.domain.expressions import (
     AndExpression,
     CoursePassedExpression,
     CourseConcurrentExpression,
     UnsupportedExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.reasons import ReasonCode
-from backend.app.planning.domain.requirements import RequirementSetStatus
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.policy import ExecutionMode, ExecutionPolicy
-from backend.app.planning.repositories.adapters.academic_data_source import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.reasons import ReasonCode
+from app.planning.domain.requirements import RequirementSetStatus
+from app.planning.domain.student import StudentState
+from app.planning.domain.version import DatasetVersion
+from app.planning.eligibility.service import EligibilityService
+from app.planning.policy import ExecutionMode, ExecutionPolicy
+from app.planning.repositories.adapters.academic_data_source import (
     AcademicEligibilityDataSource,
 )
-from backend.app.planning.repositories.adapters.academic_data_types import (
+from app.planning.repositories.adapters.academic_data_types import (
     AcademicDataConfig,
     AcademicDataDiagnostic,
     AcademicDataDiagnosticCode,
     AcademicDataSourceMode,
 )
-from backend.app.planning.repositories.adapters.academic_data_adapter import (
+from app.planning.repositories.adapters.academic_data_adapter import (
     JsonAcademicDataAdapter,
 )
-from backend.app.planning.rules.evaluator import RuleEvaluator
+from app.planning.rules.evaluator import RuleEvaluator
 
 
-def test_source_mode_is_separate_from_execution_mode() -> None:
+def test_source_mode_is_separate_from_execution_mode(
+    academic_data_root: Path,
+) -> None:
     config = AcademicDataConfig(
-        package_root=Path("data/academic"),
+        package_root=academic_data_root,
         source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
     )
 
@@ -63,12 +65,12 @@ def test_diagnostic_is_typed_immutable_and_preserves_conflict_ids() -> None:
         diagnostic.code = AcademicDataDiagnosticCode.SOURCE_UNAVAILABLE
 
 
-def test_normalized_load_keeps_usable_records_without_inventing_manifest_version() -> (
-    None
-):
+def test_normalized_load_keeps_usable_records_without_inventing_manifest_version(
+    academic_data_root: Path,
+) -> None:
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
         )
     )
@@ -81,10 +83,12 @@ def test_normalized_load_keeps_usable_records_without_inventing_manifest_version
     )
 
 
-def test_verified_load_is_unavailable_without_normalized_fallback() -> None:
+def test_verified_load_is_unavailable_without_normalized_fallback(
+    academic_data_root: Path,
+) -> None:
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
         )
     )
@@ -97,10 +101,12 @@ def test_verified_load_is_unavailable_without_normalized_fallback() -> None:
     )
 
 
-def test_normalized_data_cannot_be_selected_for_authoritative_execution() -> None:
+def test_normalized_data_cannot_be_selected_for_authoritative_execution(
+    academic_data_root: Path,
+) -> None:
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
             requested_execution_mode=ExecutionMode.AUTHORITATIVE,
         )
@@ -113,8 +119,10 @@ def test_normalized_data_cannot_be_selected_for_authoritative_execution() -> Non
     )
 
 
-def test_requirement_set_lookup_preserves_incomplete_source_coverage() -> None:
-    adapter = _load_normalized()
+def test_requirement_set_lookup_preserves_incomplete_source_coverage(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
 
     requirement_set = adapter.get_requirement_set(
         regulation=Regulation.R23,
@@ -129,10 +137,10 @@ def test_requirement_set_lookup_preserves_incomplete_source_coverage() -> None:
     )
 
 
-def _load_normalized() -> JsonAcademicDataAdapter:
+def _load_normalized(academic_data_root: Path) -> JsonAcademicDataAdapter:
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
         )
     )
@@ -140,10 +148,12 @@ def _load_normalized() -> JsonAcademicDataAdapter:
     return loaded.value
 
 
-def test_known_non_course_entities_are_diagnosed_but_do_not_poison_load() -> None:
+def test_known_non_course_entities_are_diagnosed_but_do_not_poison_load(
+    academic_data_root: Path,
+) -> None:
     loaded = JsonAcademicDataAdapter.load(
         AcademicDataConfig(
-            package_root=Path("data/academic"),
+            package_root=academic_data_root,
             source_mode=AcademicDataSourceMode.NORMALIZED_DEVELOPMENT,
         )
     )
@@ -172,8 +182,10 @@ def test_known_non_course_entities_are_diagnosed_but_do_not_poison_load() -> Non
     )
 
 
-def test_cse112_course_and_direct_prerequisite_are_mapped_from_real_data() -> None:
-    adapter = _load_normalized()
+def test_cse112_course_and_direct_prerequisite_are_mapped_from_real_data(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
     target = CourseIdentity.parse("R18:CESS:CSE112")
 
     course_lookup = adapter.get_course(target)
@@ -209,8 +221,10 @@ def test_cse112_course_and_direct_prerequisite_are_mapped_from_real_data() -> No
     assert ReasonCode.UNAPPROVED_RULE in coverage.reason_codes
 
 
-def test_cse486_preserves_blocked_conflicted_and_unresolved_prerequisite() -> None:
-    adapter = _load_normalized()
+def test_cse486_preserves_blocked_conflicted_and_unresolved_prerequisite(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
     target = CourseIdentity.parse("R23:CAIE:CSE486")
 
     course_lookup = adapter.get_course(target)
@@ -250,10 +264,11 @@ def test_cse486_preserves_blocked_conflicted_and_unresolved_prerequisite() -> No
     )
 
 
-def test_cse493_does_not_synthesize_concurrent_prerequisite_from_review_evidence() -> (
-    None
-):
-    adapter = _load_normalized()
+def test_cse493_does_not_synthesize_concurrent_prerequisite_from_review_evidence(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
+
     target = CourseIdentity.parse("R23:CAIE:CSE493")
 
     lookup = adapter.get_eligibility_rules(target)
@@ -272,8 +287,10 @@ def test_cse493_does_not_synthesize_concurrent_prerequisite_from_review_evidence
     )
 
 
-def test_conditional_and_entry_prerequisites_remain_unsupported() -> None:
-    adapter = _load_normalized()
+def test_conditional_and_entry_prerequisites_remain_unsupported(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
 
     conditional = adapter.get_eligibility_rules(CourseIdentity.parse("R23:CAIE:PHM111"))
     entry_requirement = adapter.get_eligibility_rules(
@@ -301,8 +318,10 @@ def test_conditional_and_entry_prerequisites_remain_unsupported() -> None:
     )
 
 
-def test_missing_prerequisite_row_is_incomplete_not_complete_empty() -> None:
-    adapter = _load_normalized()
+def test_missing_prerequisite_row_is_incomplete_not_complete_empty(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
     lookup = adapter.get_eligibility_rules(CourseIdentity.parse("R18:CESS:CSE111"))
 
     assert lookup.value is not None
@@ -315,8 +334,10 @@ def test_missing_prerequisite_row_is_incomplete_not_complete_empty() -> None:
     )
 
 
-def test_supported_r23_prerequisite_can_be_complete_when_coverage_is_known() -> None:
-    adapter = _load_normalized()
+def test_supported_r23_prerequisite_can_be_complete_when_coverage_is_known(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
     lookup = adapter.get_eligibility_rules(CourseIdentity.parse("R23:CAIE:CSE142"))
 
     assert lookup.value is not None
@@ -325,10 +346,13 @@ def test_supported_r23_prerequisite_can_be_complete_when_coverage_is_known() -> 
     assert isinstance(lookup.value.rules[0].expression, CoursePassedExpression)
 
 
-def test_missing_corequisite_artifact_is_not_treated_as_empty(tmp_path: Path) -> None:
+def test_missing_corequisite_artifact_is_not_treated_as_empty(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
     package_root = tmp_path / "academic"
     normalized_root = package_root / "normalized"
-    shutil.copytree(Path("data/academic/normalized"), normalized_root)
+    shutil.copytree(academic_data_root / "normalized", normalized_root)
     (normalized_root / "corequisites.json").unlink()
 
     loaded = JsonAcademicDataAdapter.load(
@@ -350,10 +374,13 @@ def test_missing_corequisite_artifact_is_not_treated_as_empty(tmp_path: Path) ->
     )
 
 
-def test_invalid_manifest_does_not_invent_a_dataset_version(tmp_path: Path) -> None:
+def test_invalid_manifest_does_not_invent_a_dataset_version(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
     package_root = tmp_path / "academic"
     normalized_root = package_root / "normalized"
-    shutil.copytree(Path("data/academic/normalized"), normalized_root)
+    shutil.copytree(academic_data_root / "normalized", normalized_root)
     (normalized_root / "dataset_manifest.json").write_text(
         json.dumps({"dataset_version": None}),
         encoding="utf-8",
@@ -376,10 +403,11 @@ def test_invalid_manifest_does_not_invent_a_dataset_version(tmp_path: Path) -> N
 
 def test_incomplete_child_preserves_supported_siblings_in_expression_tree(
     tmp_path: Path,
+    academic_data_root: Path,
 ) -> None:
     package_root = tmp_path / "academic"
     normalized_root = package_root / "normalized"
-    shutil.copytree(Path("data/academic/normalized"), normalized_root)
+    shutil.copytree(academic_data_root / "normalized", normalized_root)
     prerequisite_path = normalized_root / "prerequisites.json"
     prerequisites = json.loads(prerequisite_path.read_text(encoding="utf-8"))
     cse112 = next(
@@ -412,10 +440,11 @@ def test_incomplete_child_preserves_supported_siblings_in_expression_tree(
 
 def test_reordered_source_records_produce_identical_typed_lookups(
     tmp_path: Path,
+    academic_data_root: Path,
 ) -> None:
     first_root = tmp_path / "first"
     second_root = tmp_path / "second"
-    source_root = Path("data/academic/normalized")
+    source_root = academic_data_root / "normalized"
     shutil.copytree(source_root, first_root / "normalized")
     shutil.copytree(source_root, second_root / "normalized")
     for root in (first_root, second_root):
@@ -451,8 +480,10 @@ def test_reordered_source_records_produce_identical_typed_lookups(
     )
 
 
-def test_json_adapter_matches_narrow_typed_data_source_boundary() -> None:
-    adapter = _load_normalized()
+def test_json_adapter_matches_narrow_typed_data_source_boundary(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
 
     assert isinstance(adapter, AcademicEligibilityDataSource)
 
@@ -479,8 +510,10 @@ def _student_with_passes(*course_ids: str) -> StudentState:
     )
 
 
-def test_real_cse112_missing_direct_prerequisite_is_definitively_not_eligible() -> None:
-    adapter = _load_normalized()
+def test_real_cse112_missing_direct_prerequisite_is_definitively_not_eligible(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
     target = CourseIdentity.parse("R18:CESS:CSE112")
     course = adapter.get_course(target).value
     rule_set = adapter.get_eligibility_rules(target).value
@@ -502,10 +535,11 @@ def test_real_cse112_missing_direct_prerequisite_is_definitively_not_eligible() 
     assert ReasonCode.MISSING_REQUIRED_DATA in result.reason_codes
 
 
-def test_real_cse112_satisfied_direct_prerequisite_remains_unresolved_by_coverage_gap() -> (
-    None
-):
-    adapter = _load_normalized()
+def test_real_cse112_satisfied_direct_prerequisite_remains_unresolved_by_coverage_gap(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
+
     target = CourseIdentity.parse("R18:CESS:CSE112")
     course = adapter.get_course(target).value
     rule_set = adapter.get_eligibility_rules(target).value

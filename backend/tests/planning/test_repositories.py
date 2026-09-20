@@ -1,21 +1,21 @@
 import pytest
 
-from backend.app.planning.domain.course import (
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.requirements import ProgramRequirement
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.repositories.course_repository import CourseRepository
-from backend.app.planning.repositories.requirement_repository import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.requirements import ProgramRequirement
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.student import StudentState
+from app.planning.repositories.course_repository import CourseRepository
+from app.planning.repositories.requirement_repository import (
     RequirementRepository,
 )
-from backend.app.planning.repositories.rule_repository import RuleRepository
-from backend.app.planning.repositories.student_repository import StudentRepository
+from app.planning.repositories.rule_repository import RuleRepository
+from app.planning.repositories.student_repository import StudentRepository
 
 
 def test_domain_records_supply_repository_return_types() -> None:

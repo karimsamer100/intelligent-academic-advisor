@@ -4,24 +4,24 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from backend.app.planning.domain.course import (
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.dependency import (
+from app.planning.domain.dependency import (
     CycleKind,
     DependencyCoverageStatus,
     DependencyGraphDiagnosticCode,
     DependencyGraphScope,
     DependencyRelationKind,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     RuleSetStatus,
 )
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.expressions import (
     AndExpression,
     CourseConcurrentExpression,
     CoursePassedExpression,
@@ -29,9 +29,9 @@ from backend.app.planning.domain.expressions import (
     OrExpression,
     UnsupportedExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.graph.builder import DependencyGraphBuilder
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.rules import AcademicRule
+from app.planning.graph.builder import DependencyGraphBuilder
 
 
 def _identity(code: str, *, regulation: Regulation = Regulation.R18) -> CourseIdentity:

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.student_history import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.student_history import (
     AcademicSnapshot,
     CourseAttempt,
     CurrentRegistration,

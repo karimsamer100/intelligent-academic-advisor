@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from backend.app.planning.domain.availability import (
+from app.planning.domain.availability import (
     CourseOfferingCoverage,
     CourseOfferingFact,
     TimetableCoverage,
     TimetableFact,
 )
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.planning import PlanningCoverageStatus
-from backend.app.planning.domain.semester import TermType
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.planning import PlanningCoverageStatus
+from app.planning.domain.semester import TermType
 
 
 def test_offering_boundary_preserves_known_not_offered_without_fabricating_data() -> (

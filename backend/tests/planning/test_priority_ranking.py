@@ -1,28 +1,28 @@
 from __future__ import annotations
 
-from backend.app.planning.ranking.service import PriorityRankingService
-from backend.app.planning.domain.candidates import (
+from app.planning.ranking.service import PriorityRankingService
+from app.planning.domain.candidates import (
     CandidateAvailability,
     CandidateCourse,
     CandidateReasonCode,
 )
-from backend.app.planning.domain.course import (
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.results import ResultMetadata
-from backend.app.planning.domain.trace import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.results import ResultMetadata
+from app.planning.domain.trace import (
     DecisionStatus,
     DecisionTrace,
     DecisionTraceNode,
     TraceCode,
     TraceNodeType,
 )
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.policy import ExecutionMode
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionMode
 
 
 R23 = Regulation.R23

@@ -2,36 +2,36 @@ from __future__ import annotations
 
 import pytest
 
-from backend.app.planning.domain.academic_state import (
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.context import EvaluationHorizon, RegistrationIntent
-from backend.app.planning.domain.course import (
+from app.planning.domain.context import EvaluationHorizon, RegistrationIntent
+from app.planning.domain.course import (
     Course,
     CourseIdentity,
     Program,
     Regulation,
 )
-from backend.app.planning.domain.eligibility import (
+from app.planning.domain.eligibility import (
     CourseEligibilityRuleSet,
     EligibilityDecision,
     RuleSetStatus,
 )
-from backend.app.planning.domain.expressions import (
+from app.planning.domain.expressions import (
     CourseConcurrentExpression,
     CoursePassedExpression,
     OrExpression,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.rules import AcademicRule
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.policy import ExecutionPolicy
-from backend.app.planning.eligibility.service import EligibilityService
-from backend.app.planning.rules.evaluator import RuleEvaluator
-from backend.app.planning.semester.service import SemesterValidator
-from backend.app.planning.domain.semester import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.rules import AcademicRule
+from app.planning.domain.student import StudentState
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionPolicy
+from app.planning.eligibility.service import EligibilityService
+from app.planning.rules.evaluator import RuleEvaluator
+from app.planning.semester.service import SemesterValidator
+from app.planning.domain.semester import (
     LoadBand,
     ProposedCourse,
     ProposedSemester,

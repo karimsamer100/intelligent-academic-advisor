@@ -2,17 +2,17 @@ from __future__ import annotations
 
 import pytest
 
-from backend.app.planning.audit.service import DegreeAuditService
-from backend.app.planning.domain.audit import (
+from app.planning.audit.service import DegreeAuditService
+from app.planning.domain.audit import (
     DegreeAuditRequest,
     DegreeAuditStatus,
 )
-from backend.app.planning.domain.academic_state import (
+from app.planning.domain.academic_state import (
     AcademicHistoryCoverage,
     RegistrationCoverage,
 )
-from backend.app.planning.domain.course import CourseIdentity, Program, Regulation
-from backend.app.planning.domain.electives import (
+from app.planning.domain.course import CourseIdentity, Program, Regulation
+from app.planning.domain.electives import (
     Concentration,
     ConcentrationId,
     ElectivePool,
@@ -20,13 +20,13 @@ from backend.app.planning.domain.electives import (
     ElectivePoolType,
     ElectiveSlotId,
 )
-from backend.app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
-from backend.app.planning.domain.program_facts import (
+from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
+from app.planning.domain.program_facts import (
     FieldTrainingRecord,
     ProgramFactCoverage,
     StudentProgramFacts,
 )
-from backend.app.planning.domain.requirements import (
+from app.planning.domain.requirements import (
     ConcentrationRequirement,
     CourseCompletionRequirement,
     CourseCountFromPoolRequirement,
@@ -41,10 +41,10 @@ from backend.app.planning.domain.requirements import (
     TotalProgramCreditsRequirement,
     ZeroCreditCourseRequirement,
 )
-from backend.app.planning.domain.requirements import RequirementDefinition
-from backend.app.planning.domain.student import StudentState
-from backend.app.planning.domain.version import DatasetVersion
-from backend.app.planning.policy import ExecutionPolicy
+from app.planning.domain.requirements import RequirementDefinition
+from app.planning.domain.student import StudentState
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionPolicy
 
 
 R23 = Regulation.R23
