@@ -16,7 +16,7 @@ The original extracted page text can be persisted to `RAW_EXTRACT_DIR` for debug
 
 ## 4. Scope filtering
 
-`regulation` and `program` represent the most precise single chunk scope that can be supported. Arrays represent explicit applicability inherited from the source. Retrieval filters the arrays, not semantic content, when trusted context exists.
+`regulation`, `program`, and `document_type` represent the most precise single chunk scope supported by the source registry and chunk text. When a specific value is inferred, its applicability array contains only that value. Shared or ambiguous chunks retain the source's explicit applicability; an unscoped source never gains an invented program. Retrieval filters these arrays at SQL level.
 
 This prevents semantically similar Regulation 18 text from contaminating a Regulation 23 request.
 

@@ -34,7 +34,8 @@ class RagIngestionPipeline:
         self.enricher = enricher
         self.embedder = embedder
         self.repository = repository
-        self.pipeline_version = pipeline_version
+        # Invalidate persisted pre-narrowing chunks even when deployment config is unchanged.
+        self.pipeline_version = f"{pipeline_version}:scope-v2"
         self.preserve_raw_extraction = preserve_raw_extraction
         self.raw_extract_dir = raw_extract_dir
 
@@ -126,7 +127,8 @@ class RagIngestionPipeline:
                 pipeline_version=self.pipeline_version,
             )
 
-        drafts = list(drafts)
+        # Re-enrich older exports so stale broad applicability cannot bypass the fix.
+        drafts = [self.enricher.enrich(c.model_copy(deep=True), source) for c in drafts]
         validate_chunks(drafts, source)
         vectors = self.embedder.embed_documents([c.text for c in drafts])
         if len(vectors) != len(drafts):
@@ -156,6 +158,8 @@ class RagIngestionPipeline:
         """Validation/inspection path used to review chunk quality before vector ingestion."""
         extracted = self.extractor.extract(extraction_input, source.source_id)
         validate_extracted(extracted)
+        if self.preserve_raw_extraction and self.raw_extract_dir:
+            self._write_debug_extract(extracted)
         cleaned = self.cleaner.clean(extracted)
         drafts = [self.enricher.enrich(c, source) for c in self.chunker.chunk(cleaned, source)]
         validate_chunks(drafts, source)

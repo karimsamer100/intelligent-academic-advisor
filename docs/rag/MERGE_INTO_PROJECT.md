@@ -73,3 +73,29 @@ FastAPI route
 ```
 
 No FastAPI route is required inside the RAG module itself. This keeps retrieval logic isolated from routing and lets the backend foundation own API composition.
+
+## Applicability correction and deployment
+
+The ingestion pipeline appends `:scope-v2` to the configured pipeline version.
+Re-ingest every deployed source after merging: unchanged-file checks must not retain
+pre-fix applicability arrays. Prepared exports are re-enriched before validation.
+Existing embeddings and source text are not academic rules.
+
+The local RAG `.gitignore` explicitly includes the `models` and `embeddings` Python
+packages because the root ignore rules otherwise hide them as generated artifacts.
+Keep these source packages tracked when merging.
+
+Run `RUN_PGVECTOR_TESTS=1 python -m pytest -q -m integration` with a PostgreSQL URL
+(optionally `PGVECTOR_TEST_DATABASE_URL`). Tests apply the real migration in unique,
+transactional schemas and roll them back. The test role needs schema creation rights.
+The migration's vector dimension and `EMBEDDING_DIMENSION` must agree; changing the
+model dimension requires an explicit RAG schema migration and re-ingestion.
+
+`scripts/run_rag_smoke_tests.py --prepared-dir data/prepared_sample --output reports/RAG_SMOKE_RESULTS.json`
+uses the real provider and PostgreSQL with a fresh rollback-only proof schema.
+Exit 2 means unsupported-query threshold calibration is pending; it is not an all-pass result.
+The default mode still searches the existing database.
+
+Threshold calibration remains pending. The six-case proof is insufficient to choose
+a deployment-wide cutoff. Keep `RAG_MIN_SCORE` configurable; an empty result remains
+evidence absence for the future Decision Layer to interpret.

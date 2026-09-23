@@ -37,7 +37,7 @@ class DocumentSearchService:
         query = query.strip()
         if not query:
             raise ValueError("query must not be empty")
-        k = top_k or self.default_top_k
+        k = self.default_top_k if top_k is None else top_k
         if k <= 0 or k > self.max_top_k:
             raise ValueError(f"top_k must be between 1 and {self.max_top_k}")
         canonical_types = [canonical_document_type(x) or x for x in document_types] if document_types else None

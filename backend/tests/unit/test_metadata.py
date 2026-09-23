@@ -31,7 +31,7 @@ def test_metadata_narrows_multi_regulation_only_when_text_supports_it():
     enricher = MetadataEnricher()
     narrowed = enricher.enrich(draft("Bylaw 2023 field training requirements"), source([2018, 2023], []))
     assert narrowed.regulation == 2023
-    assert narrowed.applicable_regulations == [2018, 2023]
+    assert narrowed.applicable_regulations == [2023]
 
     ambiguous = enricher.enrich(draft("Field training requirements"), source([2018, 2023], []))
     assert ambiguous.regulation is None

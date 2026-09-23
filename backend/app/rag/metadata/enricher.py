@@ -14,12 +14,12 @@ class MetadataEnricher:
     def enrich(self, chunk: ChunkDraft, source: DocumentMetadata) -> ChunkDraft:
         canonical_types = list(dict.fromkeys(canonical_document_type(x) for x in source.document_types if canonical_document_type(x)))
         chunk.document_type = self.infer_document_type(chunk.text, canonical_types)
-        chunk.applicable_document_types = canonical_types
+        chunk.applicable_document_types = [chunk.document_type] if chunk.document_type is not None else canonical_types
         chunk.language = self.detect_language(chunk.text)
         chunk.regulation = self.infer_regulation(chunk.text, source.regulations)
         chunk.program = self.infer_program(chunk.text, source.programs)
-        chunk.applicable_regulations = list(dict.fromkeys(source.regulations))
-        chunk.applicable_programs = list(dict.fromkeys(source.programs))
+        chunk.applicable_regulations = [chunk.regulation] if chunk.regulation is not None else list(dict.fromkeys(source.regulations))
+        chunk.applicable_programs = [chunk.program] if chunk.program is not None else list(dict.fromkeys(source.programs))
         chunk.topic = self.infer_topic(chunk.text)
         chunk.metadata = {
             **chunk.metadata,

@@ -1,0 +1,16 @@
+{
+  "provider": "SentenceTransformerEmbeddingProvider",
+  "model": "BAAI/bge-m3",
+  "device": "cpu",
+  "configured_dimension": 1024,
+  "actual_dimension": 1024,
+  "embed_query": "PASS",
+  "embed_documents": "PASS",
+  "query_length": 1024,
+  "document_lengths": [
+    1024,
+    1024
+  ],
+  "dimension_mismatch": "embedding_dimension_mismatch:actual=1024:expected=1025",
+  "status": "PASS"
+}
