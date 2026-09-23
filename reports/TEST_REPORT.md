@@ -1,6 +1,51 @@
-﻿# Final RAG validation — 2026-09-23
+# Final RAG validation — 2026-09-23
 
-This report replaces historical validation claims. Results below were executed on the fixed working tree based on `bbb1ef9`, branch `KHM`.
+Latest verification was executed against commit `351d882` (`fixed rag`), branch `KHM`, plus the new runtime audit tool. Original fix validation was based on `bbb1ef9`. Exact new commands and outcomes are recorded in `VERIFICATION_RUN.json`.
+
+
+## Complete runtime rerun ? 2026-09-24
+
+The existing backend image was rebuilt from this checkout with `docker compose build backend`, then started using `docker compose up -d backend`. Both backend and PostgreSQL are healthy. The backend remains available at http://localhost:8000/docs.
+
+| Additional check | Actual result |
+|---|---|
+| Rebuilt-image compileall | PASS |
+| Rebuilt-image unit/API tests | 29 passed, 7 deselected |
+| Rebuilt-image live integration | 7 passed, 29 deselected |
+| Full corpus refresh | 8 sources re-ingested, 3 current sources skipped |
+| Persisted corpus versus fresh preparation | All 3803 chunks match, including text, pages, metadata and scope |
+| Persisted vectors | All finite, nonzero, 1024 dimensions, expected model and pipeline version |
+| Second full ingestion | 11 skipped unchanged; counts remain 11 sources / 3803 chunks |
+| API with real dependencies | 7 checks passed, no dependency overrides |
+| Actual localhost HTTP | Health, readiness, 5 citation cases and blank-query rejection passed; unsupported case pending |
+| Full-corpus smoke, default threshold unset | 5 passed, 0 failed, 1 pending |
+| Temporary measured cutoff 0.55 | 6 smoke cases passed, cafeteria query returned [] |
+| Broader diagnostic retrieval | All 10 expected citations found; 14 unsupported diagnostic queries scored |
+
+The isolated three-source proof, production-model shape/mismatch verification, full preparation and fresh extraction were also rerun successfully. Their original expected counts in the tables below remain valid.
+
+### Score separation: remaining limitation
+
+The minimum expected-citation score across ten supported queries was **0.567647**. The maximum score on fourteen unsupported queries was **0.599003** (a request for the student's current GPA retrieved generic GPA policy text). These overlap.
+
+- At 0.55, all ten expected citations survive, but two unsupported questions still retrieve evidence.
+- At 0.60, all fourteen unsupported questions are rejected, but one expected citation is lost.
+- No threshold can retain every expected citation and reject every unsupported query in this diagnostic set.
+
+The 0.55 smoke run is a temporary mechanism test selected from measured scores, not a production recommendation. No environment/default threshold was changed. RAG still returns evidence only and does not fabricate a personal GPA or a fallback academic answer. Generated English diagnostics are not independently reviewed or held-out evaluation data. Production threshold calibration and broader answerability evaluation remain pending.
+
+### Current evidence
+
+- `VERIFICATION_RUN.json`: exact executed commands and actual results.
+- `RUNTIME_VERIFICATION.json`: per-source persisted audit, unchanged re-ingestion, 24-query scores, threshold sweep and real-dependency API checks.
+- `HTTP_VERIFICATION.json`: actual localhost HTTP responses and citations.
+- `RAG_FULL_CORPUS_SMOKE.json`: default full-corpus smoke.
+- `RAG_THRESHOLD_PROBE.json`: temporary 0.55 cutoff smoke.
+- `RAG_SMOKE_RESULTS.json`: isolated three-source proof.
+- `PRODUCTION_EMBEDDING.json` and `REAL_DATA_VALIDATION.json`: rerun model/data verification.
+
+The audit can be repeated using the command documented in `docs/rag/MERGE_INTO_PROJECT.md`. Verification adds no planning, LLM generation, or decision behavior.
+
 
 | Check | Actual result |
 |---|---|
@@ -55,9 +100,9 @@ git status --short
 
 Smoke returns script exit 2 (Compose reports nonzero) for the pending unsupported-query check. It does not claim all-pass. Normal unit runs deselect seven opt-in integration cases. No required test was skipped for missing dependencies or unavailable data in the final run.
 
-## Retrieval quality
+## Isolated proof retrieval quality
 
-Final smoke is restricted to a freshly migrated, rollback-only proof schema populated with real BGE-M3 embeddings. It does not depend on older rows in the developer database.
+The isolated proof smoke is restricted to a freshly migrated, rollback-only proof schema populated with real BGE-M3 embeddings. It does not depend on older rows in the developer database.
 
 | Query | Best score |
 |---|---:|
@@ -78,6 +123,6 @@ An earlier smoke against the existing larger database also found all five citati
 
 The full source package was located through the original Docker bind mount on D: and accessed read-only. No original source text was changed. Local model caches, raw debug extraction, Python caches, and the virtual environment are excluded from Git.
 
-Existing non-proof database sources must be re-ingested on deployment to replace pre-fix applicability; the `:scope-v2` ingestion version forces replacement. Only the three proof sources were refreshed in the persistent developer database. Full-source preparation was rerun, but full-source embedding/re-ingestion was not part of the proof ingestion request.
+The full persistent corpus has now been refreshed: eight older sources were re-ingested (3723 chunks), and three current proof sources were skipped (80 chunks). All 11 sources / 3803 chunks use `rag-v0.1.0:scope-v2`. A second full ingestion skipped all 11 sources and preserved counts exactly. On another deployment, re-ingest any pre-fix sources in the same way.
 
 Future global Alembic reconciliation remains with Backend/DB integration. Academic authority conflicts remain upstream. The observed deprecation warnings concern the installed FastAPI/httpx/anyio and embedding/PDF library APIs; they did not cause test failures.

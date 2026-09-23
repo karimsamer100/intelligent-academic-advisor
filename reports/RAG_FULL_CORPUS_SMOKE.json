@@ -1,0 +1,557 @@
+{
+  "model": "BAAI/bge-m3",
+  "dimension": 1024,
+  "corpus": "existing_database",
+  "proof_ingestion": [],
+  "min_score": null,
+  "passed": 5,
+  "failed": 0,
+  "pending": 1,
+  "cases": [
+    {
+      "case_id": "RAG-EXACT-2023-CREDIT-LOAD",
+      "status": "PASS",
+      "query": "GPA >= 3.0: up to 21 credit hours",
+      "filters": {
+        "regulation": 2023,
+        "document_types": [
+          "REGULATION"
+        ],
+        "language": "en"
+      },
+      "top_results": [
+        {
+          "chunk_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF:P8:C0008:849880c7",
+          "text": "Course Registration Rules\nThe number of credits a student can register for depends on their cumulative GPA.\n•Main Semesters (Fall/Spring):\n•GPA ≥ 3.0: Up to 21 credit hours (or 8 courses, whichever is greater).\n•2.0 ≤ GPA < 3.0: Up to 18 credit hours (or 7 courses, whichever is greater).\n•GPA < 2.0: Up to 14 credit hours (or 5 courses, whichever is greater).\n•Summer Semester:\n•GPA ≥ 3.0: Up to 9 credit hours (or 3 courses, whichever is greater).\n•GPA < 3.0: Up to 8 credit hours (or 2 courses, whichever is greater).",
+          "score": 0.7689501184850874,
+          "source_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+          "file_name": "Bylaw 2023 General Rules & Regulations UEL.pdf",
+          "page_start": 8,
+          "page_end": 8,
+          "section": "Course Registration Rules",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": "UEL",
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P30:C0109:509d9ca2",
+          "text": "o\nحنر9\nساعات معتمدة أو3\nمقررات دراسية أيهما أكبر ، للطالب الحاصل عل معدل\nتراكمي أكبر من أو يساوى3.0\n.\no\nحنر8\nساعات معتمدة أو مقررين دراسيي ن أيهما أكبر ، بالنسبة للطالب الحاصل عل\nمعدل تراكمي أقل من3.0\n.\nArticle (22): Terms of Course Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit\nHours according to the following rules (after approval of the Academic Advisor):\no Up to 21 Credit Hours or 8 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 3.0 o Up to 18 Credit Hours or 7 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 2.0, but less than 3.0 o Up to 14 Credit Hours or 5 courses, whichever is greater for a student with a\nCumulative GPA less than 2.0\n•\nThe student may register courses in the summer semester in a maximum total Credit\nHours according to the following rules (after approval of the Academic Advisor):\no Up to 9 Credit Hours or 3 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 3.0 o Up to 8 Credit Hours or 2 courses, whichever is greater for a student with a\nCumulative GPA less than 3.0",
+          "score": 0.7084649378976275,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 30,
+          "page_end": 30,
+          "section": "حنر9",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "academic_standing"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P12:C0036:3985055a",
+          "text": "e Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):\no Up to 21 Credit Hours or 8 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 3.0 o Up to 18 Credit Hours or 7 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 2.0, but less than 3.0 o Up to 14 Credit Hours or 5 courses, whichever is greater for a student with a Cumula^ve GPA less than 2.0\n•\nThe student may register courses in the summer semester in a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):\no Up to 9 Credit Hours or 3 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 3.0 o Up to 8 Credit Hours or 2 courses, whichever is greater for a student with a Cumula^ve GPA less than 3.0\n•\nA student may register one addi^onal course beyond the limits men^oned above in aber the approval of the academic advisor, if it will lead to his gradua^on at the end of this semester only if the course is oﬀered in this\nsemester. For the Inter-disciplinary Majors, the course will be available even if it is not oﬀered in this semester.\n•",
+          "score": 0.7054270085437901,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 12,
+          "page_end": 12,
+          "section": "Educa5on & Student Aﬀairs Sector",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P13:C0040:5d16a234",
+          "text": "urs of these courses are included in the student's gradua^on requirements, provided that the Credit Hours of these courses do not exceed 40% of total Credit Hours for the program.\nArticle (24): Field Training\n•\nThe student must perform Field Training for 8 weeks in an industrial or service facility related to the student's program and must be under the full supervision of the faculty. It is also possible to perform the training inside the faculty in a similar environment.\n•\nThe training follow-up will be handled by the academic advisor.\n•\nIden^fying a company oﬃcial contact person.\n•\nThe student must submit a technical report to his academic advisor at the end of the training period.\n•\nThe training is divided into periods of 4 weeks at the end of the Sophomore and Junior levels. (Can be in the Senior level as well – open during the semester)\n•\nInter-disciplinary Majors students can start ﬁeld training aber passing a number of credit hours that are not less than 70% of the credit hours of the freshman level, provided that the period calculated for training does not exceed two weeks.\n•\nBy any means, training for a period 6 weeks at any level is allowed for only one ^me during the study dura^on.\n•\nThe ﬁeld training is evaluated on pass / fail basis and does not count in the cumula^ve GPA calcula^on.\n•",
+          "score": 0.678494491756619,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 13,
+          "page_end": 13,
+          "section": "Article (23): Degree Awarding Requirements",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "training"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P11:C0034:1170a5f2",
+          "text": "nd improve his chances in the labor market.\no Guaranteed a maximum number of 80 students in the lecture rooms and 40 students in the tutorial classes.\nArticle (19): Study Levels\n•\nWhenever the student completes 25% of the Program requirements (36 Credit Hours), he will be transferred from one level to the next. The following Table shows the student status based on the completed number of achieved\nCredit Hours.\nStudy Levels and relation to the achieved Credit Hours.\nStudy Level\nStudent Status\nAchieved Credit Hours\n1\nFreshman\n0% to less than 25% CH\n2\nSophomore\n25% to less than 50% CH\n3\nJunior\n50% to less than 75% CH\n4\nSenior\n75% to less than 100% CH\nArticle (21): Program Study Duration\n•\nThe minimum allowed study dura^on is eight main semesters.",
+          "score": 0.6724699930864588,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 11,
+          "page_end": 11,
+          "section": "Educa5on & Student Aﬀairs Sector",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "program_structure"
+        }
+      ]
+    },
+    {
+      "case_id": "RAG-PARAPHRASE-2023-CREDIT-LOAD",
+      "status": "PASS",
+      "query": "How many credits can a student with a GPA of at least 3 register in a main semester?",
+      "filters": {
+        "regulation": 2023,
+        "document_types": [
+          "REGULATION"
+        ],
+        "language": "en"
+      },
+      "top_results": [
+        {
+          "chunk_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF:P8:C0008:849880c7",
+          "text": "Course Registration Rules\nThe number of credits a student can register for depends on their cumulative GPA.\n•Main Semesters (Fall/Spring):\n•GPA ≥ 3.0: Up to 21 credit hours (or 8 courses, whichever is greater).\n•2.0 ≤ GPA < 3.0: Up to 18 credit hours (or 7 courses, whichever is greater).\n•GPA < 2.0: Up to 14 credit hours (or 5 courses, whichever is greater).\n•Summer Semester:\n•GPA ≥ 3.0: Up to 9 credit hours (or 3 courses, whichever is greater).\n•GPA < 3.0: Up to 8 credit hours (or 2 courses, whichever is greater).",
+          "score": 0.7612602710723877,
+          "source_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+          "file_name": "Bylaw 2023 General Rules & Regulations UEL.pdf",
+          "page_start": 8,
+          "page_end": 8,
+          "section": "Course Registration Rules",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": "UEL",
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P12:C0036:3985055a",
+          "text": "e Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):\no Up to 21 Credit Hours or 8 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 3.0 o Up to 18 Credit Hours or 7 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 2.0, but less than 3.0 o Up to 14 Credit Hours or 5 courses, whichever is greater for a student with a Cumula^ve GPA less than 2.0\n•\nThe student may register courses in the summer semester in a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):\no Up to 9 Credit Hours or 3 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 3.0 o Up to 8 Credit Hours or 2 courses, whichever is greater for a student with a Cumula^ve GPA less than 3.0\n•\nA student may register one addi^onal course beyond the limits men^oned above in aber the approval of the academic advisor, if it will lead to his gradua^on at the end of this semester only if the course is oﬀered in this\nsemester. For the Inter-disciplinary Majors, the course will be available even if it is not oﬀered in this semester.\n•",
+          "score": 0.7306681275367737,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 12,
+          "page_end": 12,
+          "section": "Educa5on & Student Aﬀairs Sector",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P30:C0109:509d9ca2",
+          "text": "o\nحنر9\nساعات معتمدة أو3\nمقررات دراسية أيهما أكبر ، للطالب الحاصل عل معدل\nتراكمي أكبر من أو يساوى3.0\n.\no\nحنر8\nساعات معتمدة أو مقررين دراسيي ن أيهما أكبر ، بالنسبة للطالب الحاصل عل\nمعدل تراكمي أقل من3.0\n.\nArticle (22): Terms of Course Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit\nHours according to the following rules (after approval of the Academic Advisor):\no Up to 21 Credit Hours or 8 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 3.0 o Up to 18 Credit Hours or 7 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 2.0, but less than 3.0 o Up to 14 Credit Hours or 5 courses, whichever is greater for a student with a\nCumulative GPA less than 2.0\n•\nThe student may register courses in the summer semester in a maximum total Credit\nHours according to the following rules (after approval of the Academic Advisor):\no Up to 9 Credit Hours or 3 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 3.0 o Up to 8 Credit Hours or 2 courses, whichever is greater for a student with a\nCumulative GPA less than 3.0",
+          "score": 0.6871104836463928,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 30,
+          "page_end": 30,
+          "section": "حنر9",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "academic_standing"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P12:C0035:6e8daa8d",
+          "text": "Educa5on & Student Aﬀairs Sector\n12\n•\nThe maximum allowed study dura^on is eight academic years, which does not include frozen semesters\n(suspension of registra^on - medical excuse - etc..) for reasons accepted by the Faculty of Engineering Council, aber which the student is dismissed from the programs.\n•\nIn case that a student registers for a Minor, one academic year is added to the maximum allowed study dura^on speciﬁed in the previous point.\n•\nThe Faculty Council has the right to allow the student to register for an addi^onal two consecu^ve main semesters in addi^on to summer semester, with condi^on that he passes at least 75% of the total credit hours of the program and of verifying the possibility of achieving gradua^on requirements. In case that the student is unable to fulﬁl the gradua^on requirements in this addi^onal period, the student's posi^on will be submi]ed to the University\nCouncil to take the appropriate decision with condi^on that he passes at least 85% of the total credit hours for the program.\nArticle (22): Terms of Course Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):",
+          "score": 0.6450743290737683,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 12,
+          "page_end": 12,
+          "section": "Educa5on & Student Aﬀairs Sector",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P25:C0085:b7b2c2ca",
+          "text": "r only one time. In case of exceeding this limit, the student is obligated to pay the separate Tuition Fees decided by the Faculty Council at the year of registering the course.\n•\nExcept for in the first level, if the student fails to achieve a minimum GPA of 2.0 for 4 consecutive main semesters, he can be exceptionally allowed to register courses for 2 more main semesters paying the separate Tuition Fees decided by the Faculty Council at the year of registering the course(s).\n•\nWith the exception of university requirements courses and courses of the Freshman and Sophomore levels, any credit hour that is registered outside the study plan for any reason has separate Tuition Fees decided by the Faculty Council at the year of registering the course.\n•\nInterdisciplinary Majors and Minors have separate tuition fees approved by faculty board each year.\n•\nStudents who are not enrolled directly to the FoE-ASU, through the National\nCoordination Office, can enrol in the Inter-Disciplinary Majors, provided that they meet the requirements approved by the University Council within the framework of the Supreme Council of Universities regulating in this matter.\n•\nStudents who are enrolled directly FoE - ASU, through the National Coordination\nOffice, can give up joining Specialized Majors and join the Inter-Disciplinary Majors paying the separate Tuition Fees.\n•",
+          "score": 0.6434110403060913,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 25,
+          "page_end": 25,
+          "section": "وفقً ا للقواعد النر ي يعلنها مجلس الكلية .كل عام",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "registration"
+        }
+      ]
+    },
+    {
+      "case_id": "RAG-2018-MAX-DURATION",
+      "status": "PASS",
+      "query": "What is the maximum allowed study duration?",
+      "filters": {
+        "regulation": 2018,
+        "language": "en"
+      },
+      "top_results": [
+        {
+          "chunk_id": "SRC-CESS_NEW_BYLAW_2018_PDF:P11:C0025:1b19870d",
+          "text": "Bylaw-2018\n7.6 Program Study Duration\n•\nThe minimum allowed study duration is nine main semesters.\n•\nThe maximum allowed study duration is twenty main semesters (ten years), which does not include frozen semesters for reasons accepted by the Faculty of Engineering Council, after which the student is dismissed from the programs.\n7.7 Degree Awarding Requirements\n•\nTo obtain the Bachelor of Science Degree in Computer Engineering and Software Systems, the student must successfully complete the required Credit Hours in the program with a GPA at graduation of at least\n2.0.\n•\nThe student must pass all zero-credit courses in the Program.\n•\nA graduation project is an essential part of the program requirements for graduation. The graduation project may be completed over two successive semesters, as per the program requirement, and the student will not graduate unless he fulfils the project pass requirements. The student must earn at least 130 Credit\nHours to register for the graduation project. If the project is divided along two semesters, the student must register them in their order.\n•\nThe student must perform Field Training for 12 weeks during his study duration.\n•\nThe student can study a number of courses in another University which has a cooperation agreement with\nAin Shams University regarding the transfer of Credits. This requires prior approval from the Faculty of",
+          "score": 0.6253231987164509,
+          "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+          "file_name": "CESS New Bylaw 2018.pdf",
+          "page_start": 11,
+          "page_end": 11,
+          "section": "7.6 Program Study Duration",
+          "document_type": "REGULATION",
+          "regulation": 2018,
+          "program": "CESS",
+          "language": "en",
+          "topic": "graduation"
+        },
+        {
+          "chunk_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF:P98:C0182:7ef4e79f",
+          "text": "not less than 12 weeks. This training period must be divided over three modules (4 weeks\neach) and should be carried out through three summer semesters. The student must practice\nat least 8 weeks in Off-Campus training and may practice the other 4 weeks in On-Campus training offered by the Faculty of Engineering.",
+          "score": 0.5990004182457686,
+          "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+          "file_name": "Collaborative Course Handbook - NAF.pdf",
+          "page_start": 98,
+          "page_end": 98,
+          "section": "Unsectioned",
+          "document_type": "COURSE_HANDBOOK",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "training"
+        },
+        {
+          "chunk_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF:P18:C0045:070e2c3c",
+          "text": "from the scheduled time. No eating, drinking, or mobile use in the class. If the student wants to leave the class for any reason, he will not be allowed to come back to the class. The student's attendance should not be less than\n75% during the course. Otherwise, the student should not be allowed to attend the final exam.",
+          "score": 0.5945355537810603,
+          "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+          "file_name": "Collaborative Course Handbook - NAF.pdf",
+          "page_start": 18,
+          "page_end": 18,
+          "section": "Teaching Policy",
+          "document_type": "COURSE_HANDBOOK",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF:P51:C0105:fdd633a9",
+          "text": "p. 51\nReading and resources for the module:\nCore\n•\nGoodhart, M.E. (2016). Human rights: politics and practice. Oxford University Press, New York, Ny\n•\nFlorian amereller LL.M., Kilian bälz LL.M. and Sven Klaiber (2010), A guide to business law in Egypt\nRecommended\n•\nForsythe, D.P. (2018). Human rights in international relations. Cambridge University Press,\nCambridge.\nIndicative learning and teaching time\n(10 hrs per credit):\nActivity\n1. Student/tutor interaction:\n-\nLecture and tutorial\n-\nGroup assignment (presentation)\n-\nParticipation in class\n125 hours\n2. Student learning time:\nunsupervised studio work/ research/ group work/ readings and reflections, etc…\n75 hours\nTotal hours (1 and 2):\n200 hours",
+          "score": 0.5832603325402945,
+          "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+          "file_name": "Collaborative Course Handbook - NAF.pdf",
+          "page_start": 51,
+          "page_end": 51,
+          "section": "1. Student/tutor interaction:",
+          "document_type": "COURSE_HANDBOOK",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "general"
+        },
+        {
+          "chunk_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF:P105:C0198:fc7b00c9",
+          "text": "p. 105\nExt enuat ing Circumst ances\nExtenuating Circumstances are circumstances which:\n• impair your examination performance or prevent you from attending\nexaminations or other types of assessment, or\n• prevent you from submitting coursework or other assessed work by the\nscheduled deadline date, or within 24 hours of the deadline date\nThe University of East London has agreed, through Academic Board, procedures governing extenuation for students concerning the assessment process.\nThis course will be subject to equivalent procedures, with the process being administered by, and the panel being held within, Ain Shams University – Faculty of\nEngineering.\nIf granted by the panel, Extenuation can\n(i) Allow students to hand in coursework up to 7 days late.\nor\n(ii) Allow students to proceed to their next attempt uncapped.\nExtenuation doesn’t\n(i) Give students more attempts to pass a module\n(ii) Reschedule exams\n(iii) Uncap a capped module\n(iv) Give students a higher mark.\n(v) Allow students to hand in work over 7 days late.\nThe basic principle is that extenuation should put you in the same position that you would have been in had you not missed the exam or handed in the assessment late – it does not confer any advantages.\nUEL decided that its procedures would be\n•\nEvidentially based\n•\nHandled centrally by a panel of senior staff (not devolved to various parts of the organisation)\n•",
+          "score": 0.5820603370666504,
+          "source_id": "SRC-COLLABORATIVE_COURSE_HANDBOOK_NAF_PDF",
+          "file_name": "Collaborative Course Handbook - NAF.pdf",
+          "page_start": 105,
+          "page_end": 105,
+          "section": "Unsectioned",
+          "document_type": "COURSE_HANDBOOK",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "assessment"
+        }
+      ]
+    },
+    {
+      "case_id": "RAG-2023-MAX-DURATION",
+      "status": "PASS",
+      "query": "What is the maximum program duration?",
+      "filters": {
+        "regulation": 2023,
+        "document_types": [
+          "REGULATION"
+        ],
+        "language": "en"
+      },
+      "top_results": [
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P30:C0107:f7ebb975",
+          "text": "ن تحقيق متطلبات\n،التخرج خالل هذه المدة اإلضافية\nيتم رفع\nموقف الطالب لمجلس الجامعة التخاذ القرار\nالمناسب وذلك فني حالة اجتياز85\n%\nعل األقل من إجماىلي\nالساعا ت\nالمعتمدة ل\nلبر نامج .\nArticle (21): Program Study Duration\n•\nThe minimum allowed study duration is eight main semesters.\n•\nThe maximum allowed study duration is eight academic years, which does not include frozen semesters (suspension of registration - medical excuse - etc..) for reasons accepted by the Faculty of Engineering Council, after which the student is dismissed from the programs.\n•\nIn case that a student registers for a Minor, one academic year is added to the maximum allowed study duration specified in the previous point.\n•\nThe Faculty Council has the right to allow the student to register for an additional two consecutive main semesters in addition to summer semester, with condition that he passes at least 75% of the total credit hours of the program and of verifying the possibility of achieving graduation requirements. In case that the student is unable to fulfil the graduation requirements in this additional period, the student's position will\nbe submitted to the University Council to take the appropriate decision with condition that he passes at least 85% of the total credit hours for the program.\n( مادة22\n:)",
+          "score": 0.6162178149093598,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 30,
+          "page_end": 30,
+          "section": "،التخرج خالل هذه المدة اإلضافية",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P12:C0035:6e8daa8d",
+          "text": "Educa5on & Student Aﬀairs Sector\n12\n•\nThe maximum allowed study dura^on is eight academic years, which does not include frozen semesters\n(suspension of registra^on - medical excuse - etc..) for reasons accepted by the Faculty of Engineering Council, aber which the student is dismissed from the programs.\n•\nIn case that a student registers for a Minor, one academic year is added to the maximum allowed study dura^on speciﬁed in the previous point.\n•\nThe Faculty Council has the right to allow the student to register for an addi^onal two consecu^ve main semesters in addi^on to summer semester, with condi^on that he passes at least 75% of the total credit hours of the program and of verifying the possibility of achieving gradua^on requirements. In case that the student is unable to fulﬁl the gradua^on requirements in this addi^onal period, the student's posi^on will be submi]ed to the University\nCouncil to take the appropriate decision with condi^on that he passes at least 85% of the total credit hours for the program.\nArticle (22): Terms of Course Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):",
+          "score": 0.6074130641079442,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 12,
+          "page_end": 12,
+          "section": "Educa5on & Student Aﬀairs Sector",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF:P6:C0006:256c1f57",
+          "text": "Academic System & Duration\n•A student moves to the next level after completing 25% (36 credit hours) of the program requirements.\n•Levels are defined based on the percentage of completed credits:\n•Level 1: 0% to <25%.\n•Level 2: 25% to <50%.\n•Level 3: 50% to <75%.\n•Level 4: 75% to <100%.\n•Program Duration\n•Minimum: Eight main semesters.\n•Maximum: Eight academic years (excluding approved enrollment suspensions). An additional academic year is granted for students enrolled in a minor program",
+          "score": 0.6067516080437216,
+          "source_id": "SRC-BYLAW_2023_GENERAL_RULES_REGULATIONS_UEL_PDF",
+          "file_name": "Bylaw 2023 General Rules & Regulations UEL.pdf",
+          "page_start": 6,
+          "page_end": 6,
+          "section": "Unsectioned",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": "UEL",
+          "language": "en",
+          "topic": "program_structure"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF:P12:C0036:3985055a",
+          "text": "e Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):\no Up to 21 Credit Hours or 8 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 3.0 o Up to 18 Credit Hours or 7 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 2.0, but less than 3.0 o Up to 14 Credit Hours or 5 courses, whichever is greater for a student with a Cumula^ve GPA less than 2.0\n•\nThe student may register courses in the summer semester in a maximum total Credit Hours according to the following rules (aber approval of the Academic Advisor):\no Up to 9 Credit Hours or 3 courses, whichever is greater for a student with a Cumula^ve GPA larger than or equal to 3.0 o Up to 8 Credit Hours or 2 courses, whichever is greater for a student with a Cumula^ve GPA less than 3.0\n•\nA student may register one addi^onal course beyond the limits men^oned above in aber the approval of the academic advisor, if it will lead to his gradua^on at the end of this semester only if the course is oﬀered in this\nsemester. For the Inter-disciplinary Majors, the course will be available even if it is not oﬀered in this semester.\n•",
+          "score": 0.572555712156811,
+          "source_id": "SRC-BYLAW_2023_BRIEF_ICHEP_PDF",
+          "file_name": "Bylaw 2023 Brief-ICHEP.pdf",
+          "page_start": 12,
+          "page_end": 12,
+          "section": "Educa5on & Student Aﬀairs Sector",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "credit_load"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P30:C0109:509d9ca2",
+          "text": "o\nحنر9\nساعات معتمدة أو3\nمقررات دراسية أيهما أكبر ، للطالب الحاصل عل معدل\nتراكمي أكبر من أو يساوى3.0\n.\no\nحنر8\nساعات معتمدة أو مقررين دراسيي ن أيهما أكبر ، بالنسبة للطالب الحاصل عل\nمعدل تراكمي أقل من3.0\n.\nArticle (22): Terms of Course Registration\n•\nThe student may register courses in the main semesters with a maximum total Credit\nHours according to the following rules (after approval of the Academic Advisor):\no Up to 21 Credit Hours or 8 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 3.0 o Up to 18 Credit Hours or 7 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 2.0, but less than 3.0 o Up to 14 Credit Hours or 5 courses, whichever is greater for a student with a\nCumulative GPA less than 2.0\n•\nThe student may register courses in the summer semester in a maximum total Credit\nHours according to the following rules (after approval of the Academic Advisor):\no Up to 9 Credit Hours or 3 courses, whichever is greater for a student with a\nCumulative GPA larger than or equal to 3.0 o Up to 8 Credit Hours or 2 courses, whichever is greater for a student with a\nCumulative GPA less than 3.0",
+          "score": 0.5706486021699229,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 30,
+          "page_end": 30,
+          "section": "حنر9",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "academic_standing"
+        }
+      ],
+      "unfiltered_distractors": [
+        {
+          "chunk_id": "SRC-CESS_NEW_BYLAW_2018_PDF:P11:C0025:1b19870d",
+          "text": "Bylaw-2018\n7.6 Program Study Duration\n•\nThe minimum allowed study duration is nine main semesters.\n•\nThe maximum allowed study duration is twenty main semesters (ten years), which does not include frozen semesters for reasons accepted by the Faculty of Engineering Council, after which the student is dismissed from the programs.\n7.7 Degree Awarding Requirements\n•\nTo obtain the Bachelor of Science Degree in Computer Engineering and Software Systems, the student must successfully complete the required Credit Hours in the program with a GPA at graduation of at least\n2.0.\n•\nThe student must pass all zero-credit courses in the Program.\n•\nA graduation project is an essential part of the program requirements for graduation. The graduation project may be completed over two successive semesters, as per the program requirement, and the student will not graduate unless he fulfils the project pass requirements. The student must earn at least 130 Credit\nHours to register for the graduation project. If the project is divided along two semesters, the student must register them in their order.\n•\nThe student must perform Field Training for 12 weeks during his study duration.\n•\nThe student can study a number of courses in another University which has a cooperation agreement with\nAin Shams University regarding the transfer of Credits. This requires prior approval from the Faculty of",
+          "score": 0.5937587749197301,
+          "source_id": "SRC-CESS_NEW_BYLAW_2018_PDF",
+          "file_name": "CESS New Bylaw 2018.pdf",
+          "page_start": 11,
+          "page_end": 11,
+          "section": "7.6 Program Study Duration",
+          "document_type": "REGULATION",
+          "regulation": 2018,
+          "program": "CESS",
+          "language": "en",
+          "topic": "graduation"
+        }
+      ]
+    },
+    {
+      "case_id": "RAG-PROCEDURE-HELP-REQUEST",
+      "status": "PASS",
+      "query": "If a portfolio issue is not resolved by the course instructor, who should the student ask next?",
+      "filters": {
+        "regulation": 2018,
+        "document_types": [
+          "PROCEDURE"
+        ],
+        "language": "en"
+      },
+      "top_results": [
+        {
+          "chunk_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF:P8:C0015:28920e6e",
+          "text": "4 then the\ndocument should be scanned in A4 sized portions without size reduction.\n• Both sides of the document must be scanned.\n• File size of a portfolio should not exceed 5 MB.\n4. Help request procedures\nThe student shall seek help by following steps the followed step:\n1. Refer to the course instructor for the content of the portfolio. Give it MAXIMUM one week to\nbe resolved otherwise go to step #2.\n2. If the issue was not resolved, then the student refer to his/her academic advisor. Give it\nMAXIMUM four days to be resolved otherwise go to step #3.\n3. If the issue was not resolved, then the student refer to the program coordinator and/or the\nprogram unit head.\n4. For IT issues related to the LMS, kindly refer to the IT Help at the ICHEP building ground\nfloor beside the control room",
+          "score": 0.6086925734648021,
+          "source_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+          "file_name": "Student_s Guidline Booklet - V1.5.pdf",
+          "page_start": 8,
+          "page_end": 8,
+          "section": "4. Help request procedures",
+          "document_type": "PROCEDURE",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF:P7:C0012:3ddf1df9",
+          "text": "(i.CHEP)\nSGB - 5\n3-e. Deadline for Portfolio Submission\nThe submission of the portfolio is MANDATORY for ALL students. Portfolio submission for reviewing is scheduled to be by the end of semester. If the student fails to stick to the aforementioned deadline, the External Examiner might reject the awarded grade and his/her U.K. degree might be withdrawn.\n3-f. Portfolio Review and Feedback Procedure\nCourse instructor shall review the uploaded portfolio. Feedback shall be given within 2 weeks, and accordingly, students must update his/her portfolio in light of instructor’s remarks and resubmit his/her portfolio within only one week. Portfolio will be reviewed according to the following checklist.\nCourse Code:\nCourse Name:\nDate:\nStudent Name:\nStudent ID:\nCriteria\nY\nN\nNotes\nPortfolio Form Evaluation\nPortfolio type (lecture/studio -based) is correct\n⎕\n⎕\nPortfolio in PDF format\n⎕\n⎕\nFile name is according to the naming system\n⎕\n⎕\nStudent’s personal data\nStudent Name exists\n⎕\n⎕\nASU Student’s ID exists\n⎕\n⎕\nUEL Student’s ID exists\n⎕\n⎕\nCourse/Module Data\nUEL Module Code is correct\n⎕\n⎕\nUEL Module Name is correct\n⎕\n⎕\nASU course Code is correct\n⎕\n⎕\nASU course name is correct\n⎕\n⎕\nSemester is correct\n⎕\n⎕\nStudent’s work Samples\nExists\nPictures Quality,\nAccepted?\nNotes\nY\nN\nY\nN\nStudent’s assignments\n⎕\n⎕\n⎕\n⎕\nStudent’s Quizzes\n⎕\n⎕\n⎕\n⎕\nStudent’s Midterm\n⎕\n⎕\n⎕\n⎕\nStudent’s Report\n⎕\n⎕\n⎕\n⎕",
+          "score": 0.5967272164388181,
+          "source_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+          "file_name": "Student_s Guidline Booklet - V1.5.pdf",
+          "page_start": 7,
+          "page_end": 7,
+          "section": "SGB - 5",
+          "document_type": "PROCEDURE",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-IMS_TRAINING_TUTORIAL_STUDENTS_PDF:P3:C0003:4c02b4a6",
+          "text": "Steps to apply for an opportunity offered/supported by the Faculty",
+          "score": 0.5793356550135829,
+          "source_id": "SRC-IMS_TRAINING_TUTORIAL_STUDENTS_PDF",
+          "file_name": "IMS Training Tutorial_Students_.pdf",
+          "page_start": 3,
+          "page_end": 3,
+          "section": "Unsectioned",
+          "document_type": "PROCEDURE",
+          "regulation": null,
+          "program": null,
+          "language": "en",
+          "topic": "general"
+        },
+        {
+          "chunk_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF:P4:C0009:62dec0b3",
+          "text": "ation with course instructors.\nSubmission matrix shall be published online starting from week (2) by the UH who will be responsible of monitoring the submission matrix regularity.\n3. Portfolio: Types, Format, and Templates\nThere are two types of portfolios: lecture-based courses portfolio and project/studio-based courses portfolio that must be revised and approved by the course instructor on the LMS according to the students’ portfolio revision checklist which will be illustrated later in this booklet.\nPortfolio templates are published online, and students must follow and submit their portfolios using the template in only one PDF file with the format which will be explained later. Student’s portfolio must contain only summative assessments except the final examination.\n3-a. Portfolio Types\n➢ Lecture Based Portfolio shall include:\n▪ Assignments\n1 Summative assessment is the one evaluated with grades and these grades are included in the total evaluation of the student’s performance.\n2 Formative assessment is the one evaluated with no grades and aims at making the student percept how far he/she understood and/or master the subject without affecting his total grade.",
+          "score": 0.5632581375087428,
+          "source_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+          "file_name": "Student_s Guidline Booklet - V1.5.pdf",
+          "page_start": 4,
+          "page_end": 4,
+          "section": "3. Portfolio: Types, Format, and Templates",
+          "document_type": "PROCEDURE",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF:P2:C0003:d2a4e8d8",
+          "text": ".......... 3\n3-c. Lecture Based Portfolio Template:......................................................................................................................... 3\n3-d. Project/Studio Based Portfolio Template .............................................................................................................. 4\n3-e. Deadline for Portfolio Submission ......................................................................................................................... 5\n3-f. Portfolio Review and Feedback Procedure ............................................................................................................ 5\n3-g. Instructions for uploading the Portfolio on the IMS .............................................................................................. 6\n3-h. Student’s work Scanning Guidelines ..................................................................................................................... 6\n4.\nHelp request procedures .......................................................................................................................................... 6\n5.\nFrequently Asked Questions (FAQ) ........................................................................................................................... 7\n5-a.",
+          "score": 0.5576803019427893,
+          "source_id": "SRC-STUDENT_S_GUIDLINE_BOOKLET_V1_5_PDF",
+          "file_name": "Student_s Guidline Booklet - V1.5.pdf",
+          "page_start": 2,
+          "page_end": 2,
+          "section": "Unsectioned",
+          "document_type": "PROCEDURE",
+          "regulation": 2018,
+          "program": "UEL",
+          "language": "en",
+          "topic": "student_procedure"
+        }
+      ]
+    },
+    {
+      "case_id": "RAG-UNSUPPORTED",
+      "status": "MANUAL_REVIEW_SET_RAG_MIN_SCORE",
+      "query": "What is today's cafeteria lunch menu?",
+      "filters": {
+        "regulation": 2023,
+        "language": "en"
+      },
+      "top_results": [
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P242:C0714:5316c0d0",
+          "text": "erty\n☒ GOAL 2: Zero Hunger\n☒ GOAL 3: Good Health and Well-being\n☒ GOAL 4: Quality\nEducation\n☒ GOAL 5: Gender\nEquality\n☒ GOAL 6: Clean Water and Sanitation\n☒ GOAL 7: Affordable and\nClean Energy\n☒ GOAL 8: Decent Work and Economic Growth\n☒ GOAL 9: Industry,\nInnovation and\nInfrastructure\n☒ GOAL 10: Reduced\nInequality\n☒ GOAL 11: Sustainable\nCities and Communities\n☒ GOAL 12: Responsible\nConsumption and\nProduction\n☒ GOAL 13: Climate\nAction\n☒ GOAL 14: Life Below\nWater\n☒ GOAL 15: Life on Land\n☒ GOAL 16: Peace and\nJustice Strong Institutions\n☒ GOAL 17: Partnerships to achieve the Goal\nTaught in Program(s)\nAs major in Program(s) Code(s)\nMTRL\nAs minor in Program(s) Code(s)\nPTRO\nAssessment Weights\nStudent Activities (SA)\nMidterm (MT)\nTechnical Exam (TE)\nFinal (FE)\n○ Assignment\n● Unseen Exam\n● Practical Exam\n○ 'Viva' Oral Exam\n○ Assignment\n● Unseen Exam\n20.00\n25.00\n15.00\n40.00\nStudent Activities Breakdown (Distribution for Study Blocks)\nSeminar-based (SB)\nSelf-learning-based (SL)\nProject-based (PB)\nIndustry-based (IB)\n20.00\n0.00\n0.00\n0.00",
+          "score": 0.4729365424551648,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 242,
+          "page_end": 242,
+          "section": "Clean Energy",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P454:C1400:6780277d",
+          "text": "erty\n☐ GOAL 2: Zero Hunger\n☒ GOAL 3: Good Health and Well-being\n☒ GOAL 4: Quality\nEducation\n☒ GOAL 5: Gender\nEquality\n☒ GOAL 6: Clean Water and Sanitation\n☒ GOAL 7: Affordable and\nClean Energy\n☒ GOAL 8: Decent Work and Economic Growth\n☒ GOAL 9: Industry,\nInnovation and\nInfrastructure\n☒ GOAL 10: Reduced\nInequality\n☒ GOAL 11: Sustainable\nCities and Communities\n☐ GOAL 12: Responsible\nConsumption and\nProduction\n☒ GOAL 13: Climate\nAction\n☐ GOAL 14: Life Below\nWater\n☐ GOAL 15: Life on Land\n☒ GOAL 16: Peace and\nJustice Strong Institutions\n☐ GOAL 17: Partnerships to achieve the Goal\nTaught in Program(s)\nAs major in Program(s) Code(s)\nHAUD\nAs minor in Program(s) Code(s)\nSCSI\nAssessment Weights\nStudent Activities (SA)\nMidterm (MT)\nTechnical Exam (TE)\nFinal (FE)\n● Assignment\n○ Unseen Exam\n● Practical Exam\n○ 'Viva' Oral Exam\n○ Assignment\n○ Unseen Exam\n50.00\n15.00\n15.00\n20.00\nStudent Activities Breakdown (Distribution for Study Blocks)\nSeminar-based (SB)\nSelf-learning-based (SL)\nProject-based (PB)\nIndustry-based (IB)\n5.00\n15.00\n30.00\n0.00",
+          "score": 0.4726960377278313,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 454,
+          "page_end": 454,
+          "section": "Clean Energy",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P276:C0825:cb8c7e83",
+          "text": "erty\n☐ GOAL 2: Zero Hunger\n☐ GOAL 3: Good Health and Well-being\n☒ GOAL 4: Quality\nEducation\n☐ GOAL 5: Gender\nEquality\n☐ GOAL 6: Clean Water and Sanitation\n☐ GOAL 7: Affordable and\nClean Energy\n☐ GOAL 8: Decent Work and Economic Growth\n☒ GOAL 9: Industry,\nInnovation and\nInfrastructure\n☐ GOAL 10: Reduced\nInequality\n☐ GOAL 11: Sustainable\nCities and Communities\n☒ GOAL 12: Responsible\nConsumption and\nProduction\n☒ GOAL 13: Climate\nAction\n☐ GOAL 14: Life Below\nWater\n☐ GOAL 15: Life on Land\n☐ GOAL 16: Peace and\nJustice Strong Institutions\n☐ GOAL 17: Partnerships to achieve the Goal\nTaught in Program(s)\nAs major in Program(s) Code(s)\nMTRL\nAs minor in Program(s) Code(s)\nPTRO\nAssessment Weights\nStudent Activities (SA)\nMidterm (MT)\nTechnical Exam (TE)\nFinal (FE)\n○ Assignment\n● Unseen Exam\n○ Practical Exam\n● 'Viva' Oral Exam\n○ Assignment\n● Unseen Exam\n25.00\n25.00\n10.00\n40.00\nStudent Activities Breakdown (Distribution for Study Blocks)\nSeminar-based (SB)\nSelf-learning-based (SL)\nProject-based (PB)\nIndustry-based (IB)\n20.00\n0.00\n0.00\n5.00",
+          "score": 0.4684266764863334,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 276,
+          "page_end": 276,
+          "section": "Clean Energy",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P480:C1485:dff73740",
+          "text": "erty\n☐ GOAL 2: Zero Hunger\n☐ GOAL 3: Good Health and Well-being\n☒ GOAL 4: Quality\nEducation\n☐ GOAL 5: Gender\nEquality\n☐ GOAL 6: Clean Water and Sanitation\n☒ GOAL 7: Affordable and\nClean Energy\n☐ GOAL 8: Decent Work and Economic Growth\n☐ GOAL 9: Industry,\nInnovation and\nInfrastructure\n☐ GOAL 10: Reduced\nInequality\n☐ GOAL 11: Sustainable\nCities and Communities\n☐ GOAL 12: Responsible\nConsumption and\nProduction\n☒ GOAL 13: Climate\nAction\n☐ GOAL 14: Life Below\nWater\n☐ GOAL 15: Life on Land\n☐ GOAL 16: Peace and\nJustice Strong Institutions\n☐ GOAL 17: Partnerships to achieve the Goal\nTaught in Program(s)\nAs major in Program(s) Code(s)\nAs minor in Program(s) Code(s)\nEVCL\nAssessment Weights\nStudent Activities (SA)\nMidterm (MT)\nTechnical Exam (TE)\nFinal (FE)\n○ Assignment\n● Unseen Exam\n○ Practical Exam\n● 'Viva' Oral Exam\n○ Assignment\n● Unseen Exam\n20.00\n20.00\n10.00\n50.00\nStudent Activities Breakdown (Distribution for Study Blocks)\nSeminar-based (SB)\nSelf-learning-based (SL)\nProject-based (PB)\nIndustry-based (IB)\n15.00\n5.00\n0.00\n0.00",
+          "score": 0.4676639178199866,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 480,
+          "page_end": 480,
+          "section": "Clean Energy",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "assessment"
+        },
+        {
+          "chunk_id": "SRC-BYLAW_2023_PDF:P673:C2124:6ed16f80",
+          "text": "erty\n☒ GOAL 2: Zero Hunger\n☒ GOAL 3: Good Health and Well-being\n☐ GOAL 4: Quality\nEducation\n☐ GOAL 5: Gender\nEquality\n☒ GOAL 6: Clean Water and Sanitation\n☒ GOAL 7: Affordable and\nClean Energy\n☒ GOAL 8: Decent Work and Economic Growth\n☐ GOAL 9: Industry,\nInnovation and\nInfrastructure\n☐ GOAL 10: Reduced\nInequality\n☒ GOAL 11: Sustainable\nCities and Communities\n☒ GOAL 12: Responsible\nConsumption and\nProduction\n☒ GOAL 13: Climate\nAction\n☐ GOAL 14: Life Below\nWater\n☒ GOAL 15: Life on Land\n☐ GOAL 16: Peace and\nJustice Strong Institutions\n☒ GOAL 17: Partnerships to achieve the Goal\nTaught in Program(s)\nAs major in Program(s) Code(s)\nAs minor in Program(s) Code(s)\nAssessment Weights\nStudent Activities (SA)\nMidterm (MT)\nTechnical Exam (TE)\nFinal (FE)\n○ Assignment\n● Unseen Exam\n○ Practical Exam\n○ 'Viva' Oral Exam\n○ Assignment\n● Unseen Exam\n25.00\n25.00\n0.00\n50.00\nStudent Activities Breakdown (Distribution for Study Blocks)\nSeminar-based (SB)\nSelf-learning-based (SL)\nProject-based (PB)\nIndustry-based (IB)\n15.00\n10.00\n0.00\n0.00",
+          "score": 0.46765184788085845,
+          "source_id": "SRC-BYLAW_2023_PDF",
+          "file_name": "Bylaw 2023.pdf",
+          "page_start": 673,
+          "page_end": 673,
+          "section": "Clean Energy",
+          "document_type": "REGULATION",
+          "regulation": 2023,
+          "program": null,
+          "language": "en",
+          "topic": "assessment"
+        }
+      ]
+    }
+  ]
+}

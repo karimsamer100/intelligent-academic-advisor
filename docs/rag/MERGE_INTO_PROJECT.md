@@ -99,3 +99,18 @@ The default mode still searches the existing database.
 Threshold calibration remains pending. The six-case proof is insufficient to choose
 a deployment-wide cutoff. Keep `RAG_MIN_SCORE` configurable; an empty result remains
 evidence absence for the future Decision Layer to interpret.
+
+After refreshing the full corpus, audit the persisted data and real API dependencies:
+
+```text
+python -m app.rag.validation.verify_runtime --foundation-path /app/data/academic_foundation --smoke-cases /app/data/smoke_tests/rag_smoke_tests.json --output /app/reports/RUNTIME_VERIFICATION.json
+```
+
+This compares every expected chunk with PostgreSQL, validates vectors and ingestion
+versions, checks unchanged re-ingestion without count growth, and exercises API
+readiness and citation lookup without dependency overrides. It also measures an
+English diagnostic set of supported queries, unrelated queries, and requests for
+student-specific/live facts. Generated diagnostic examples are not held-out,
+independently labeled calibration data; inspect the score overlap and threshold
+sweep before drawing conclusions. `PASS_WITH_CALIBRATION_PENDING` confirms the
+runtime contracts, not reliable rejection of all unsupported questions.
