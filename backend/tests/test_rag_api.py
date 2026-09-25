@@ -18,7 +18,8 @@ class StubRetriever:
         ]
 
 
-def test_rag_search_without_a_retriever_is_a_clean_501(client):
+def test_rag_search_without_a_retriever_is_a_clean_501(app, client):
+    app.dependency_overrides[get_rag_service] = lambda: RAGService()
     response = client.post("/api/v1/rag/search", json={"query": "What is the maximum credit load?"})
     assert response.status_code == 501
     error = response.json()["error"]

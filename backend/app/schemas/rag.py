@@ -49,6 +49,7 @@ class RAGRequest(BaseModel):
     program: str | None = None
     document_types: list[str] | None = None
     language: str | None = None
+    official_status: str | None = None
     top_k: int = Field(default_factory=_default_top_k, gt=0)
 
     @field_validator("document_types")
@@ -56,6 +57,14 @@ class RAGRequest(BaseModel):
     def _no_blank_document_types(cls, value: list[str] | None) -> list[str] | None:
         if value is not None and any(not item.strip() for item in value):
             raise ValueError("document_types must not contain blank values")
+        return value
+
+    @field_validator("top_k")
+    @classmethod
+    def _top_k_within_configured_max(cls, value: int) -> int:
+        maximum = get_settings().rag_max_top_k
+        if value > maximum:
+            raise ValueError(f"top_k must be less than or equal to {maximum}")
         return value
 
 
