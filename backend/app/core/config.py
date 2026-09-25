@@ -9,7 +9,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL, make_url
 
@@ -45,7 +45,21 @@ class Settings(BaseSettings):
 
     # --- RAG ---------------------------------------------------------------
     rag_top_k: int = Field(default=5, gt=0)
+    rag_max_top_k: int = Field(default=20, gt=0)
+    rag_min_score: float | None = None
+    academic_data_foundation_path: Path | None = None
     documents_path: Path = Path("./data/documents")
+    embedding_model: str = "BAAI/bge-m3"
+    embedding_device: str = "cpu"
+    embedding_dimension: int = Field(default=1024, gt=0)
+    embedding_batch_size: int = Field(default=16, gt=0)
+    embedding_cache_dir: Path | None = None
+    chunk_size: int = Field(default=1400, gt=0)
+    chunk_overlap: int = Field(default=180, ge=0)
+    chunk_min_chars: int = Field(default=80, gt=0)
+    pipeline_version: str = "rag-v0.1.0"
+    preserve_raw_extraction: bool = True
+    raw_extract_dir: Path = Path("../data/rag_debug/extracted")
 
     # --- logging / http ----------------------------------------------------
     log_level: str = "INFO"
@@ -57,6 +71,13 @@ class Settings(BaseSettings):
     @classmethod
     def _blank_database_url_is_none(cls, value: Any) -> Any:
         if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
+    @field_validator("rag_min_score", mode="before")
+    @classmethod
+    def _blank_rag_min_score_is_none(cls, value: Any) -> Any:
+        if value is None or (isinstance(value, str) and not value.strip()):
             return None
         return value
 
@@ -75,6 +96,14 @@ class Settings(BaseSettings):
         if level not in _VALID_LOG_LEVELS:
             raise ValueError(f"LOG_LEVEL must be one of {sorted(_VALID_LOG_LEVELS)}")
         return level
+
+    @model_validator(mode="after")
+    def _validate_rag_ranges(self) -> "Settings":
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError("CHUNK_OVERLAP must be smaller than CHUNK_SIZE")
+        if self.rag_top_k > self.rag_max_top_k:
+            raise ValueError("RAG_TOP_K must be <= RAG_MAX_TOP_K")
+        return self
 
     # --- derived values ----------------------------------------------------
     @property

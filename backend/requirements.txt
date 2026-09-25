@@ -6,6 +6,11 @@ pydantic-settings>=2.5,<3.0
 SQLAlchemy>=2.0.30,<2.1
 alembic>=1.13,<2.0
 psycopg[binary]>=3.2,<4.0
+pgvector>=0.4,<1.0
+PyMuPDF>=1.24,<2.0
+sentence-transformers>=3.0,<6.0
+numpy>=1.26,<3.0
+PyYAML>=6.0,<7.0
 
 # Tests (kept here so `docker compose exec backend pytest` works out of the box)
 pytest>=8.0,<9.0

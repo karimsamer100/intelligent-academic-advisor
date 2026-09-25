@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -7,6 +9,11 @@ _ENV_KEYS = [
     "APP_ENV", "APP_NAME", "APP_HOST", "APP_PORT", "API_V1_PREFIX",
     "DATABASE_URL", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD",
     "POSTGRES_HOST", "POSTGRES_PORT", "RAG_TOP_K", "DOCUMENTS_PATH",
+    "ACADEMIC_DATA_FOUNDATION_PATH", "EMBEDDING_MODEL", "EMBEDDING_DEVICE",
+    "EMBEDDING_DIMENSION", "EMBEDDING_BATCH_SIZE", "EMBEDDING_CACHE_DIR",
+    "CHUNK_SIZE", "CHUNK_OVERLAP", "CHUNK_MIN_CHARS", "RAG_MAX_TOP_K",
+    "RAG_MIN_SCORE", "PIPELINE_VERSION", "PRESERVE_RAW_EXTRACTION",
+    "RAW_EXTRACT_DIR",
     "LOG_LEVEL", "CORS_ORIGINS",
 ]  # fmt: skip
 
@@ -27,6 +34,20 @@ def test_defaults_are_sensible():
     assert settings.app_env == "development"
     assert settings.api_v1_prefix == "/api/v1"
     assert settings.rag_top_k == 5
+    assert settings.academic_data_foundation_path is None
+    assert settings.embedding_model == "BAAI/bge-m3"
+    assert settings.embedding_device == "cpu"
+    assert settings.embedding_dimension == 1024
+    assert settings.embedding_batch_size == 16
+    assert settings.embedding_cache_dir is None
+    assert settings.chunk_size == 1400
+    assert settings.chunk_overlap == 180
+    assert settings.chunk_min_chars == 80
+    assert settings.rag_max_top_k == 20
+    assert settings.rag_min_score is None
+    assert settings.pipeline_version == "rag-v0.1.0"
+    assert settings.preserve_raw_extraction is True
+    assert settings.raw_extract_dir == Path("../data/rag_debug/extracted")
     assert settings.log_level == "INFO"
     assert settings.docs_enabled is True
 
@@ -46,6 +67,43 @@ def test_values_are_loaded_from_environment(monkeypatch):
     assert settings.rag_top_k == 8
     assert str(settings.documents_path) == "/tmp/docs"
     assert settings.log_level == "DEBUG"
+
+
+def test_rag_values_are_loaded_from_environment(monkeypatch):
+    monkeypatch.setenv("ACADEMIC_DATA_FOUNDATION_PATH", "../data/academic")
+    monkeypatch.setenv("EMBEDDING_MODEL", "test/model")
+    monkeypatch.setenv("EMBEDDING_DEVICE", "cpu")
+    monkeypatch.setenv("EMBEDDING_DIMENSION", "384")
+    monkeypatch.setenv("EMBEDDING_BATCH_SIZE", "4")
+    monkeypatch.setenv("EMBEDDING_CACHE_DIR", "../data/model-cache")
+    monkeypatch.setenv("CHUNK_SIZE", "900")
+    monkeypatch.setenv("CHUNK_OVERLAP", "100")
+    monkeypatch.setenv("CHUNK_MIN_CHARS", "40")
+    monkeypatch.setenv("RAG_TOP_K", "7")
+    monkeypatch.setenv("RAG_MAX_TOP_K", "12")
+    monkeypatch.setenv("RAG_MIN_SCORE", "0.3")
+    monkeypatch.setenv("PIPELINE_VERSION", "rag-test")
+    monkeypatch.setenv("PRESERVE_RAW_EXTRACTION", "false")
+    monkeypatch.setenv("RAW_EXTRACT_DIR", "../data/rag-debug")
+
+    settings = make_settings()
+
+    assert settings.academic_data_foundation_path == Path("../data/academic")
+    assert settings.embedding_model == "test/model"
+    assert settings.embedding_dimension == 384
+    assert settings.embedding_batch_size == 4
+    assert settings.embedding_cache_dir == Path("../data/model-cache")
+    assert (settings.chunk_size, settings.chunk_overlap, settings.chunk_min_chars) == (900, 100, 40)
+    assert (settings.rag_top_k, settings.rag_max_top_k) == (7, 12)
+    assert settings.rag_min_score == pytest.approx(0.3)
+    assert settings.pipeline_version == "rag-test"
+    assert settings.preserve_raw_extraction is False
+    assert settings.raw_extract_dir == Path("../data/rag-debug")
+
+
+def test_blank_rag_min_score_becomes_none():
+    assert make_settings(rag_min_score="").rag_min_score is None
+    assert make_settings(rag_min_score="   ").rag_min_score is None
 
 
 def test_database_url_is_built_from_postgres_parts_with_escaping(monkeypatch):
@@ -112,9 +170,33 @@ def test_cors_origins_parsing(raw, expected):
 
 @pytest.mark.parametrize(
     "bad",
-    [{"rag_top_k": 0}, {"log_level": "LOUD"}, {"api_v1_prefix": "api/v1"}, {"api_v1_prefix": "/api/v1/"}, {"app_port": 0}],
+    [
+        {"rag_top_k": 0},
+        {"rag_max_top_k": 0},
+        {"embedding_dimension": 0},
+        {"embedding_batch_size": 0},
+        {"chunk_size": 0},
+        {"chunk_overlap": -1},
+        {"chunk_min_chars": 0},
+        {"log_level": "LOUD"},
+        {"api_v1_prefix": "api/v1"},
+        {"api_v1_prefix": "/api/v1/"},
+        {"app_port": 0},
+    ],
 )
 def test_invalid_values_are_rejected(bad):
+    with pytest.raises(ValidationError):
+        make_settings(**bad)
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"chunk_size": 1400, "chunk_overlap": 1400},
+        {"rag_top_k": 21, "rag_max_top_k": 20},
+    ],
+)
+def test_rag_ranges_are_rejected(bad):
     with pytest.raises(ValidationError):
         make_settings(**bad)
 
