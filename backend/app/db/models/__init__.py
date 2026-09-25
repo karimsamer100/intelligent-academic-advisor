@@ -1,1 +1,5 @@
-"""ORM models. Intentionally empty: the academic schema is not finalised yet."""
+"""Import ORM models so Alembic can register them on ``Base.metadata``."""
+
+from app.rag.models.orm import RagChunk, RagSource  # noqa: F401
+
+__all__ = ["RagChunk", "RagSource"]
