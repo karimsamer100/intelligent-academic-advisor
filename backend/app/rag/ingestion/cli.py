@@ -171,7 +171,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     prep = sub.add_parser("prepare-foundation", help="Build enriched chunks without embeddings/DB for inspection")
     add_source_args(prep)
-    prep.add_argument("--output-dir", default="data/prepared_rag")
+    prep.add_argument("--output-dir", default="/data/prepared_rag")
     prep.set_defaults(func=prepare_foundation)
 
     ingest = sub.add_parser("ingest-foundation", help="Embed and ingest selected Academic Data Foundation sources")

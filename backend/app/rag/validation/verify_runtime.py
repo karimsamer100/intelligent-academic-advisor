@@ -7,10 +7,10 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
-from app.api.dependencies import get_embedding_provider
 from app.core.config import get_settings
 from app.db.session import session_scope
 from app.main import app
+from app.rag.provider import get_embedding_provider
 from app.rag.extractors.foundation_extractor import FoundationExtractedTextExtractor
 from app.rag.ingestion.cli import _common_pipeline
 from app.rag.ingestion.foundation_adapter import AcademicDataFoundationAdapter

@@ -5,6 +5,7 @@ connection - the readiness endpoint reports database problems instead.
 """
 
 from collections.abc import Iterator
+from contextlib import contextmanager
 from functools import lru_cache
 
 from sqlalchemy import Engine, create_engine
@@ -35,6 +36,20 @@ def get_db() -> Iterator[Session]:
         yield db
     finally:
         db.close()
+
+
+@contextmanager
+def session_scope() -> Iterator[Session]:
+    """Provide a committing, rollback-safe session for CLI work."""
+    session = get_session_factory()()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 def dispose_engine() -> None:

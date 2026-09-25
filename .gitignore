@@ -53,6 +53,10 @@ models/
 embeddings/
 vector_store/
 tmp/
+data/academic_foundation/
+data/model-cache/
+data/rag_debug/
+data/prepared_rag/
 
 .coverage
 htmlcov/
