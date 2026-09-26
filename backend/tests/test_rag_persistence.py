@@ -19,6 +19,7 @@ from app.rag.models.domain import (
 
 pytestmark = pytest.mark.integration
 
+
 EXPECTED_SOURCE_COLUMNS = {
     "source_id",
     "file_name",
@@ -41,6 +42,7 @@ EXPECTED_SOURCE_COLUMNS = {
     "expected_chunk_count",
     "ingested_at",
 }
+
 
 EXPECTED_CHUNK_COLUMNS = {
     "chunk_id",
@@ -76,7 +78,8 @@ def _columns(db_engine, table_name: str) -> set[str]:
                     """
                     SELECT column_name
                     FROM information_schema.columns
-                    WHERE table_schema = 'public' AND table_name = :table_name
+                    WHERE table_schema = 'public'
+                      AND table_name = :table_name
                     """
                 ),
                 {"table_name": table_name},
@@ -132,10 +135,16 @@ def _stored_chunks(
             "CAIE",
         ),
     ]
+
     chunks: list[StoredChunk] = []
-    for index, (chunk_id, content, document_type, regulation, program) in enumerate(
-        specifications
-    ):
+
+    for index, (
+        chunk_id,
+        content,
+        document_type,
+        regulation,
+        program,
+    ) in enumerate(specifications):
         draft = ChunkDraft(
             chunk_id=chunk_id,
             source_id=source.source_id,
@@ -155,6 +164,7 @@ def _stored_chunks(
             applicable_programs=[program],
             metadata={"checkpoint": 3, "index": index},
         )
+
         chunks.append(
             StoredChunk(
                 **draft.model_dump(),
@@ -164,6 +174,7 @@ def _stored_chunks(
                 official_status=source.official_status,
             )
         )
+
     return chunks
 
 
@@ -172,6 +183,7 @@ def test_alembic_reaches_integrated_rag_head(db_engine) -> None:
         revision = connection.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
+
     assert revision == "0002"
 
 
@@ -192,6 +204,7 @@ def test_rag_tables_have_expected_columns_and_vector_contract(db_engine) -> None
                 """
             )
         ).scalar_one()
+
     assert vector_type == "vector(1024)"
 
 
@@ -202,6 +215,7 @@ def test_rag_orm_registration_matches_fixed_schema_dimension() -> None:
     from app.rag.models.orm import RagChunk
 
     configured_dimension = Settings(_env_file=None).embedding_dimension
+
     assert configured_dimension == 1024
     assert RagChunk.__table__.c.embedding.type.dim == configured_dimension
 
@@ -235,27 +249,44 @@ def test_rag_indexes_have_required_definitions(db_engine) -> None:
         "ix_rag_chunks_applicable_programs",
         "ix_rag_chunks_embedding_hnsw",
     }
+
     assert required <= indexes.keys()
 
     hnsw_definition = re.sub(
-        r"\s+", " ", indexes["ix_rag_chunks_embedding_hnsw"].lower()
+        r"\s+",
+        " ",
+        indexes["ix_rag_chunks_embedding_hnsw"].lower(),
     )
+
     assert "using hnsw" in hnsw_definition
     assert "vector_cosine_ops" in hnsw_definition
     assert re.search(r"\bm\s*=\s*'?16'?", hnsw_definition)
-    assert re.search(r"\bef_construction\s*=\s*'?64'?", hnsw_definition)
+    assert re.search(
+        r"\bef_construction\s*=\s*'?64'?",
+        hnsw_definition,
+    )
 
 
-def test_pgvector_repository_retrieval_filters_and_replacement(db_engine) -> None:
+def test_pgvector_repository_retrieval_filters_and_replacement(
+    db_engine,
+) -> None:
     from app.rag.models.orm import RagChunk
-    from app.rag.repositories.pgvector_repository import PgVectorChunkRepository
+    from app.rag.repositories.pgvector_repository import (
+        PgVectorChunkRepository,
+    )
     from app.rag.retrieval.service import DocumentSearchService
 
     provider = HashTestEmbeddingProvider(dimension=1024)
     source = _source()
     chunks = _stored_chunks(provider, source)
-    session = Session(bind=db_engine, expire_on_commit=False)
+
+    session = Session(
+        bind=db_engine,
+        expire_on_commit=False,
+    )
+
     repository = PgVectorChunkRepository(session)
+
     service = DocumentSearchService(
         embedder=provider,
         repository=repository,
@@ -266,23 +297,40 @@ def test_pgvector_repository_retrieval_filters_and_replacement(db_engine) -> Non
     try:
         assert repository.replace_source(source, chunks) == 3
         assert repository.replace_source(source, chunks) == 3
-        assert session.scalar(
-            select(func.count())
-            .select_from(RagChunk)
-            .where(RagChunk.source_id == source.source_id)
-        ) == 3
 
-        all_results = service.search_documents("credit load", top_k=10)
-        assert {result.chunk_id for result in all_results} == {
+        assert (
+            session.scalar(
+                select(func.count())
+                .select_from(RagChunk)
+                .where(RagChunk.source_id == source.source_id)
+            )
+            == 3
+        )
+
+        # Restrict retrieval to test-owned rows so the test remains isolated
+        # even when the database already contains the real RAG corpus.
+        all_results = service.search_documents(
+            "credit load",
+            official_status="TEST_ONLY",
+            top_k=10,
+        )
+
+        assert {
+            result.chunk_id for result in all_results
+        } == {
             chunk.chunk_id for chunk in chunks
         }
 
         regulation_results = service.search_documents(
             "credit load",
             regulation=23,
+            official_status="TEST_ONLY",
             top_k=10,
         )
-        assert {result.chunk_id for result in regulation_results} == {
+
+        assert {
+            result.chunk_id for result in regulation_results
+        } == {
             "CHECKPOINT3-REG23-CAIE",
             "CHECKPOINT3-GUIDE-CAIE",
         }
@@ -290,32 +338,62 @@ def test_pgvector_repository_retrieval_filters_and_replacement(db_engine) -> Non
         program_results = service.search_documents(
             "credit load",
             program="CESS",
+            official_status="TEST_ONLY",
             top_k=10,
         )
-        assert {result.chunk_id for result in program_results} == {
+
+        assert {
+            result.chunk_id for result in program_results
+        } == {
             "CHECKPOINT3-REG18-CESS"
         }
 
         document_type_results = service.search_documents(
             "credit load",
             document_types=["REGULATION"],
+            official_status="TEST_ONLY",
             top_k=10,
         )
-        assert {result.chunk_id for result in document_type_results} == {
+
+        assert {
+            result.chunk_id for result in document_type_results
+        } == {
             "CHECKPOINT3-REG23-CAIE",
             "CHECKPOINT3-REG18-CESS",
         }
 
-        replacement = [chunks[0].model_copy(update={"chunk_id": "CHECKPOINT3-REPLACED"})]
-        assert repository.replace_source(source, replacement) == 1
-        state = repository.get_source_state(source.source_id)
+        replacement = [
+            chunks[0].model_copy(
+                update={
+                    "chunk_id": "CHECKPOINT3-REPLACED",
+                }
+            )
+        ]
+
+        assert repository.replace_source(
+            source,
+            replacement,
+        ) == 1
+
+        state = repository.get_source_state(
+            source.source_id
+        )
+
         assert state is not None
         assert state.chunk_count == 1
-        assert session.scalar(
-            select(func.count())
-            .select_from(RagChunk)
-            .where(RagChunk.source_id == source.source_id)
-        ) == 1
+
+        assert (
+            session.scalar(
+                select(func.count())
+                .select_from(RagChunk)
+                .where(
+                    RagChunk.source_id
+                    == source.source_id
+                )
+            )
+            == 1
+        )
+
     finally:
         session.rollback()
         session.close()
