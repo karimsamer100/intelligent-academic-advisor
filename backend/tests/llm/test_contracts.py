@@ -56,6 +56,27 @@ def test_valid_messages_cover_text_tool_call_and_tool_result_context() -> None:
 
 
 @pytest.mark.parametrize(
+    "correlation",
+    [
+        {"tool_name": "search_documents"},
+        {"tool_call_id": "call-1"},
+        {"tool_call_id": "call-1", "tool_name": "search_documents"},
+    ],
+)
+def test_tool_messages_accept_name_id_or_both(
+    correlation: dict[str, str],
+) -> None:
+    message = LLMMessage(
+        role=MessageRole.TOOL,
+        content='{"results": []}',
+        **correlation,
+    )
+
+    assert message.tool_call_id == correlation.get("tool_call_id")
+    assert message.tool_name == correlation.get("tool_name")
+
+
+@pytest.mark.parametrize(
     ("role", "kwargs"),
     [
         (MessageRole.SYSTEM, {}),
@@ -78,6 +99,10 @@ def test_message_contracts_enforce_role_semantics() -> None:
 
     with pytest.raises(ValidationError):
         LLMMessage(role=MessageRole.ASSISTANT, content="answer", tool_call_id="call-1")
+
+    for role in (MessageRole.SYSTEM, MessageRole.USER, MessageRole.ASSISTANT):
+        with pytest.raises(ValidationError):
+            LLMMessage(role=role, content="message", tool_name="search_documents")
 
     with pytest.raises(ValidationError):
         LLMMessage(role=MessageRole.TOOL, content="tool output")

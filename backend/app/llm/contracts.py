@@ -39,6 +39,7 @@ class LLMMessage(_LLMModel):
     content: str | None = None
     tool_calls: list[ToolCall] = Field(default_factory=list)
     tool_call_id: str | None = Field(default=None, min_length=1)
+    tool_name: str | None = Field(default=None, min_length=1)
 
     @model_validator(mode="after")
     def _validate_role_semantics(self) -> "LLMMessage":
@@ -53,14 +54,17 @@ class LLMMessage(_LLMModel):
         elif self.role is MessageRole.TOOL:
             if not has_content:
                 raise ValueError("tool messages require content")
-            if self.tool_call_id is None:
-                raise ValueError("tool messages require tool_call_id")
+            if self.tool_call_id is None and self.tool_name is None:
+                raise ValueError("tool messages require tool_call_id or tool_name")
 
         if self.role is not MessageRole.ASSISTANT and self.tool_calls:
             raise ValueError("only assistant messages may contain tool_calls")
 
         if self.role is not MessageRole.TOOL and self.tool_call_id is not None:
             raise ValueError("only tool messages may contain tool_call_id")
+
+        if self.role is not MessageRole.TOOL and self.tool_name is not None:
+            raise ValueError("only tool messages may contain tool_name")
 
         return self
 
