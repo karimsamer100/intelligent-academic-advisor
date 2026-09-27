@@ -14,7 +14,7 @@ _ENV_KEYS = [
     "CHUNK_SIZE", "CHUNK_OVERLAP", "CHUNK_MIN_CHARS", "RAG_MAX_TOP_K",
     "RAG_MIN_SCORE", "PIPELINE_VERSION", "PRESERVE_RAW_EXTRACTION",
     "RAW_EXTRACT_DIR",
-    "LOG_LEVEL", "CORS_ORIGINS",
+    "LOG_LEVEL", "CORS_ORIGINS", "LLM_BASE_URL", "LLM_MODEL", "LLM_TIMEOUT_SECONDS",
 ]  # fmt: skip
 
 
@@ -48,6 +48,9 @@ def test_defaults_are_sensible():
     assert settings.pipeline_version == "rag-v0.1.0"
     assert settings.preserve_raw_extraction is True
     assert settings.raw_extract_dir == Path("../data/rag_debug/extracted")
+    assert settings.llm_base_url == "http://localhost:11434"
+    assert settings.llm_model == "qwen3.5:9b-q4_K_M"
+    assert settings.llm_timeout_seconds == pytest.approx(60.0)
     assert settings.log_level == "INFO"
     assert settings.docs_enabled is True
 
@@ -59,6 +62,9 @@ def test_values_are_loaded_from_environment(monkeypatch):
     monkeypatch.setenv("RAG_TOP_K", "8")
     monkeypatch.setenv("DOCUMENTS_PATH", "/tmp/docs")
     monkeypatch.setenv("LOG_LEVEL", "debug")
+    monkeypatch.setenv("LLM_BASE_URL", "http://ollama.test")
+    monkeypatch.setenv("LLM_MODEL", "qwen-test")
+    monkeypatch.setenv("LLM_TIMEOUT_SECONDS", "12.5")
 
     settings = make_settings()
     assert settings.app_env == "staging"
@@ -67,6 +73,9 @@ def test_values_are_loaded_from_environment(monkeypatch):
     assert settings.rag_top_k == 8
     assert str(settings.documents_path) == "/tmp/docs"
     assert settings.log_level == "DEBUG"
+    assert settings.llm_base_url == "http://ollama.test"
+    assert settings.llm_model == "qwen-test"
+    assert settings.llm_timeout_seconds == pytest.approx(12.5)
 
 
 def test_rag_values_are_loaded_from_environment(monkeypatch):
@@ -182,6 +191,7 @@ def test_cors_origins_parsing(raw, expected):
         {"api_v1_prefix": "api/v1"},
         {"api_v1_prefix": "/api/v1/"},
         {"app_port": 0},
+        {"llm_timeout_seconds": 0},
     ],
 )
 def test_invalid_values_are_rejected(bad):

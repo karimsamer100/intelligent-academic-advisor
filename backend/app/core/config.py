@@ -61,6 +61,11 @@ class Settings(BaseSettings):
     preserve_raw_extraction: bool = True
     raw_extract_dir: Path = Path("../data/rag_debug/extracted")
 
+    # --- local LLM ---------------------------------------------------------
+    llm_base_url: str = "http://localhost:11434"
+    llm_model: str = "qwen3.5:9b-q4_K_M"
+    llm_timeout_seconds: float = Field(default=60.0, gt=0)
+
     # --- logging / http ----------------------------------------------------
     log_level: str = "INFO"
     # Comma-separated list (or a JSON list) of allowed origins.
