@@ -92,6 +92,8 @@ class CheckCourseEligibilityTool(AcademicTool[CheckCourseEligibilityArguments]):
             raise ToolDataUnavailableError(self.name) from None
 
         result = self._planning_service.check_eligibility(request)
+        # Transitional internal Planning payload; future LLM projections
+        # should be smaller, so orchestration must not depend on every field.
         return result.to_dict()
 
 

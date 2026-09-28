@@ -14,6 +14,9 @@ from app.planning.domain.requirements import (
     RequirementSetStatus,
     RequirementStage,
 )
+from app.planning.repositories.adapters.academic_data_source import (
+    AcademicEligibilityDataSource,
+)
 from app.planning.repositories.student_repository import StudentRepository
 from app.services.planning_service import PlanningService
 from app.tools.context import ToolExecutionContext, resolve_student_state
@@ -21,7 +24,7 @@ from app.tools.errors import ToolDataUnavailableError
 from app.tools.interface import AcademicTool
 
 
-class AcademicAuditDataSource(Protocol):
+class AcademicAuditDataSource(AcademicEligibilityDataSource, Protocol):
     """Typed slice of the existing academic adapter needed by degree audit."""
 
     def get_requirement_set(
@@ -102,6 +105,8 @@ class DegreeAuditTool(AcademicTool[DegreeAuditArguments]):
                 pools=pools,
             )
             result = self._planning_service.audit(request)
+            # Transitional internal Planning payload; future LLM projections
+            # should be smaller, so orchestration must not depend on every field.
             return result.to_dict()
         except (AttributeError, TypeError, ValueError, KeyError):
             raise ToolDataUnavailableError(self.name) from None
