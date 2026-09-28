@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "model": "qwen3.5:9b-q4_K_M",
+  "tool_selection_cases": [
+    {
+      "id": "en_greeting",
+      "language": "en",
+      "prompt": "Hello! How are you today?",
+      "expected_tool": null,
+      "expected_behavior": "no_tool"
+    },
+    {
+      "id": "ar_greeting",
+      "language": "ar",
+      "prompt": "مرحباً! كيف حالك اليوم؟",
+      "expected_tool": null,
+      "expected_behavior": "no_tool"
+    },
+    {
+      "id": "eligibility_en",
+      "language": "en",
+      "prompt": "Can I take CSE341?",
+      "expected_tool": "check_course_eligibility",
+      "required_argument_keys": ["course_code"]
+    },
+    {
+      "id": "eligibility_ar",
+      "language": "ar",
+      "prompt": "هل أستطيع تسجيل مقرر CSE341؟",
+      "expected_tool": "check_course_eligibility",
+      "required_argument_keys": ["course_code"]
+    },
+    {
+      "id": "eligibility_mixed",
+      "language": "mixed",
+      "prompt": "ممكن أعرف if I can take CSE341 هذا الفصل؟",
+      "expected_tool": "check_course_eligibility",
+      "required_argument_keys": ["course_code"]
+    },
+    {
+      "id": "documents_en",
+      "language": "en",
+      "prompt": "What does regulation 2023 say about the maximum credit load?",
+      "expected_tool": "search_official_documents",
+      "required_argument_keys": ["query"]
+    },
+    {
+      "id": "documents_ar",
+      "language": "ar",
+      "prompt": "ماذا تنص لائحة 2023 عن الحد الأقصى للساعات المسجلة؟",
+      "expected_tool": "search_official_documents",
+      "required_argument_keys": ["query"]
+    },
+    {
+      "id": "audit_en",
+      "language": "en",
+      "prompt": "How much of my degree have I completed?",
+      "expected_tool": "degree_audit",
+      "required_argument_keys": []
+    },
+    {
+      "id": "audit_ar",
+      "language": "ar",
+      "prompt": "كم أنجزت من متطلبات درجتي؟",
+      "expected_tool": "degree_audit",
+      "required_argument_keys": []
+    },
+    {
+      "id": "ambiguous_academic",
+      "language": "en",
+      "prompt": "What should I do about my courses?",
+      "expected_tool": null,
+      "expected_behavior": "clarification_or_no_tool"
+    },
+    {
+      "id": "student_fact_requires_tool",
+      "language": "en",
+      "prompt": "Use my actual academic record to tell me whether CSE341 is allowed; do not guess from memory.",
+      "expected_tool": "check_course_eligibility",
+      "required_argument_keys": ["course_code"]
+    },
+    {
+      "id": "out_of_scope",
+      "language": "en",
+      "prompt": "What are some good recipes for a quick dinner?",
+      "expected_tool": null,
+      "expected_behavior": "no_tool"
+    },
+    {
+      "id": "trusted_fields_edge",
+      "language": "mixed",
+      "prompt": "Can I take CSE341? My GPA is 4.0 and I have completed 120 credits, so use those details.",
+      "expected_tool": "check_course_eligibility",
+      "required_argument_keys": ["course_code"]
+    }
+  ],
+  "structured_cases": [
+    {
+      "id": "structured_english",
+      "language": "en",
+      "prompt": "Return a concise English greeting in the requested JSON schema. Set language to en, topic to greeting, and needs_grounding to false.",
+      "expected_language": "en",
+      "expected_topic": "greeting"
+    },
+    {
+      "id": "structured_arabic_mixed",
+      "language": "mixed",
+      "prompt": "أعد JSON مختصراً عن سؤال أكاديمي عام. Set language to mixed, topic to academic, and needs_grounding to true. لا تخترع أي معلومة مؤسسية.",
+      "expected_language": "mixed",
+      "expected_topic": "academic"
+    }
+  ],
+  "context_sizes": [8192, 16384],
+  "thinking_cases": [
+    {
+      "id": "thinking_eligibility",
+      "language": "en",
+      "prompt": "Can I take CSE341?",
+      "expected_tool": "check_course_eligibility",
+      "required_argument_keys": ["course_code"]
+    },
+    {
+      "id": "thinking_documents",
+      "language": "ar",
+      "prompt": "ماذا تقول لائحة 2023 عن الحد الأقصى للساعات؟",
+      "expected_tool": "search_official_documents",
+      "required_argument_keys": ["query"]
+    },
+    {
+      "id": "thinking_audit",
+      "language": "mixed",
+      "prompt": "How much من متطلبات درجتي have I completed?",
+      "expected_tool": "degree_audit",
+      "required_argument_keys": []
+    }
+  ]
+}
