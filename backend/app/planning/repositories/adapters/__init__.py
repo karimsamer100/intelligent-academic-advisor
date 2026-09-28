@@ -10,6 +10,7 @@ from .academic_data_types import (
     AcademicDataSourceMode,
 )
 from .academic_data_adapter import AcademicDataAdapter, JsonAcademicDataAdapter
+from .student_json_repository import JsonStudentRepository, StudentRepositoryDataError
 
 __all__ = [
     "AcademicDataAdapter",
@@ -21,4 +22,6 @@ __all__ = [
     "AcademicDataSourceMode",
     "AcademicEligibilityDataSource",
     "JsonAcademicDataAdapter",
+    "JsonStudentRepository",
+    "StudentRepositoryDataError",
 ]

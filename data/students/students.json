@@ -1,0 +1,54 @@
+{
+  "students": [
+    {
+      "student_id": "DEV-STUDENT-001",
+      "regulation": 2023,
+      "program": "CAIE",
+      "track": null,
+      "course_attempts": [
+        {
+          "student_id": "DEV-STUDENT-001",
+          "course_id": "R23:CAIE:CSE121",
+          "attempt_number": 1,
+          "term": "Fall",
+          "academic_year": 2024,
+          "status": "recorded",
+          "passed": true,
+          "failed": false,
+          "withdrawn": false,
+          "repeated": false,
+          "credits_earned": 3,
+          "source": "development_sample"
+        },
+        {
+          "student_id": "DEV-STUDENT-001",
+          "course_id": "R23:CAIE:CSE141",
+          "attempt_number": 1,
+          "term": "Fall",
+          "academic_year": 2024,
+          "status": "recorded",
+          "passed": true,
+          "failed": false,
+          "withdrawn": false,
+          "repeated": false,
+          "credits_earned": 3,
+          "source": "development_sample"
+        }
+      ],
+      "current_registrations": [],
+      "academic_snapshot": {
+        "student_id": "DEV-STUDENT-001",
+        "regulation": 2023,
+        "program": "CAIE",
+        "gpa": 3.0,
+        "earned_credit_hours": 6,
+        "registered_credit_hours": 0,
+        "academic_level": "2",
+        "academic_standing": "GOOD",
+        "track": null
+      },
+      "history_coverage": "COMPLETE",
+      "registration_coverage": "COMPLETE"
+    }
+  ]
+}

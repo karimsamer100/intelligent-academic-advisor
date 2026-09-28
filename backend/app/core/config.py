@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     rag_max_top_k: int = Field(default=20, gt=0)
     rag_min_score: float | None = None
     academic_data_foundation_path: Path | None = None
+    student_data_path: Path = Path("../data/students/students.json")
     documents_path: Path = Path("./data/documents")
     embedding_model: str = "BAAI/bge-m3"
     embedding_device: str = "cpu"

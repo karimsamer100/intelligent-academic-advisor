@@ -5,6 +5,10 @@ from typing import Protocol, runtime_checkable
 from ..domain.student import StudentState
 
 
+class StudentRepositoryError(RuntimeError):
+    """Base error for safe failures while resolving trusted student state."""
+
+
 @runtime_checkable
 class StudentRepository(Protocol):
     """Read-only domain contract for student-state retrieval."""

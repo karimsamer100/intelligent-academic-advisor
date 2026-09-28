@@ -13,7 +13,7 @@ _ENV_KEYS = [
     "EMBEDDING_DIMENSION", "EMBEDDING_BATCH_SIZE", "EMBEDDING_CACHE_DIR",
     "CHUNK_SIZE", "CHUNK_OVERLAP", "CHUNK_MIN_CHARS", "RAG_MAX_TOP_K",
     "RAG_MIN_SCORE", "PIPELINE_VERSION", "PRESERVE_RAW_EXTRACTION",
-    "RAW_EXTRACT_DIR",
+    "RAW_EXTRACT_DIR", "STUDENT_DATA_PATH",
     "LOG_LEVEL", "CORS_ORIGINS", "LLM_BASE_URL", "LLM_MODEL", "LLM_TIMEOUT_SECONDS",
 ]  # fmt: skip
 
@@ -48,6 +48,7 @@ def test_defaults_are_sensible():
     assert settings.pipeline_version == "rag-v0.1.0"
     assert settings.preserve_raw_extraction is True
     assert settings.raw_extract_dir == Path("../data/rag_debug/extracted")
+    assert settings.student_data_path == Path("../data/students/students.json")
     assert settings.llm_base_url == "http://localhost:11434"
     assert settings.llm_model == "qwen3.5:9b-q4_K_M"
     assert settings.llm_timeout_seconds == pytest.approx(60.0)
@@ -94,6 +95,7 @@ def test_rag_values_are_loaded_from_environment(monkeypatch):
     monkeypatch.setenv("PIPELINE_VERSION", "rag-test")
     monkeypatch.setenv("PRESERVE_RAW_EXTRACTION", "false")
     monkeypatch.setenv("RAW_EXTRACT_DIR", "../data/rag-debug")
+    monkeypatch.setenv("STUDENT_DATA_PATH", "../data/students/test.json")
 
     settings = make_settings()
 
@@ -108,6 +110,7 @@ def test_rag_values_are_loaded_from_environment(monkeypatch):
     assert settings.pipeline_version == "rag-test"
     assert settings.preserve_raw_extraction is False
     assert settings.raw_extract_dir == Path("../data/rag-debug")
+    assert settings.student_data_path == Path("../data/students/test.json")
 
 
 def test_blank_rag_min_score_becomes_none():
