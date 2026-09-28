@@ -33,10 +33,34 @@ class ToolExecutionError(ToolError):
         super().__init__(f"Tool '{tool_name}' failed to produce a valid result")
 
 
+class ToolDuplicateNameError(ToolError):
+    """A registry already contains the requested stable tool name."""
+
+    def __init__(self, tool_name: str) -> None:
+        super().__init__(f"Tool name '{tool_name}' is already registered")
+
+
+class UnknownToolError(ToolError):
+    """The requested tool name is not registered."""
+
+    def __init__(self, tool_name: str) -> None:
+        super().__init__(f"Unknown tool '{tool_name}'")
+
+
+class ToolCompositionError(ToolError):
+    """Required application dependencies cannot safely compose the tools."""
+
+    def __init__(self) -> None:
+        super().__init__("Academic tools could not be composed from configured data")
+
+
 __all__ = [
     "ToolArgumentValidationError",
     "ToolContextRequiredError",
     "ToolDataUnavailableError",
+    "ToolDuplicateNameError",
     "ToolError",
     "ToolExecutionError",
+    "ToolCompositionError",
+    "UnknownToolError",
 ]
