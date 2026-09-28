@@ -34,10 +34,17 @@ class InvalidProviderResponseError(LLMProviderError):
     message = "LLM provider returned an invalid response"
 
 
+class StructuredOutputValidationError(LLMProviderError):
+    """The provider returned JSON that failed the requested Pydantic schema."""
+
+    message = "LLM structured output failed schema validation"
+
+
 __all__ = [
     "InvalidProviderResponseError",
     "LLMProviderError",
     "ProviderExecutionError",
     "ProviderTimeoutError",
     "ProviderUnavailableError",
+    "StructuredOutputValidationError",
 ]

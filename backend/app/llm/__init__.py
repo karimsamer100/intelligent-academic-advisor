@@ -14,6 +14,7 @@ from app.llm.errors import (
     ProviderExecutionError,
     ProviderTimeoutError,
     ProviderUnavailableError,
+    StructuredOutputValidationError,
 )
 from app.llm.interface import LLMProvider
 
@@ -28,6 +29,7 @@ __all__ = [
     "ProviderExecutionError",
     "ProviderTimeoutError",
     "ProviderUnavailableError",
+    "StructuredOutputValidationError",
     "ToolCall",
     "ToolDefinition",
 ]

@@ -7,7 +7,7 @@ from typing import Any
 
 import httpx
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from app.core.config import Settings
 from app.llm.contracts import (
@@ -22,8 +22,19 @@ from app.llm.errors import (
     ProviderExecutionError,
     ProviderTimeoutError,
     ProviderUnavailableError,
+    StructuredOutputValidationError,
 )
 from app.llm.providers.ollama import OllamaProvider
+
+
+class Requirement(BaseModel):
+    code: str
+    credits: int
+
+
+class CoursePlan(BaseModel):
+    title: str
+    requirements: list[Requirement]
 
 
 def _settings(**overrides: Any) -> Settings:
@@ -442,3 +453,97 @@ def test_settings_supply_ollama_base_url_model_and_positive_timeout() -> None:
 def test_timeout_configuration_must_be_positive() -> None:
     with pytest.raises(ValidationError):
         _settings(llm_timeout_seconds=0)
+
+
+def test_structured_generation_sends_response_model_schema_and_returns_nested_model() -> None:
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["payload"] = json.loads(request.content)
+        return _text_response(
+            content=json.dumps(
+                {
+                    "title": "Computer Science plan",
+                    "requirements": [{"code": "CS101", "credits": 3}],
+                }
+            )
+        )
+
+    request = GenerationRequest(
+        messages=[LLMMessage(role=MessageRole.USER, content="Build a plan.")]
+    )
+
+    with _provider(handler) as provider:
+        result = provider.generate_structured(request, CoursePlan)
+
+    assert captured["payload"]["format"] == CoursePlan.model_json_schema()
+    assert captured["payload"]["stream"] is False
+    assert result == CoursePlan(
+        title="Computer Science plan",
+        requirements=[Requirement(code="CS101", credits=3)],
+    )
+    assert isinstance(result, CoursePlan)
+
+
+def test_structured_generation_rejects_malformed_json_as_invalid_provider_response() -> None:
+    with _provider(lambda _: _text_response(content="not-json")) as provider:
+        with pytest.raises(InvalidProviderResponseError) as raised:
+            provider.generate_structured(
+                GenerationRequest(
+                    messages=[LLMMessage(role=MessageRole.USER, content="Build a plan.")]
+                ),
+                CoursePlan,
+            )
+
+    assert str(raised.value) == "LLM provider returned an invalid response"
+    assert "not-json" not in str(raised.value)
+
+
+def test_structured_generation_rejects_valid_json_with_schema_errors() -> None:
+    invalid_content = json.dumps(
+        {
+            "title": "Computer Science plan",
+            "requirements": [{"code": "CS101", "credits": "three"}],
+        }
+    )
+
+    with _provider(lambda _: _text_response(content=invalid_content)) as provider:
+        with pytest.raises(StructuredOutputValidationError) as raised:
+            provider.generate_structured(
+                GenerationRequest(
+                    messages=[LLMMessage(role=MessageRole.USER, content="Build a plan.")]
+                ),
+                CoursePlan,
+            )
+
+    assert str(raised.value) == "LLM structured output failed schema validation"
+    assert "three" not in str(raised.value)
+
+
+@pytest.mark.parametrize(
+    ("failure", "expected_error"),
+    [
+        ("connection", ProviderUnavailableError),
+        ("timeout", ProviderTimeoutError),
+        ("http", ProviderExecutionError),
+    ],
+)
+def test_structured_generation_preserves_provider_error_mapping(
+    failure: str,
+    expected_error: type[Exception],
+) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if failure == "connection":
+            raise httpx.ConnectError("private connection details", request=request)
+        if failure == "timeout":
+            raise httpx.ReadTimeout("private timeout details", request=request)
+        return httpx.Response(503, json={"error": "private server details"})
+
+    with _provider(handler) as provider:
+        with pytest.raises(expected_error):
+            provider.generate_structured(
+                GenerationRequest(
+                    messages=[LLMMessage(role=MessageRole.USER, content="Build a plan.")]
+                ),
+                CoursePlan,
+            )

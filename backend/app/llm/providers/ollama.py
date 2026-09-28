@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any
+import json
+from typing import Any, TypeVar
 
 import httpx
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from app.core.config import Settings, get_settings
 from app.llm.contracts import (
@@ -20,7 +21,10 @@ from app.llm.errors import (
     ProviderExecutionError,
     ProviderTimeoutError,
     ProviderUnavailableError,
+    StructuredOutputValidationError,
 )
+
+StructuredT = TypeVar("StructuredT", bound=BaseModel)
 
 
 class OllamaProvider:
@@ -38,7 +42,39 @@ class OllamaProvider:
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         """Generate one response and translate provider failures safely."""
 
+        return self._generate_response(request)
+
+    def generate_structured(
+        self,
+        request: GenerationRequest,
+        response_model: type[StructuredT],
+    ) -> StructuredT:
+        """Generate JSON using Ollama's schema format and validate it."""
+
+        response = self._generate_response(
+            request,
+            response_format=response_model.model_json_schema(),
+        )
+
+        try:
+            structured_payload = json.loads(response.content or "")
+        except (TypeError, ValueError) as exc:
+            raise InvalidProviderResponseError from exc
+
+        try:
+            return response_model.model_validate(structured_payload)
+        except ValidationError as exc:
+            raise StructuredOutputValidationError from exc
+
+    def _generate_response(
+        self,
+        request: GenerationRequest,
+        *,
+        response_format: dict[str, Any] | None = None,
+    ) -> GenerationResponse:
         payload = self._build_request_payload(request)
+        if response_format is not None:
+            payload["format"] = response_format
 
         try:
             response = self._client.post(self._chat_url, json=payload)

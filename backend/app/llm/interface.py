@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+from typing import Protocol, TypeVar, runtime_checkable
+
+from pydantic import BaseModel
 
 from app.llm.contracts import GenerationRequest, GenerationResponse
+
+StructuredT = TypeVar("StructuredT", bound=BaseModel)
 
 
 @runtime_checkable
@@ -13,6 +17,15 @@ class LLMProvider(Protocol):
 
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         """Generate one provider-neutral response for ``request``."""
+
+        ...
+
+    def generate_structured(
+        self,
+        request: GenerationRequest,
+        response_model: type[StructuredT],
+    ) -> StructuredT:
+        """Generate and validate a structured response for ``response_model``."""
 
         ...
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import BaseModel
 
 from app.llm.contracts import GenerationRequest, GenerationResponse
 from app.llm.errors import (
@@ -9,6 +10,7 @@ from app.llm.errors import (
     ProviderExecutionError,
     ProviderTimeoutError,
     ProviderUnavailableError,
+    StructuredOutputValidationError,
 )
 from app.llm.interface import LLMProvider
 
@@ -17,11 +19,18 @@ class FakeProvider:
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         return GenerationResponse(content=request.messages[0].content or "")
 
+    def generate_structured(
+        self,
+        request: GenerationRequest,
+        response_model: type[BaseModel],
+    ) -> BaseModel:
+        return response_model.model_validate({"answer": request.messages[0].content})
+
 
 def test_provider_protocol_accepts_a_replaceable_fake() -> None:
     assert isinstance(FakeProvider(), LLMProvider)
     assert hasattr(LLMProvider, "generate")
-    assert not hasattr(LLMProvider, "generate_structured")
+    assert hasattr(LLMProvider, "generate_structured")
 
 
 @pytest.mark.parametrize(
@@ -31,6 +40,7 @@ def test_provider_protocol_accepts_a_replaceable_fake() -> None:
         ProviderTimeoutError,
         ProviderExecutionError,
         InvalidProviderResponseError,
+        StructuredOutputValidationError,
     ],
 )
 def test_provider_errors_share_the_llm_provider_error_boundary(error_type: type[LLMProviderError]) -> None:
