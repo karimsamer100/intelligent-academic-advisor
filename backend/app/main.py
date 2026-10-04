@@ -7,6 +7,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,18 +26,25 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
+    llm_http_client = httpx.Client(timeout=settings.llm_timeout_seconds)
+    app.state.llm_http_client = llm_http_client
     # No database connection is made here: /api/v1/ready reports DB state.
-    logger.info(
-        "application starting",
-        extra={
-            "environment": settings.app_env,
-            "database": settings.redacted_database_url,
-            "log_level": settings.log_level,
-        },
-    )
-    yield
-    dispose_engine()
-    logger.info("application stopped")
+    try:
+        logger.info(
+            "application starting",
+            extra={
+                "environment": settings.app_env,
+                "database": settings.redacted_database_url,
+                "log_level": settings.log_level,
+            },
+        )
+        yield
+    finally:
+        try:
+            dispose_engine()
+        finally:
+            llm_http_client.close()
+        logger.info("application stopped")
 
 
 def create_app() -> FastAPI:
