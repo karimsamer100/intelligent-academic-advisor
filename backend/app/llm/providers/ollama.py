@@ -54,6 +54,7 @@ class OllamaProvider:
         response = self._generate_response(
             request,
             response_format=response_model.model_json_schema(),
+            think=False,
         )
 
         try:
@@ -71,10 +72,13 @@ class OllamaProvider:
         request: GenerationRequest,
         *,
         response_format: dict[str, Any] | None = None,
+        think: bool | None = None,
     ) -> GenerationResponse:
         payload = self._build_request_payload(request)
         if response_format is not None:
             payload["format"] = response_format
+        if think is not None:
+            payload["think"] = think
 
         try:
             response = self._client.post(self._chat_url, json=payload)

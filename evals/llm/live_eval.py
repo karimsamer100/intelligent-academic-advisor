@@ -577,7 +577,7 @@ def run(cases_path: Path) -> dict[str, Any]:
                         )
                     ],
                     temperature=0.0,
-                    max_tokens=16,
+                    max_tokens=256,
                 )
             )
         )

@@ -117,6 +117,7 @@ def test_simple_generation_maps_model_messages_and_non_streaming_request() -> No
             "stream": False,
         },
     }
+    assert "think" not in captured["payload"]
     assert response.content == "provider answer"
 
 
@@ -477,6 +478,7 @@ def test_structured_generation_sends_response_model_schema_and_returns_nested_mo
         result = provider.generate_structured(request, CoursePlan)
 
     assert captured["payload"]["format"] == CoursePlan.model_json_schema()
+    assert captured["payload"]["think"] is False
     assert captured["payload"]["stream"] is False
     assert result == CoursePlan(
         title="Computer Science plan",
