@@ -158,6 +158,7 @@ class LoadedAcademicRecords:
     source_ids: frozenset[str]
     corequisites_loaded: bool
     corequisite_count: int
+    corequisite_course_ids: frozenset[str]
     dataset_version: DatasetVersion | None
     diagnostics: tuple[AcademicDataDiagnostic, ...]
     uel_modules: tuple[RawUELModuleRecord, ...] = ()
@@ -175,7 +176,11 @@ def load_academic_records(
     source_ids = _load_source_ids(source_root / "source_registry.json", diagnostics)
     courses = _load_courses(source_root / "courses.json", diagnostics)
     prerequisites = _load_prerequisites(source_root / "prerequisites.json", diagnostics)
-    corequisites_loaded, corequisite_count = _load_corequisites(
+    (
+        corequisites_loaded,
+        corequisite_count,
+        corequisite_course_ids,
+    ) = _load_corequisites(
         source_root / "corequisites.json", diagnostics
     )
     academic_rules = _load_academic_rule_metadata(
@@ -206,6 +211,7 @@ def load_academic_records(
         source_ids=frozenset(source_ids),
         corequisites_loaded=corequisites_loaded,
         corequisite_count=corequisite_count,
+        corequisite_course_ids=corequisite_course_ids,
         dataset_version=dataset_version,
         diagnostics=_sorted_diagnostics(diagnostics),
         uel_modules=tuple(uel_modules),
@@ -408,10 +414,19 @@ def _load_prerequisites(
 def _load_corequisites(
     path: Path,
     diagnostics: list[AcademicDataDiagnostic],
-) -> tuple[bool, int]:
+) -> tuple[bool, int, frozenset[str]]:
     values = _read_array(path, diagnostics)
-    return path.is_file() and not _has_source_unavailable(diagnostics, path), len(
-        values
+    course_ids = frozenset(
+        value["course_id"].strip()
+        for value in values
+        if isinstance(value, dict)
+        and isinstance(value.get("course_id"), str)
+        and value["course_id"].strip()
+    )
+    return (
+        path.is_file() and not _has_source_unavailable(diagnostics, path),
+        len(values),
+        course_ids,
     )
 
 

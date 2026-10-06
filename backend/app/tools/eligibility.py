@@ -17,8 +17,10 @@ from app.planning.repositories.adapters.academic_data_source import (
 from app.planning.repositories.student_repository import StudentRepository
 from app.services.planning_service import PlanningService
 from app.tools.context import ToolExecutionContext, resolve_student_state
+from app.tools.course_codes import normalize_course_code
 from app.tools.errors import ToolArgumentValidationError, ToolDataUnavailableError
 from app.tools.interface import AcademicTool
+from app.tools.projections import project_eligibility
 
 
 class CheckCourseEligibilityArguments(BaseModel):
@@ -56,20 +58,29 @@ class CheckCourseEligibilityTool(AcademicTool[CheckCourseEligibilityArguments]):
             self.name,
         )
 
+        available_courses = self._academic_data.list_courses(
+            regulation=student.regulation,
+            program=student.program,
+        )
+        available_codes = tuple(
+            course.identity.course_code for course in available_courses
+        )
+
         try:
+            course_code = normalize_course_code(
+                arguments.course_code,
+                available_codes=available_codes,
+            )
             identity = CourseIdentity(
                 regulation=student.regulation,
                 program=student.program,
-                course_code=arguments.course_code,
+                course_code=course_code,
             )
         except (TypeError, ValueError):
             raise ToolArgumentValidationError(self.name) from None
 
-        try:
-            course_lookup = self._academic_data.get_course(identity)
-            rule_lookup = self._academic_data.get_eligibility_rules(identity)
-        except (TypeError, ValueError, KeyError):
-            raise ToolDataUnavailableError(self.name) from None
+        course_lookup = self._academic_data.get_course(identity)
+        rule_lookup = self._academic_data.get_eligibility_rules(identity)
 
         course = course_lookup.value
         rule_set = rule_lookup.value
@@ -82,19 +93,14 @@ class CheckCourseEligibilityTool(AcademicTool[CheckCourseEligibilityArguments]):
         ):
             raise ToolDataUnavailableError(self.name)
 
-        try:
-            request = EligibilityRequest(
-                student=student,
-                course=course,
-                rule_set=rule_set,
-            )
-        except (TypeError, ValueError):
-            raise ToolDataUnavailableError(self.name) from None
+        request = EligibilityRequest(
+            student=student,
+            course=course,
+            rule_set=rule_set,
+        )
 
         result = self._planning_service.check_eligibility(request)
-        # Transitional internal Planning payload; future LLM projections
-        # should be smaller, so orchestration must not depend on every field.
-        return result.to_dict()
+        return project_eligibility(result, course=course)
 
 
 __all__ = [

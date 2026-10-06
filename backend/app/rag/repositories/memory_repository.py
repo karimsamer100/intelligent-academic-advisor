@@ -39,9 +39,17 @@ class MemoryChunkRepository(ChunkRepository):
     def search(self, query_embedding, filters, top_k, min_score=None):
         candidates: list[tuple[float, StoredChunk, DocumentMetadata]] = []
         for chunk in self.chunks.values():
-            if filters.regulation is not None and filters.regulation not in chunk.applicable_regulations:
+            if (
+                filters.regulation is not None
+                and chunk.applicable_regulations
+                and filters.regulation not in chunk.applicable_regulations
+            ):
                 continue
-            if filters.program is not None and filters.program not in chunk.applicable_programs:
+            if (
+                filters.program is not None
+                and chunk.applicable_programs
+                and filters.program not in chunk.applicable_programs
+            ):
                 continue
             if filters.document_types and not any(t in chunk.applicable_document_types for t in filters.document_types):
                 continue

@@ -127,13 +127,12 @@ class OllamaProvider:
                 for tool in request.tools
             ]
 
-        options: dict[str, Any] = {}
+        options: dict[str, Any] = {"num_ctx": self._settings.llm_num_ctx}
         if request.temperature is not None:
             options["temperature"] = request.temperature
         if request.max_tokens is not None:
             options["num_predict"] = request.max_tokens
-        if options:
-            payload["options"] = options
+        payload["options"] = options
 
         return payload
 

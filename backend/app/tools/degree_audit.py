@@ -22,6 +22,7 @@ from app.services.planning_service import PlanningService
 from app.tools.context import ToolExecutionContext, resolve_student_state
 from app.tools.errors import ToolDataUnavailableError
 from app.tools.interface import AcademicTool
+from app.tools.projections import project_degree_audit
 
 
 class AcademicAuditDataSource(AcademicEligibilityDataSource, Protocol):
@@ -77,18 +78,15 @@ class DegreeAuditTool(AcademicTool[DegreeAuditArguments]):
             self.name,
         )
 
-        try:
-            requirement_set = self._academic_data.get_requirement_set(
-                regulation=student.regulation,
-                program=student.program,
-                stage=RequirementStage.PROGRAM_COMPLETION,
-            )
-            pools = self._academic_data.list_elective_pools(
-                regulation=student.regulation,
-                program=student.program,
-            )
-        except (AttributeError, KeyError, TypeError, ValueError):
-            raise ToolDataUnavailableError(self.name) from None
+        requirement_set = self._academic_data.get_requirement_set(
+            regulation=student.regulation,
+            program=student.program,
+            stage=RequirementStage.PROGRAM_COMPLETION,
+        )
+        pools = self._academic_data.list_elective_pools(
+            regulation=student.regulation,
+            program=student.program,
+        )
 
         if (
             not isinstance(requirement_set, ProgramRequirementSet)
@@ -96,20 +94,15 @@ class DegreeAuditTool(AcademicTool[DegreeAuditArguments]):
         ):
             raise ToolDataUnavailableError(self.name)
 
-        try:
-            pools = tuple(pools)
-            request = DegreeAuditRequest(
-                student=student,
-                requirement_set=requirement_set,
-                stage=RequirementStage.PROGRAM_COMPLETION,
-                pools=pools,
-            )
-            result = self._planning_service.audit(request)
-            # Transitional internal Planning payload; future LLM projections
-            # should be smaller, so orchestration must not depend on every field.
-            return result.to_dict()
-        except (AttributeError, TypeError, ValueError, KeyError):
-            raise ToolDataUnavailableError(self.name) from None
+        pools = tuple(pools)
+        request = DegreeAuditRequest(
+            student=student,
+            requirement_set=requirement_set,
+            stage=RequirementStage.PROGRAM_COMPLETION,
+            pools=pools,
+        )
+        result = self._planning_service.audit(request)
+        return project_degree_audit(result)
 
 
 __all__ = [

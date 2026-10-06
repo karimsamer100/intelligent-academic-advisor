@@ -148,6 +148,49 @@ def _load_normalized(academic_data_root: Path) -> JsonAcademicDataAdapter:
     return loaded.value
 
 
+def _test_corequisite_record(
+    academic_data_root: Path,
+    target_course_id: str,
+    partner_course_id: str,
+) -> dict[str, object]:
+    prerequisites = json.loads(
+        (academic_data_root / "normalized" / "prerequisites.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    template = next(
+        record for record in prerequisites if record["course_id"] == target_course_id
+    )
+    record = dict(template)
+    record["prerequisite_rule_id"] = f"COREQ-TEST-{target_course_id}"
+    record["rule_type"] = "COREQUISITE"
+    record["expression"] = {
+        "type": "CONCURRENT_COURSE",
+        "course_id": partner_course_id,
+        "course_code": partner_course_id.rsplit(":", 1)[-1],
+    }
+    return record
+
+
+def _load_normalized_with_corequisites(
+    tmp_path: Path,
+    academic_data_root: Path,
+    relationships: tuple[tuple[str, str], ...],
+) -> JsonAcademicDataAdapter:
+    package_root = tmp_path / "academic"
+    normalized_root = package_root / "normalized"
+    shutil.copytree(academic_data_root / "normalized", normalized_root)
+    records = [
+        _test_corequisite_record(academic_data_root, target, partner)
+        for target, partner in relationships
+    ]
+    (normalized_root / "corequisites.json").write_text(
+        json.dumps(records),
+        encoding="utf-8",
+    )
+    return _load_normalized(package_root)
+
+
 def test_known_non_course_entities_are_diagnosed_but_do_not_poison_load(
     academic_data_root: Path,
 ) -> None:
@@ -344,6 +387,130 @@ def test_supported_r23_prerequisite_can_be_complete_when_coverage_is_known(
     assert lookup.value.status is RuleSetStatus.COMPLETE
     assert len(lookup.value.rules) == 1
     assert isinstance(lookup.value.rules[0].expression, CoursePassedExpression)
+
+
+def test_isolated_corequisite_does_not_incomplete_unrelated_course(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized_with_corequisites(
+        tmp_path,
+        academic_data_root,
+        (("R23:CAIE:CSE493", "R23:CAIE:CSE392"),),
+    )
+    lookup = adapter.get_eligibility_rules(CourseIdentity.parse("R23:CAIE:CSE142"))
+
+    assert lookup.value is not None
+    assert lookup.value.status is RuleSetStatus.COMPLETE
+    assert not any(diagnostic.field == "corequisites" for diagnostic in lookup.diagnostics)
+
+
+def test_corequisite_coverage_is_attached_to_the_target_course(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized_with_corequisites(
+        tmp_path,
+        academic_data_root,
+        (("R23:CAIE:CSE493", "R23:CAIE:CSE392"),),
+    )
+    target = CourseIdentity.parse("R23:CAIE:CSE493")
+    lookup = adapter.get_eligibility_rules(target)
+
+    assert lookup.value is not None
+    assert lookup.value.status is RuleSetStatus.INCOMPLETE
+    assert any(
+        diagnostic.course_id == target and diagnostic.field == "corequisites"
+        for diagnostic in lookup.diagnostics
+    )
+
+
+def test_multiple_unrelated_courses_remain_complete_with_one_corequisite_record(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized_with_corequisites(
+        tmp_path,
+        academic_data_root,
+        (("R23:CAIE:CSE493", "R23:CAIE:CSE392"),),
+    )
+
+    for course_id in ("R23:CAIE:CSE142", "R23:CAIE:PHM213"):
+        lookup = adapter.get_eligibility_rules(CourseIdentity.parse(course_id))
+        assert lookup.value is not None
+        assert lookup.value.status is RuleSetStatus.COMPLETE
+        assert not any(
+            diagnostic.field == "corequisites" for diagnostic in lookup.diagnostics
+        )
+
+
+def test_empty_corequisite_dataset_preserves_complete_course_behavior(
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized(academic_data_root)
+    lookup = adapter.get_eligibility_rules(CourseIdentity.parse("R23:CAIE:CSE142"))
+
+    assert adapter.corequisite_count == 0
+    assert lookup.value is not None
+    assert lookup.value.status is RuleSetStatus.COMPLETE
+    assert not any(diagnostic.field == "corequisites" for diagnostic in lookup.diagnostics)
+
+
+def test_multiple_corequisite_records_remain_scoped_to_their_targets(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized_with_corequisites(
+        tmp_path,
+        academic_data_root,
+        (
+            ("R23:CAIE:CSE493", "R23:CAIE:CSE392"),
+            ("R23:CAIE:CSE494", "R23:CAIE:CSE493"),
+        ),
+    )
+
+    for course_id in ("R23:CAIE:CSE493", "R23:CAIE:CSE494"):
+        lookup = adapter.get_eligibility_rules(CourseIdentity.parse(course_id))
+        assert any(diagnostic.field == "corequisites" for diagnostic in lookup.diagnostics)
+
+    unrelated = adapter.get_eligibility_rules(CourseIdentity.parse("R23:CAIE:CSE142"))
+    assert unrelated.value is not None
+    assert unrelated.value.status is RuleSetStatus.COMPLETE
+    assert not any(
+        diagnostic.field == "corequisites" for diagnostic in unrelated.diagnostics
+    )
+
+
+def test_isolated_corequisite_does_not_remove_unrelated_eligible_result(
+    tmp_path: Path,
+    academic_data_root: Path,
+) -> None:
+    adapter = _load_normalized_with_corequisites(
+        tmp_path,
+        academic_data_root,
+        (("R23:CAIE:CSE493", "R23:CAIE:CSE392"),),
+    )
+    target = CourseIdentity.parse("R23:CAIE:CSE142")
+    course = adapter.get_course(target).value
+    rule_set = adapter.get_eligibility_rules(target).value
+
+    assert course is not None
+    assert rule_set is not None
+    result = _adapter_eligibility_service().check(
+        EligibilityRequest(
+            student=StudentState(
+                student_id="adapter-caie-student",
+                regulation=Regulation.R23,
+                program=Program("CAIE"),
+                passed_courses=frozenset({CourseIdentity.parse("R23:CAIE:CSE141")}),
+            ),
+            course=course,
+            rule_set=rule_set,
+        )
+    )
+
+    assert result.status is EligibilityStatus.ELIGIBLE
+    assert result.eligible is True
 
 
 def test_missing_corequisite_artifact_is_not_treated_as_empty(

@@ -43,9 +43,10 @@ Selected tools are not executed. Argument validity is checked against the
 existing tool schemas only.
 
 The context-size (`8192`, `16384`) and thinking (`disabled`, `enabled`, and
-model `default`) probes are evaluation-only direct HTTP calls. They are kept
-outside production contracts because the application provider currently uses
-non-streaming generation and intentionally has no context/thinking controls.
+model `default`) probes are evaluation-only direct HTTP calls. The production
+provider now sends the centralized `LLM_NUM_CTX` value for context size, while
+these probes remain outside the provider-neutral contract so the evaluator can
+compare multiple runtime settings without adding orchestration controls.
 They record Ollama runtime metadata when the server returns it, including load
 duration, prompt/evaluation counts and durations, and generation tokens/sec.
 

@@ -15,6 +15,7 @@ _ENV_KEYS = [
     "RAG_MIN_SCORE", "PIPELINE_VERSION", "PRESERVE_RAW_EXTRACTION",
     "RAW_EXTRACT_DIR", "STUDENT_DATA_PATH",
     "LOG_LEVEL", "CORS_ORIGINS", "LLM_BASE_URL", "LLM_MODEL", "LLM_TIMEOUT_SECONDS",
+    "LLM_NUM_CTX",
 ]  # fmt: skip
 
 
@@ -52,6 +53,7 @@ def test_defaults_are_sensible():
     assert settings.llm_base_url == "http://localhost:11434"
     assert settings.llm_model == "qwen3.5:9b-q4_K_M"
     assert settings.llm_timeout_seconds == pytest.approx(60.0)
+    assert settings.llm_num_ctx == 8192
     assert settings.log_level == "INFO"
     assert settings.docs_enabled is True
 
@@ -66,6 +68,7 @@ def test_values_are_loaded_from_environment(monkeypatch):
     monkeypatch.setenv("LLM_BASE_URL", "http://ollama.test")
     monkeypatch.setenv("LLM_MODEL", "qwen-test")
     monkeypatch.setenv("LLM_TIMEOUT_SECONDS", "12.5")
+    monkeypatch.setenv("LLM_NUM_CTX", "16384")
 
     settings = make_settings()
     assert settings.app_env == "staging"
@@ -77,6 +80,13 @@ def test_values_are_loaded_from_environment(monkeypatch):
     assert settings.llm_base_url == "http://ollama.test"
     assert settings.llm_model == "qwen-test"
     assert settings.llm_timeout_seconds == pytest.approx(12.5)
+    assert settings.llm_num_ctx == 16384
+
+
+def test_llm_num_ctx_environment_override(monkeypatch):
+    monkeypatch.setenv("LLM_NUM_CTX", "16384")
+
+    assert make_settings().llm_num_ctx == 16384
 
 
 def test_rag_values_are_loaded_from_environment(monkeypatch):
@@ -195,6 +205,8 @@ def test_cors_origins_parsing(raw, expected):
         {"api_v1_prefix": "/api/v1/"},
         {"app_port": 0},
         {"llm_timeout_seconds": 0},
+        {"llm_num_ctx": 0},
+        {"llm_num_ctx": -1},
     ],
 )
 def test_invalid_values_are_rejected(bad):

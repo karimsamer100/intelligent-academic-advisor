@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterable, Mapping
 from typing import Any
 
@@ -9,8 +10,15 @@ from pydantic import BaseModel
 
 from app.llm.contracts import ToolDefinition
 from app.tools.context import ToolExecutionContext
-from app.tools.errors import ToolDuplicateNameError, UnknownToolError
+from app.tools.errors import (
+    ToolDuplicateNameError,
+    ToolError,
+    ToolExecutionError,
+    UnknownToolError,
+)
 from app.tools.interface import AcademicTool
+
+logger = logging.getLogger(__name__)
 
 
 class ToolRegistry:
@@ -50,9 +58,16 @@ class ToolRegistry:
         arguments: Mapping[str, Any] | BaseModel,
         trusted_context: ToolExecutionContext,
     ) -> dict[str, Any]:
-        """Resolve and execute a tool; argument validation remains tool-owned."""
+        """Execute a tool while preserving expected and sanitizing unexpected errors."""
 
-        return self.get(name).execute(arguments, trusted_context)
+        tool = self.get(name)
+        try:
+            return tool.execute(arguments, trusted_context)
+        except ToolError:
+            raise
+        except Exception:
+            logger.exception("tool execution failed", extra={"tool_name": tool.name})
+            raise ToolExecutionError(tool.name) from None
 
 
 __all__ = ["ToolRegistry"]

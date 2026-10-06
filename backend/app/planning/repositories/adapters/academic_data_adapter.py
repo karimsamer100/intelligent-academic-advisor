@@ -66,6 +66,7 @@ class JsonAcademicDataAdapter:
     _diagnostics: tuple[AcademicDataDiagnostic, ...]
     _corequisites_loaded: bool
     _corequisite_count: int
+    _corequisite_course_ids: frozenset[str]
     _uel_modules: tuple[UELModuleDefinition, ...] = ()
     _uel_mappings: UELMappingSet = UELMappingSet()
     _uel_module_coverage: UELProgressCoverage = UELProgressCoverage.UNAVAILABLE
@@ -247,6 +248,7 @@ class JsonAcademicDataAdapter:
             _diagnostics=_sorted_diagnostics(diagnostics),
             _corequisites_loaded=records.corequisites_loaded,
             _corequisite_count=records.corequisite_count,
+            _corequisite_course_ids=records.corequisite_course_ids,
             _uel_modules=uel_modules,
             _uel_mappings=uel_mappings,
             _uel_module_coverage=uel_module_coverage,
@@ -531,6 +533,7 @@ class JsonAcademicDataAdapter:
             course_id,
             loaded=self._corequisites_loaded,
             count=self._corequisite_count,
+            target_course_ids=self._corequisite_course_ids,
         )
         diagnostics.extend(corequisite_diagnostics)
         if corequisite_diagnostics:
@@ -1109,8 +1112,11 @@ def _corequisite_coverage_diagnostics(
     *,
     loaded: bool,
     count: int,
+    target_course_ids: frozenset[str],
 ) -> tuple[AcademicDataDiagnostic, ...]:
-    if loaded and count == 0:
+    if loaded and (
+        count == 0 or course_id.course_id not in target_course_ids
+    ):
         return ()
     detail = (
         "corequisite records exist but semester-aware corequisite semantics "

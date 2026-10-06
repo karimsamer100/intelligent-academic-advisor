@@ -42,6 +42,7 @@ def _settings(**overrides: Any) -> Settings:
         "llm_base_url": "http://ollama.test/",
         "llm_model": "qwen-test",
         "llm_timeout_seconds": 3.5,
+        "llm_num_ctx": 8192,
     }
     values.update(overrides)
     return Settings(_env_file=None, **values)
@@ -115,10 +116,28 @@ def test_simple_generation_maps_model_messages_and_non_streaming_request() -> No
             "model": "qwen-test",
             "messages": [{"role": "user", "content": "What is the rule?"}],
             "stream": False,
+            "options": {"num_ctx": 8192},
         },
     }
     assert "think" not in captured["payload"]
     assert response.content == "provider answer"
+
+
+def test_generation_includes_configured_context_size() -> None:
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["payload"] = json.loads(request.content)
+        return _text_response()
+
+    with _provider(handler, settings=_settings(llm_num_ctx=16384)) as provider:
+        provider.generate(
+            GenerationRequest(
+                messages=[LLMMessage(role=MessageRole.USER, content="Hello")]
+            )
+        )
+
+    assert captured["payload"]["options"]["num_ctx"] == 16384
 
 
 def test_system_user_assistant_and_tool_name_messages_map_to_ollama_roles() -> None:
@@ -168,7 +187,11 @@ def test_generation_controls_map_to_supported_ollama_options() -> None:
     with _provider(handler) as provider:
         provider.generate(request)
 
-    assert captured["options"] == {"temperature": 0.2, "num_predict": 256}
+    assert captured["options"] == {
+        "num_ctx": 8192,
+        "temperature": 0.2,
+        "num_predict": 256,
+    }
 
 
 def test_tool_definitions_map_to_ollama_function_tools() -> None:

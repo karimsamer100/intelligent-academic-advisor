@@ -397,3 +397,106 @@ def test_pgvector_repository_retrieval_filters_and_replacement(
     finally:
         session.rollback()
         session.close()
+
+
+def test_pgvector_repository_empty_scope_is_wildcard_and_specific_scope_is_strict(
+    db_engine,
+) -> None:
+    from app.rag.models.domain import RetrievalFilters
+    from app.rag.repositories.pgvector_repository import PgVectorChunkRepository
+
+    provider = HashTestEmbeddingProvider(dimension=1024)
+    source = _source()
+    base = _stored_chunks(provider, source)[0]
+    chunks = [
+        base,
+        base.model_copy(
+            update={
+                "chunk_id": "CHECKPOINT3-GENERAL-PROGRAM",
+                "program": None,
+                "applicable_programs": [],
+                "chunk_index": 3,
+            }
+        ),
+        base.model_copy(
+            update={
+                "chunk_id": "CHECKPOINT3-WRONG-PROGRAM",
+                "program": "CESS",
+                "applicable_programs": ["CESS"],
+                "chunk_index": 4,
+            }
+        ),
+        base.model_copy(
+            update={
+                "chunk_id": "CHECKPOINT3-GENERAL-REGULATION",
+                "regulation": None,
+                "applicable_regulations": [],
+                "program": None,
+                "applicable_programs": [],
+                "chunk_index": 5,
+            }
+        ),
+        base.model_copy(
+            update={
+                "chunk_id": "CHECKPOINT3-WRONG-REGULATION",
+                "regulation": 18,
+                "applicable_regulations": [18],
+                "program": None,
+                "applicable_programs": [],
+                "chunk_index": 6,
+            }
+        ),
+    ]
+
+    session = Session(
+        bind=db_engine,
+        expire_on_commit=False,
+    )
+    repository = PgVectorChunkRepository(session)
+
+    try:
+        assert repository.replace_source(source, chunks) == len(chunks)
+
+        program_results = repository.search(
+            provider.embed_query("credit load"),
+            RetrievalFilters(program="CAIE"),
+            top_k=10,
+        )
+        assert {
+            result.chunk_id for result in program_results
+        } == {
+            "CHECKPOINT3-REG23-CAIE",
+            "CHECKPOINT3-GENERAL-PROGRAM",
+            "CHECKPOINT3-GENERAL-REGULATION",
+            "CHECKPOINT3-WRONG-REGULATION",
+        }
+
+        regulation_results = repository.search(
+            provider.embed_query("credit load"),
+            RetrievalFilters(regulation=23),
+            top_k=10,
+        )
+        assert {
+            result.chunk_id for result in regulation_results
+        } == {
+            "CHECKPOINT3-REG23-CAIE",
+            "CHECKPOINT3-GENERAL-PROGRAM",
+            "CHECKPOINT3-GENERAL-REGULATION",
+            "CHECKPOINT3-WRONG-PROGRAM",
+        }
+
+        combined_results = repository.search(
+            provider.embed_query("credit load"),
+            RetrievalFilters(regulation=23, program="CAIE"),
+            top_k=10,
+        )
+        assert {
+            result.chunk_id for result in combined_results
+        } == {
+            "CHECKPOINT3-REG23-CAIE",
+            "CHECKPOINT3-GENERAL-PROGRAM",
+            "CHECKPOINT3-GENERAL-REGULATION",
+        }
+    finally:
+        session.rollback()
+        session.close()

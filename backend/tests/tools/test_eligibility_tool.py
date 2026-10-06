@@ -1,17 +1,35 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 
 import pytest
 
 from app.planning.domain.course import Course, CourseIdentity
-from app.planning.domain.eligibility import CourseEligibilityRuleSet, RuleSetStatus
+from app.planning.domain.eligibility import (
+    CourseEligibilityRuleSet,
+    EligibilityResult,
+    EligibilityStatus,
+    RuleSetStatus,
+)
 from app.planning.domain.lifecycle import ApprovalStatus, VerificationStatus
 from app.planning.repositories.adapters.academic_data_types import (
     AcademicDataLookup,
     AcademicDataSourceMode,
 )
+from app.planning.domain.provenance import Provenance
+from app.planning.domain.reasons import ReasonCode
+from app.planning.domain.results import ResultMetadata
+from app.planning.domain.trace import (
+    DecisionStatus,
+    DecisionTrace,
+    DecisionTraceNode,
+    TraceCode,
+    TraceNodeType,
+)
+from app.planning.domain.version import DatasetVersion
+from app.planning.policy import ExecutionMode
 from app.planning.repositories.adapters.student_json_repository import (
     JsonStudentRepository,
 )
@@ -21,7 +39,9 @@ from app.tools.errors import (
     ToolArgumentValidationError,
     ToolContextRequiredError,
     ToolDataUnavailableError,
+    ToolExecutionError,
 )
+from app.tools.registry import ToolRegistry
 
 
 def _write_student(tmp_path, student_id: str = "student-001") -> JsonStudentRepository:
@@ -67,6 +87,14 @@ class FakeAcademicData:
             dataset_version=None,
         )
 
+    def list_courses(self, *, regulation, program) -> tuple[Course, ...]:
+        if (
+            self.course.identity.regulation is regulation
+            and self.course.identity.program == program
+        ):
+            return (self.course,)
+        return ()
+
     def get_eligibility_rules(
         self, course_id: CourseIdentity
     ) -> AcademicDataLookup[CourseEligibilityRuleSet]:
@@ -76,26 +104,67 @@ class FakeAcademicData:
         )
 
 
+class RaisingEligibilityAcademicData:
+    def __init__(self, error: Exception) -> None:
+        self.error = error
+
+    def list_courses(self, *, regulation, program) -> tuple[Course, ...]:
+        del regulation, program
+        raise self.error
+
+
 class FakePlanningService:
-    def __init__(self, result: dict[str, object]) -> None:
+    def __init__(self, result: EligibilityResult) -> None:
         self.result = result
         self.requests = []
 
     def check_eligibility(self, request):
         self.requests.append(request)
-        return _Result(self.result)
+        return self.result
 
 
-class _Result:
-    def __init__(self, payload: dict[str, object]) -> None:
-        self.payload = payload
+def _eligibility_result(identity: CourseIdentity) -> EligibilityResult:
+    trace = DecisionTrace(
+        DecisionTraceNode(
+            node_id="eligibility",
+            code=TraceCode.ELIGIBILITY,
+            node_type=TraceNodeType.ROOT,
+            status=DecisionStatus.SATISFIED,
+            subject=identity,
+        )
+    )
+    metadata = ResultMetadata(
+        dataset_version=DatasetVersion("tool-test"),
+        execution_mode=ExecutionMode.DEVELOPMENT,
+        authoritative=False,
+        reason_codes=(ReasonCode.UNAPPROVED_RULE,),
+        provenance=(
+            Provenance(
+                rule_id="RULE-TOOL",
+                source_id="SRC-TOOL",
+                source_page=7,
+            ),
+        ),
+        decision_trace=trace,
+    )
+    return EligibilityResult(
+        target_course=identity,
+        status=EligibilityStatus.ELIGIBLE,
+        eligible=True,
+        rule_set_status=RuleSetStatus.COMPLETE,
+        metadata=metadata,
+    )
 
-    def to_dict(self) -> dict[str, object]:
-        return self.payload
 
-
-def _tool(tmp_path, *, student_id: str = "student-001"):
-    identity = CourseIdentity.parse("R23:CAIE:CSE221")
+def _tool(
+    tmp_path,
+    *,
+    student_id: str = "student-001",
+    identity: CourseIdentity | None = None,
+    academic_data=None,
+    planning_service=None,
+):
+    identity = identity or CourseIdentity.parse("R23:CAIE:CSE221")
     course = Course(
         identity=identity,
         course_name="Algorithms",
@@ -107,12 +176,10 @@ def _tool(tmp_path, *, student_id: str = "student-001"):
         target_course=identity,
         status=RuleSetStatus.COMPLETE,
     )
-    planning = FakePlanningService(
-        {"target_course": identity.course_id, "status": "ELIGIBLE"}
-    )
+    planning = planning_service or FakePlanningService(_eligibility_result(identity))
     tool = CheckCourseEligibilityTool(
         student_repository=_write_student(tmp_path, student_id),
-        academic_data=FakeAcademicData(course, rule_set),
+        academic_data=academic_data or FakeAcademicData(course, rule_set),
         planning_service=planning,
     )
     return tool, planning
@@ -146,10 +213,97 @@ def test_eligibility_tool_loads_trusted_state_and_academic_data(tmp_path) -> Non
     assert request.student.program.value == "CAIE"
     assert request.course.identity.course_id == "R23:CAIE:CSE221"
     assert request.rule_set.target_course == request.course.identity
-    assert result == {
-        "target_course": "R23:CAIE:CSE221",
-        "status": "ELIGIBLE",
-    }
+    assert result["course"] == {"code": "CSE221", "name": "Algorithms"}
+    assert result["decision"] == "ELIGIBLE"
+    assert result["status"] == "ELIGIBLE"
+    assert result["authoritative"] is False
+    assert result["requires_human_review"] is False
+    assert result["citations"] == [
+        {"source_id": "SRC-TOOL", "page": 7, "rule_id": "RULE-TOOL"}
+    ]
+    assert "decision_trace" not in result
+
+
+@pytest.mark.parametrize("course_code", ["cse221", "Cse221", "CSE 221"])
+def test_eligibility_tool_accepts_course_code_formatting_variants(
+    tmp_path,
+    course_code: str,
+) -> None:
+    tool, planning = _tool(tmp_path)
+
+    result = tool.execute(
+        {"course_code": course_code},
+        ToolExecutionContext(student_id="student-001"),
+    )
+
+    assert result["course"]["code"] == "CSE221"
+    assert result["decision"] == "ELIGIBLE"
+    assert planning.requests[0].course.identity == CourseIdentity.parse(
+        "R23:CAIE:CSE221"
+    )
+
+
+def test_eligibility_tool_accepts_surrounding_course_code_whitespace(tmp_path) -> None:
+    tool, planning = _tool(tmp_path)
+
+    result = tool.execute(
+        {"course_code": "  CSE221  "},
+        ToolExecutionContext(student_id="student-001"),
+    )
+
+    assert result["course"]["code"] == "CSE221"
+    assert planning.requests[0].course.identity.course_code == "CSE221"
+
+
+def test_eligibility_tool_keeps_unknown_course_unknown(tmp_path) -> None:
+    tool, planning = _tool(tmp_path)
+
+    with pytest.raises(ToolDataUnavailableError):
+        tool.execute(
+            {"course_code": "CSE9999"},
+            ToolExecutionContext(student_id="student-001"),
+        )
+
+    assert planning.requests == []
+
+
+@pytest.mark.parametrize(
+    "out_of_scope_identity",
+    ["R18:CAIE:CSE221", "R23:CESS:CSE221"],
+)
+def test_eligibility_tool_does_not_cross_trusted_regulation_or_program_scope(
+    tmp_path,
+    out_of_scope_identity: str,
+) -> None:
+    tool, planning = _tool(
+        tmp_path,
+        identity=CourseIdentity.parse(out_of_scope_identity),
+    )
+
+    with pytest.raises(ToolDataUnavailableError):
+        tool.execute(
+            {"course_code": "cse221"},
+            ToolExecutionContext(student_id="student-001"),
+        )
+
+    assert planning.requests == []
+
+
+def test_eligibility_tool_preserves_asux_canonical_code(tmp_path) -> None:
+    tool, planning = _tool(
+        tmp_path,
+        identity=CourseIdentity.parse("R23:CAIE:ASUx31"),
+    )
+
+    result = tool.execute(
+        {"course_code": "ASU X31"},
+        ToolExecutionContext(student_id="student-001"),
+    )
+
+    assert result["course"]["code"] == "ASUx31"
+    assert planning.requests[0].course.identity == CourseIdentity.parse(
+        "R23:CAIE:ASUx31"
+    )
 
 
 def test_eligibility_tool_requires_trusted_student_context(tmp_path) -> None:
@@ -188,3 +342,46 @@ def test_eligibility_tool_rejects_academic_overrides(tmp_path) -> None:
         )
 
     assert planning.requests == []
+
+
+@pytest.mark.parametrize("error_type", [AttributeError, TypeError])
+def test_unexpected_eligibility_dependency_errors_use_safe_registry_path(
+    tmp_path,
+    caplog,
+    error_type: type[Exception],
+) -> None:
+    tool, _ = _tool(
+        tmp_path,
+        academic_data=RaisingEligibilityAcademicData(
+            error_type("synthetic programming bug")
+        ),
+    )
+    registry = ToolRegistry([tool])
+
+    with caplog.at_level(logging.ERROR, logger="app.tools.registry"):
+        with pytest.raises(ToolExecutionError) as raised:
+            registry.execute(
+                "check_course_eligibility",
+                {"course_code": "CSE221"},
+                ToolExecutionContext(student_id="student-001"),
+            )
+
+    assert str(raised.value) == "Tool 'check_course_eligibility' failed to produce a valid result"
+    assert "synthetic programming bug" not in str(raised.value)
+    assert "tool execution failed" in caplog.text
+    assert any(
+        record.exc_info and isinstance(record.exc_info[1], error_type)
+        for record in caplog.records
+    )
+
+
+def test_registry_preserves_known_eligibility_data_unavailable_error(tmp_path) -> None:
+    tool, _ = _tool(tmp_path)
+    registry = ToolRegistry([tool])
+
+    with pytest.raises(ToolDataUnavailableError):
+        registry.execute(
+            "check_course_eligibility",
+            {"course_code": "CSE9999"},
+            ToolExecutionContext(student_id="student-001"),
+        )

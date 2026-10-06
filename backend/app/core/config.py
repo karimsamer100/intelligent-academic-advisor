@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://localhost:11434"
     llm_model: str = "qwen3.5:9b-q4_K_M"
     llm_timeout_seconds: float = Field(default=60.0, gt=0)
+    # 8K is the conservative development baseline documented by the local LLM
+    # evaluation guidance; deployments can override it for their hardware.
+    llm_num_ctx: int = Field(default=8192, gt=0)
 
     # --- logging / http ----------------------------------------------------
     log_level: str = "INFO"

@@ -20,7 +20,6 @@ class SearchOfficialDocumentsArguments(BaseModel):
 
     query: str = Field(min_length=1)
     document_types: list[str] | None = None
-    language: str | None = Field(default=None, min_length=1)
 
     @field_validator("document_types")
     @classmethod
@@ -69,7 +68,6 @@ class SearchOfficialDocumentsTool(AcademicTool[SearchOfficialDocumentsArguments]
             regulation=regulation,
             program=program,
             document_types=arguments.document_types,
-            language=arguments.language,
         )
         response = self._rag_service.search(request)
         return response.model_dump(mode="json")

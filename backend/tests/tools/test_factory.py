@@ -85,7 +85,7 @@ def test_factory_creates_exactly_the_frozen_three_tool_set() -> None:
         registry.get("search_official_documents").definition.input_schema[
             "properties"
         ]
-    ) == {"query", "document_types", "language"}
+    ) == {"query", "document_types"}
 
 
 def test_factory_does_not_construct_planning_or_discover_data() -> None:

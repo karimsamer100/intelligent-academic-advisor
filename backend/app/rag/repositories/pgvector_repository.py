@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 from app.rag.models.domain import DocumentMetadata, RetrievedEvidence, RetrievalFilters, SourceState, StoredChunk
@@ -109,9 +109,19 @@ class PgVectorChunkRepository(ChunkRepository):
 
         # Trusted scope is enforced at SQL level. Applicability arrays come only from explicit source/chunk metadata.
         if filters.regulation is not None:
-            stmt = stmt.where(RagChunk.applicable_regulations.contains([filters.regulation]))
+            stmt = stmt.where(
+                or_(
+                    func.cardinality(RagChunk.applicable_regulations) == 0,
+                    RagChunk.applicable_regulations.contains([filters.regulation]),
+                )
+            )
         if filters.program is not None:
-            stmt = stmt.where(RagChunk.applicable_programs.contains([filters.program]))
+            stmt = stmt.where(
+                or_(
+                    func.cardinality(RagChunk.applicable_programs) == 0,
+                    RagChunk.applicable_programs.contains([filters.program]),
+                )
+            )
         if filters.document_types:
             stmt = stmt.where(RagChunk.applicable_document_types.overlap(filters.document_types))
         if filters.language:
