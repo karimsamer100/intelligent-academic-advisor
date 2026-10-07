@@ -459,7 +459,7 @@ def test_pgvector_repository_empty_scope_is_wildcard_and_specific_scope_is_stric
 
         program_results = repository.search(
             provider.embed_query("credit load"),
-            RetrievalFilters(program="CAIE"),
+            RetrievalFilters(program="CAIE", official_status="TEST_ONLY"),
             top_k=10,
         )
         assert {
@@ -473,7 +473,7 @@ def test_pgvector_repository_empty_scope_is_wildcard_and_specific_scope_is_stric
 
         regulation_results = repository.search(
             provider.embed_query("credit load"),
-            RetrievalFilters(regulation=23),
+            RetrievalFilters(regulation=23, official_status="TEST_ONLY"),
             top_k=10,
         )
         assert {
@@ -487,7 +487,11 @@ def test_pgvector_repository_empty_scope_is_wildcard_and_specific_scope_is_stric
 
         combined_results = repository.search(
             provider.embed_query("credit load"),
-            RetrievalFilters(regulation=23, program="CAIE"),
+            RetrievalFilters(
+                regulation=23,
+                program="CAIE",
+                official_status="TEST_ONLY",
+            ),
             top_k=10,
         )
         assert {
