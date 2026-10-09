@@ -4,8 +4,8 @@
 **Status date:** 2026-10-09
 **Repository:** `karimsamer100/intelligent-academic-advisor`
 **Integration branch:** `feat/orchestration-grounded-advisor`
-**Current verified code HEAD:** `9a91e0a5fb6f519682d3633ffb4679d47cca2a2d`
-**Latest verified code commit:** `fix(orchestration): redact evaluation report prompts`
+**Current verified code HEAD:** `c9aa843330638f9b9e48981a912cc30232273f6e`
+**Latest verified code commit:** `fix(advisor): improve tool selection and grounded evaluation`
 
 ---
 
@@ -22,7 +22,7 @@ Local LLM Foundation          DONE
 Real Local LLM Validation     DONE
 Pre-Orchestration Hardening   DONE
 Orchestration                 COMPLETE OFFLINE / LIVE EVALUATION PENDING
-Final Grounded Responses      OFFLINE LOOP VERIFIED / LIVE QUALITY PENDING
+Final Grounded Responses      BOUNDED MULTI-TOOL LOOP VERIFIED / LIVE QUALITY PENDING
 Chat API / Persistence        NOT STARTED
 Frontend Implementation       DESIGN IN PROGRESS
 CI Workflow                   NOT IMPLEMENTED YET
@@ -283,6 +283,13 @@ official_status="TEST_ONLY"
 
 Current repository HEAD includes that test-only fix.
 
+Bounded multi-tool orchestration V2 is now implemented offline. The current
+defaults are a maximum of 3 tool rounds and 5 total tool executions per user
+turn. Tool batches are validated before execution, repeated calls are rejected,
+trusted student context remains backend-owned, and ordered provider-neutral
+execution records/transcripts preserve each tool result. These are current
+implementation limits, not a new permanent product decision.
+
 Backend QA/regression work has already been carried out substantially.
 
 Checkpoint 1 deterministic verification on 2026-10-09:
@@ -345,6 +352,25 @@ only in memory for the request sent to the LLM. The runner CLI import path was
 verified offline. Live grounded-response evaluation remains pending, and no
 final grounded-response quality approval has been granted.
 
+Bounded multi-tool orchestration V2 verification on 2026-10-09:
+
+```text
+Production commit:                  b13e704697f79009d279b339aa0ba652a7d9b5ec
+Evaluation commit:                  c9aa843330638f9b9e48981a912cc30232273f6e
+Focused backend LLM/tools/orchestration: 146 passed
+Evaluator tests:                    27 passed
+Docker DB-required backend:         686 passed
+Compileall:                         passed
+Ruff for changed Python files:      passed
+```
+
+The V2 evaluator preserves the earlier real Qwen report as the baseline and
+adds bounded multi-tool history, zero-evidence distinction, source/page and
+degree-audit consistency checks, Arabic technical-token handling, and
+case-ID selection. The live Ollama server was not contacted during this work.
+Live grounded-response evaluation remains pending; no final grounded-response
+quality approval has been granted.
+
 **Remaining QA infrastructure gap:** GitHub Actions CI workflow is not yet present; `.github/workflows/` currently contains only `.gitkeep`.
 
 ---
@@ -375,8 +401,8 @@ Recommended semester placement is not the same as actual term offering.
 
 ### Final advisor answers
 
-The offline one-tool grounded response loop is implemented and deterministic
-tests pass. Real Ollama final-answer quality remains unevaluated.
+The offline bounded multi-tool grounded response loop is implemented and
+deterministic tests pass. Real Ollama final-answer quality remains unevaluated.
 
 ---
 
@@ -425,13 +451,13 @@ Previous backend QA/regression testing has already been performed; do not assign
 
 ## 9. Immediate Next Technical Step
 
-Run the smallest orchestration loop against the configured Ollama model when
+Run the smallest bounded orchestration loop against the configured Ollama model when
 the remote host is available:
 
 ```text
 User
   ↓
-LLM selects one of the approved tools
+LLM selects zero or more useful approved tools within the bounded limits
   ↓
 Tool executes with trusted context
   ↓

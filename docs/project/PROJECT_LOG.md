@@ -196,3 +196,22 @@ The project already completed and integrated:
 - Persisted report prompts and answers are redacted; no final grounded-response
   quality approval has been granted.
 - Live grounded-response evaluation remains pending.
+
+## 2026-10-09 — Bounded multi-tool orchestration V2 verified offline
+
+- Production commit: `b13e704697f79009d279b339aa0ba652a7d9b5ec`.
+- Evaluation commit: `c9aa843330638f9b9e48981a912cc30232273f6e`.
+- Added bounded multi-tool rounds with a maximum of 3 rounds and 5 total
+  executions per user turn, ordered execution records, transcript correlation,
+  repeated-call rejection, and aggregate human-review preservation.
+- Hardened canonical RAG document-type filters and retained backend-owned
+  student/regulation/program scope.
+- Updated the non-CI evaluator for multi-round history, zero-evidence
+  retrieval, source/page consistency, degree-audit numeric/rule checks, and
+  Arabic technical-token handling. The earlier real Qwen report remains the
+  baseline; no new Ollama request was made.
+- Verified focused backend LLM/tools/orchestration: 146 passed; evaluator:
+  27 passed; Docker DB-required backend: 686 passed; compileall and Ruff
+  passed.
+- Live grounded-response evaluation remains pending; no final grounded-
+  response quality approval has been granted.
