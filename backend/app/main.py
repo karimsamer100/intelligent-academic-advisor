@@ -19,6 +19,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware
 from app.db.session import dispose_engine
+from app.orchestration.composition import build_advisor_static_dependencies
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.llm_http_client = llm_http_client
     # No database connection is made here: /api/v1/ready reports DB state.
     try:
+        # Planning and academic data do not depend on a request-scoped
+        # resource, so compose them once for the application when configured.
+        # The dependency layer retains a safe lazy fallback for lightweight
+        # test applications that intentionally omit academic-data settings.
+        if settings.academic_data_foundation_path is not None:
+            app.state.advisor_static_dependencies = (
+                build_advisor_static_dependencies(settings)
+            )
         logger.info(
             "application starting",
             extra={
