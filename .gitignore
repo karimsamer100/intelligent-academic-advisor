@@ -60,3 +60,6 @@ data/prepared_rag/
 
 .coverage
 htmlcov/
+
+# Non-CI grounded-advisor evaluation outputs
+evals/orchestration/results/
