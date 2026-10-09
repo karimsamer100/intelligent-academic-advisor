@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from app.llm.contracts import ToolCall
-from app.orchestration.contracts import AdvisorResponse
+from app.orchestration.contracts import AdvisorResponse, AdvisorToolExecution
 
-from evaluator import grade_turn, skip_case
+from evaluator import detect_language, grade_turn, skip_case
 from live_eval import (
     Discovery,
     _blocked_case_result,
@@ -13,6 +13,7 @@ from live_eval import (
     _case_report_prompt,
     _redact_student_sensitive_text,
     _safe_report_prompt,
+    _select_cases,
 )
 
 
@@ -417,6 +418,15 @@ def test_missing_prerequisite_is_explicitly_skipped() -> None:
     assert result["final_answer"] is None
 
 
+def test_case_id_selection_is_explicit_and_deterministic() -> None:
+    selected = _select_cases(
+        [{"id": "first", "prompt": "one"}, {"id": "second", "prompt": "two"}],
+        ["second"],
+    )
+
+    assert selected == [{"id": "second", "prompt": "two"}]
+
+
 def test_live_report_redacts_student_sensitive_totals() -> None:
     redacted = _redact_student_sensitive_text(
         "Student DEV-TEST has GPA 3.0 and completed 6 of 144 credits.",
@@ -466,3 +476,273 @@ def test_persisted_prompts_are_redacted_on_normal_blocked_and_skipped_paths() ->
         "application dependency unavailable",
     )
     assert blocked_payload["cases"][0]["prompt"] is None
+
+
+def test_page_token_is_not_classified_as_an_unsupported_course_code() -> None:
+    result = grade_turn(
+        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        response=_eligibility_response(
+            "You are eligible to take CSE221; see page161 in the returned record."
+        ),
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert "unsupported_course_code:PAGE161" not in result[
+        "invented_academic_information"
+    ]
+
+
+def test_negated_non_authority_claim_is_not_graded_as_positive_authority() -> None:
+    result = grade_turn(
+        case={
+            "id": "eligibility_en",
+            "kind": "eligibility",
+            "expected_tool": "check_course_eligibility",
+        },
+        response=_eligibility_response(
+            "The modeled result is eligible, but the data is NOT fully authoritative."
+        ),
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert "non_authoritative_result_requires_manual_review" not in result["reasons"]
+
+
+def test_arabic_prose_with_technical_terms_and_course_codes_is_arabic() -> None:
+    assert detect_language("يمكنك تسجيل CSE221 مع human review في page161.") == "ar"
+    assert detect_language("You can take CSE221 ويمكنك التسجيل.") == "mixed"
+
+
+def test_multi_tool_execution_history_is_recorded_and_review_is_aggregated() -> None:
+    eligibility_result = {
+        "course": {"code": "CSE221"},
+        "decision": "ELIGIBLE",
+        "status": "ELIGIBLE",
+        "eligible": True,
+        "authoritative": False,
+        "requires_human_review": False,
+    }
+    audit_result = {
+        "status": "INDETERMINATE",
+        "requirement_set_status": "INCOMPLETE",
+        "credits": {"completed": 84, "required": 144, "remaining": 60},
+        "requirements": {"satisfied_count": 1, "total_count": 3},
+        "requires_human_review": True,
+    }
+    response = AdvisorResponse(
+        text="CSE221 is eligible in the modeled result; the degree audit is indeterminate and requires human review.",
+        requires_human_review=True,
+        tool_executions=[
+            AdvisorToolExecution(
+                call_id="call-1",
+                tool_name="check_course_eligibility",
+                arguments={"course_code": "CSE221"},
+                status="executed",
+                round_index=1,
+                result=eligibility_result,
+            ),
+            AdvisorToolExecution(
+                call_id="call-2",
+                tool_name="degree_audit",
+                arguments={},
+                status="executed",
+                round_index=2,
+                result=audit_result,
+            ),
+        ],
+    )
+
+    result = grade_turn(
+        case={
+            "id": "compound",
+            "kind": "compound",
+            "required_tools": ["check_course_eligibility", "degree_audit"],
+        },
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        tool_calls_by_round=[
+            [_eligibility_call()],
+            [ToolCall(name="degree_audit", arguments={})],
+        ],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+    assert result["tool_execution_count"] == 2
+    assert result["tool_round_count"] == 2
+    assert result["human_review_required"] is True
+    assert result["human_review_preserved"] is True
+    assert result["selected_tools"] == ["check_course_eligibility", "degree_audit"]
+    assert len(result["trusted_tool_summaries"]) == 2
+
+
+def test_repeated_tool_execution_is_a_hard_failure() -> None:
+    response = AdvisorResponse(
+        text="The first result is retained.",
+        tool_executions=[
+            AdvisorToolExecution(
+                call_id="call-1",
+                tool_name="check_course_eligibility",
+                arguments={"course_code": "CSE221"},
+                status="executed",
+                round_index=1,
+                result=_eligibility_response("unused").tool_result,
+            ),
+            AdvisorToolExecution(
+                call_id="call-2",
+                tool_name="check_course_eligibility",
+                arguments={"course_code": "CSE221"},
+                status="rejected",
+                round_index=2,
+                result={
+                    "error": {
+                        "code": "REPEATED_TOOL_CALL",
+                        "message": "repeated",
+                    }
+                },
+            ),
+        ],
+    )
+
+    result = grade_turn(
+        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        tool_calls_by_round=[[_eligibility_call()], [_eligibility_call()]],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["status"] == "FAIL"
+    assert "tool_execution_bound_exceeded" in result["reasons"]
+    assert len(result["rejected_tool_calls"]) == 1
+
+
+def test_irrelevant_extra_tool_is_manual_review_not_automatic_pass() -> None:
+    eligibility_result = _eligibility_response("unused").tool_result
+    assert eligibility_result is not None
+    response = AdvisorResponse(
+        text="The eligibility result is available.",
+        tool_executions=[
+            AdvisorToolExecution(
+                call_id="call-1",
+                tool_name="check_course_eligibility",
+                arguments={"course_code": "CSE221"},
+                status="executed",
+                round_index=1,
+                result=eligibility_result,
+            ),
+            AdvisorToolExecution(
+                call_id="call-2",
+                tool_name="degree_audit",
+                arguments={},
+                status="executed",
+                round_index=1,
+                result={
+                    "status": "ACADEMIC_REQUIREMENTS_NOT_SATISFIED",
+                    "requirement_set_status": "COMPLETE",
+                    "credits": {"completed": 84, "required": 144, "remaining": 60},
+                    "requirements": {"satisfied_count": 1, "total_count": 3},
+                    "requires_human_review": False,
+                },
+            ),
+        ],
+    )
+
+    result = grade_turn(
+        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        tool_calls_by_round=[
+            [
+                _eligibility_call(),
+                ToolCall(name="degree_audit", arguments={}),
+            ]
+        ],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+    assert "unjustified_extra_tool_call" in result["reasons"]
+
+
+def test_zero_evidence_retrieval_is_not_graded_as_supported() -> None:
+    response = AdvisorResponse(
+        text="No official evidence was returned, so I cannot confirm the rule.",
+        tool_name="search_official_documents",
+        tool_result={"results": []},
+    )
+
+    result = grade_turn(
+        case={
+            "id": "official_regulation",
+            "kind": "official_documents",
+            "expected_tool": "search_official_documents",
+        },
+        response=response,
+        initial_tool_calls=[
+            ToolCall(
+                name="search_official_documents",
+                arguments={"query": "registration"},
+            )
+        ],
+    )
+
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+    assert result["citations_supported"] is None
+    assert "retrieval_no_evidence" in result["reasons"]
+
+
+def test_degree_audit_rule_page_mismatch_is_a_hard_failure() -> None:
+    result = grade_turn(
+        case={"id": "degree_audit", "kind": "degree_audit", "expected_tool": "degree_audit"},
+        response=AdvisorResponse(
+            text="REQ23-004 is satisfied according to page 81.",
+            requires_human_review=False,
+            tool_executions=[
+                AdvisorToolExecution(
+                    call_id="call-1",
+                    tool_name="degree_audit",
+                    arguments={},
+                    status="executed",
+                    round_index=1,
+                    result={
+                        "status": "ACADEMIC_REQUIREMENTS_NOT_SATISFIED",
+                        "requirement_set_status": "COMPLETE",
+                        "credits": {"completed": 84, "required": 144, "remaining": 60},
+                        "requirements": {"satisfied_count": 1, "total_count": 3},
+                        "requires_human_review": False,
+                        "citations": [
+                            {"rule_id": "REQ23-004", "source_id": "SRC-RULES", "page": 13}
+                        ],
+                    },
+                )
+            ],
+        ),
+        initial_tool_calls=[ToolCall(name="degree_audit", arguments={})],
+    )
+
+    assert result["status"] == "FAIL"
+    assert "degree_audit_deterministic_contradiction" in result["reasons"]
+
+
+def test_degree_audit_numeric_summary_mismatch_is_a_hard_failure() -> None:
+    result = grade_turn(
+        case={"id": "degree_audit", "kind": "degree_audit", "expected_tool": "degree_audit"},
+        response=AdvisorResponse(
+            text="Completed credits: 85; required credits: 144; remaining credits: 59.",
+            tool_name="degree_audit",
+            tool_result={
+                "status": "ACADEMIC_REQUIREMENTS_NOT_SATISFIED",
+                "requirement_set_status": "COMPLETE",
+                "credits": {"completed": 84, "required": 144, "remaining": 60},
+                "requirements": {"satisfied_count": 1, "total_count": 3},
+                "requires_human_review": False,
+            },
+        ),
+        initial_tool_calls=[ToolCall(name="degree_audit", arguments={})],
+    )
+
+    assert result["status"] == "FAIL"
+    assert "degree_audit_deterministic_contradiction" in result["reasons"]

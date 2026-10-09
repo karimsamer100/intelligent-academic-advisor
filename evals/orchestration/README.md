@@ -4,7 +4,7 @@ This is a small, explicit, non-CI evaluation for the complete production
 composition:
 
 ```text
-Ollama -> AdvisorOrchestrator -> ToolRegistry -> Planning/RAG -> final Ollama answer
+Ollama -> bounded AdvisorOrchestrator -> ToolRegistry -> Planning/RAG -> final Ollama answer
 ```
 
 The runner discovers a development student and supported courses from the
@@ -12,6 +12,8 @@ configured trusted data. It executes real eligibility, degree-audit, and RAG
 dependencies; it does not substitute fake Planning or RAG results in live
 mode. Each case receives a fresh request-scoped RAG session while the
 application-owned static Planning and academic-data dependencies are reused.
+The orchestrator permits at most 3 tool rounds and 5 total tool executions per
+turn, and records every requested and executed call.
 
 ## Run later when Ollama is available
 
@@ -25,6 +27,9 @@ docker compose run --rm --no-deps -w /app `
   backend python /evals/orchestration/live_eval.py `
   --cases /evals/orchestration/cases.json
 ```
+
+Run focused cases without editing the case file by repeating `--case-id`, for
+example `--case-id eligibility_ar --case-id compound_grounded_advisor`.
 
 The generated JSON is written under `evals/orchestration/results/`, which is
 gitignored. The command exits `0` only for an all-PASS result, `1` for a hard
@@ -40,17 +45,19 @@ credit totals in the result payload.
 
 The prepared cases cover English, Arabic, mixed-language eligibility, degree
 audit, official regulation evidence, a trusted GPA/credit override attempt,
-an ambiguous clarification request, and a discovered human-review eligibility
-case. Cases whose real prerequisites are not present are explicitly marked
-`SKIPPED`; no academic result is invented.
+an ambiguous clarification request, a discovered human-review eligibility
+case, and compound/sequential multi-tool questions. Cases whose real
+prerequisites are not present are explicitly marked `SKIPPED`; no academic
+result is invented.
 
-Automated grading checks tool selection, one-tool execution, trusted argument
-boundaries, deterministic Planning contradictions, human-review preservation,
+Automated grading checks requested tools across all rounds, bounded execution,
+trusted argument boundaries, deterministic Planning contradictions, human-
+review preservation, numeric/rule consistency where trusted data is explicit,
 and whether cited source IDs/pages occur in returned RAG evidence. A
-contradiction of a deterministic Planning result is a hard failure. Nuanced
-language quality, completeness, and academic interpretation still require
-manual review; a PASS is not a claim that live academic correctness has been
-fully verified.
+contradiction of a deterministic Planning result is a hard failure. Retrieval
+with no evidence, unsupported or ambiguous citations, and nuanced language,
+completeness, and academic interpretation require manual review; a PASS is not
+a claim that live academic correctness has been fully verified.
 
 ## Deterministic evaluator tests
 

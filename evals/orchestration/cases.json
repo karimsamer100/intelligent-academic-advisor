@@ -1,5 +1,5 @@
 {
-  "schema_version": "orchestration-eval-v1",
+  "schema_version": "orchestration-eval-v2",
   "cases": [
     {
       "id": "eligibility_en",
@@ -22,6 +22,7 @@
       "kind": "eligibility",
       "language_expected": "mixed",
       "expected_tool": "check_course_eligibility",
+      "allowed_extra_tools": ["search_official_documents"],
       "requires": ["eligibility_course"],
       "prompt": "Check my eligibility for {{eligibility_course}} و اشرح prerequisites باختصار، مع الحفاظ على أي human review flag."
     },
@@ -64,6 +65,29 @@
       "expected_tool": "check_course_eligibility",
       "requires": ["review_course"],
       "prompt": "Can I take {{review_course}}? State the result exactly, and clearly explain if a human academic review is required."
+    },
+    {
+      "id": "compound_grounded_advisor",
+      "kind": "compound",
+      "language_expected": "en",
+      "required_tools": [
+        "check_course_eligibility",
+        "degree_audit",
+        "search_official_documents"
+      ],
+      "requires": ["eligibility_course", "rag_available"],
+      "prompt": "Combine an eligibility check for {{eligibility_course}}, my degree progress, and official regulation evidence about prerequisites. Use each result only for the part it supports, preserve any human-review or non-authoritative limitation, and cite returned documents only."
+    },
+    {
+      "id": "sequential_grounded_followup",
+      "kind": "compound",
+      "language_expected": "en",
+      "required_tools": [
+        "check_course_eligibility",
+        "search_official_documents"
+      ],
+      "requires": ["eligibility_course", "rag_available"],
+      "prompt": "First determine whether I can take {{eligibility_course}}. Then use official document evidence to explain the relevant prerequisite or registration rule. Keep the two trusted results distinct."
     }
   ]
 }

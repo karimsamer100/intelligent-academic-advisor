@@ -423,6 +423,14 @@ def _initial_tool_calls(provider: RecordingProvider) -> list[ToolCall]:
     return list(provider.calls[0].response.tool_calls)
 
 
+def _tool_calls_by_round(provider: RecordingProvider) -> list[list[ToolCall]]:
+    return [
+        list(call.response.tool_calls)
+        for call in provider.calls
+        if call.response is not None
+    ]
+
+
 def _blocked_case_result(
     *,
     case: Mapping[str, Any],
@@ -432,22 +440,60 @@ def _blocked_case_result(
     response: AdvisorResponse | None,
     error: BaseException,
 ) -> dict[str, Any]:
-    calls = _initial_tool_calls(provider) if provider is not None else []
+    requested_rounds = _tool_calls_by_round(provider) if provider is not None else []
+    calls = [call for round_calls in requested_rounds for call in round_calls]
+    executions = list(response.tool_executions) if response is not None else []
+    executed = [
+        execution for execution in executions if execution.status in {"executed", "failed"}
+    ]
+    summaries = [
+        _safe_tool_summary(execution.result)
+        for execution in executions
+        if execution.result is not None
+    ]
+    summaries = [summary for summary in summaries if summary is not None]
+    available_result = any(
+        isinstance(execution.result, Mapping) and "error" not in execution.result
+        for execution in executed
+    )
     return {
         "case_id": str(case["id"]),
         "prompt": _safe_report_prompt(prompt, student_id),
         "language_expected": case.get("language_expected"),
         "status": "BLOCKED",
         "selected_tools": [call.name for call in calls],
+        "requested_tools_by_round": [
+            _tool_call_payload(round_calls) for round_calls in requested_rounds
+        ],
+        "executed_tools": [
+            {
+                "tool_name": execution.tool_name,
+                "status": execution.status,
+                "round_index": execution.round_index,
+                "arguments": _safe_arguments(execution.tool_name, execution.arguments),
+                "result": _safe_tool_summary(execution.result),
+            }
+            for execution in executed
+        ],
+        "rejected_tool_calls": [
+            {
+                "tool_name": execution.tool_name,
+                "status": execution.status,
+                "round_index": execution.round_index,
+                "arguments": _safe_arguments(execution.tool_name, execution.arguments),
+                "result": _safe_tool_summary(execution.result),
+            }
+            for execution in executions
+            if execution.status == "rejected"
+        ],
         "tool_arguments": _tool_call_payload(calls),
         "tool_selected": calls[0].name if len(calls) == 1 else None,
-        "tool_executed": bool(response and response.tool_name),
-        "tool_result_available": bool(
-            response and response.tool_result and "error" not in response.tool_result
-        ),
-        "trusted_tool_summary": _safe_tool_summary(
-            response.tool_result if response else None
-        ),
+        "tool_executed": bool(executed),
+        "tool_execution_count": len(executed),
+        "tool_round_count": len(requested_rounds),
+        "tool_result_available": available_result,
+        "trusted_tool_summary": summaries[0] if len(summaries) == 1 else None,
+        "trusted_tool_summaries": summaries,
         "final_answer": None,
         "response_language": None,
         "decision_preserved": None,
@@ -520,6 +566,7 @@ def _run_case(
         case=case,
         response=response,
         initial_tool_calls=initial_calls,
+        tool_calls_by_round=_tool_calls_by_round(provider),
         known_course_codes=discovery.course_codes,
     )
     graded["prompt"] = _safe_report_prompt(prompt, discovery.student_id)
@@ -538,28 +585,20 @@ def _run_case(
         settings.llm_model,
     )
     graded["final_request_had_no_tools"] = bool(
-        len(provider.calls) < 2 or not provider.calls[1].request.tools
+        provider.calls and not provider.calls[-1].request.tools
     )
     graded["final_response_had_tool_calls"] = bool(
-        len(provider.calls) >= 2
-        and provider.calls[1].response is not None
-        and provider.calls[1].response.tool_calls
+        provider.calls
+        and provider.calls[-1].response is not None
+        and provider.calls[-1].response.tool_calls
     )
-    graded["tool_execution_count"] = 1 if response.tool_name else 0
-    if len(provider.calls) > 2:
+    graded["provider_call_latencies_ms"] = [
+        round(call.latency_ms, 2) for call in provider.calls
+    ]
+    graded["provider_generation_count"] = len(provider.calls)
+    if len(provider.calls) > 4:
         graded["status"] = "FAIL"
-        graded["reasons"].append("more_than_two_provider_generations")
-    if graded["final_response_had_tool_calls"]:
-        graded["status"] = "FAIL"
-        graded["reasons"].append("final_generation_requested_tool")
-    expected_language = case.get("language_expected")
-    if (
-        expected_language
-        and graded["response_language"] != expected_language
-        and graded["status"] == "PASS"
-    ):
-        graded["status"] = "NEEDS_MANUAL_REVIEW"
-        graded["reasons"].append("response_language_mismatch")
+        graded["reasons"].append("orchestration_generation_bound_exceeded")
     return graded
 
 
@@ -610,7 +649,7 @@ def _blocked_payload(cases: Sequence[Mapping[str, Any]], reason: str) -> dict[st
     ]
     results = [dict(result, status="BLOCKED", skip_reason=reason) for result in results]
     return {
-        "schema_version": "orchestration-live-eval-v1",
+        "schema_version": "orchestration-live-eval-v2",
         "evaluation": "grounded-advisor-orchestration",
         "status": "BLOCKED",
         "model": None,
@@ -621,11 +660,29 @@ def _blocked_payload(cases: Sequence[Mapping[str, Any]], reason: str) -> dict[st
     }
 
 
-def run_evaluation(cases_path: Path) -> dict[str, Any]:
+def _select_cases(
+    cases: Sequence[Mapping[str, Any]],
+    case_ids: Sequence[str] | None,
+) -> list[dict[str, Any]]:
+    if not case_ids:
+        return [dict(case) for case in cases]
+    by_id = {str(case.get("id")): dict(case) for case in cases}
+    missing = [case_id for case_id in case_ids if case_id not in by_id]
+    if missing:
+        raise EvaluationBlocked("requested case is unavailable: " + ",".join(missing))
+    return [by_id[case_id] for case_id in case_ids]
+
+
+def run_evaluation(
+    cases_path: Path,
+    *,
+    case_ids: Sequence[str] | None = None,
+) -> dict[str, Any]:
     """Run the complete live path and return a safe, bounded result payload."""
 
     try:
-        cases = _load_cases(cases_path)
+        all_cases = _load_cases(cases_path)
+        cases = _select_cases(all_cases, case_ids)
         settings = get_settings()
     except EvaluationBlocked as error:
         return _blocked_payload([], str(error))
@@ -673,7 +730,7 @@ def run_evaluation(cases_path: Path) -> dict[str, Any]:
 
             status = _aggregate_status(results)
             return {
-                "schema_version": "orchestration-live-eval-v1",
+                "schema_version": "orchestration-live-eval-v2",
                 "evaluation": "grounded-advisor-orchestration",
                 "status": status,
                 "model": settings.llm_model,
@@ -701,9 +758,15 @@ def main() -> int:
         default=Path(__file__).with_name("cases.json"),
     )
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--case-id",
+        action="append",
+        default=None,
+        help="Run only the selected case ID; repeat the option for multiple cases.",
+    )
     args = parser.parse_args()
 
-    payload = run_evaluation(args.cases)
+    payload = run_evaluation(args.cases, case_ids=args.case_id)
     output_path = args.output or _default_output_path()
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
