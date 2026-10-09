@@ -219,6 +219,7 @@ def grade_turn(
         return _manual(result, "heuristic_academic_claim_requires_review")
 
     if case.get("kind") in {
+        "eligibility",
         "degree_audit",
         "official_documents",
         "trusted_override",

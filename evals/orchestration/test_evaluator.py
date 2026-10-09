@@ -53,6 +53,22 @@ def test_valid_grounded_answer_passes() -> None:
     assert result["tool_executed"] is True
 
 
+def test_eligibility_narrative_requires_manual_review() -> None:
+    result = grade_turn(
+        case={
+            "id": "eligibility_en",
+            "kind": "eligibility",
+            "expected_tool": "check_course_eligibility",
+        },
+        response=_eligibility_response("You are eligible to take CSE221."),
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+    assert "narrative_requires_manual_review" in result["reasons"]
+
+
 def test_contradictory_planning_answer_is_hard_failure() -> None:
     result = grade_turn(
         case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
