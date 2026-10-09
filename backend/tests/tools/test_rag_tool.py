@@ -93,6 +93,62 @@ def test_rag_tool_injects_trusted_student_filters(tmp_path) -> None:
     assert result["results"][0]["chunk_id"] == "chunk-1"
 
 
+@pytest.mark.parametrize(
+    ("document_type", "expected"),
+    [
+        ("REGULATION", "REGULATION"),
+        ("regulations", "REGULATION"),
+        ("Full Academic Regulation", "REGULATION"),
+        ("course handbook", "COURSE_HANDBOOK"),
+        ("training handbook", "TRAINING_HANDBOOK"),
+        ("module specifications", "MODULE_SPEC"),
+        ("program structure / module mapping", "PROGRAM_STRUCTURE"),
+        ("course tree / study plan", "COURSE_TREE"),
+    ],
+)
+def test_rag_tool_canonicalizes_supported_document_type_aliases(
+    tmp_path,
+    document_type: str,
+    expected: str,
+) -> None:
+    rag = RecordingRAGService()
+    tool = SearchOfficialDocumentsTool(_student_repository(tmp_path), rag)
+
+    tool.execute(
+        {"query": "credit requirements", "document_types": [document_type]},
+        ToolExecutionContext(student_id="student-001"),
+    )
+
+    assert rag.requests[0].document_types == [expected]
+
+
+def test_rag_tool_rejects_unknown_document_type_instead_of_returning_silent_zero_results(
+    tmp_path,
+) -> None:
+    rag = RecordingRAGService()
+    tool = SearchOfficialDocumentsTool(_student_repository(tmp_path), rag)
+
+    with pytest.raises(ToolArgumentValidationError):
+        tool.execute(
+            {"query": "official policy", "document_types": ["policies"]},
+            ToolExecutionContext(student_id="student-001"),
+        )
+
+    assert rag.requests == []
+
+
+def test_rag_tool_omits_document_type_filter_when_not_provided(tmp_path) -> None:
+    rag = RecordingRAGService()
+    tool = SearchOfficialDocumentsTool(_student_repository(tmp_path), rag)
+
+    tool.execute(
+        {"query": "credit requirements"},
+        ToolExecutionContext(student_id="student-001"),
+    )
+
+    assert rag.requests[0].document_types is None
+
+
 def test_rag_tool_does_not_filter_by_query_language(tmp_path) -> None:
     rag = RecordingRAGService()
     tool = SearchOfficialDocumentsTool(_student_repository(tmp_path), rag)

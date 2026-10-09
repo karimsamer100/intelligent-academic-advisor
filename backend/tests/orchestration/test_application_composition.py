@@ -143,7 +143,7 @@ def test_composed_orchestrator_executes_real_eligibility_and_delivers_compact_re
     assert response.tool_result["authoritative"] is False
     assert response.requires_human_review is False
     assert len(provider.requests) == 2
-    assert provider.requests[1].tools == []
+    assert provider.requests[1].tools
     assert provider.requests[1].messages[-1].content == json.dumps(
         response.tool_result,
         ensure_ascii=False,

@@ -19,7 +19,10 @@ from app.tools.errors import ToolDataUnavailableError
 from app.tools.interface import AcademicTool
 from app.tools.registry import ToolRegistry
 from app.orchestration.contracts import AdvisorRequest
-from app.orchestration.orchestrator import AdvisorOrchestrator
+from app.orchestration.orchestrator import (
+    AdvisorOrchestrationLimits,
+    AdvisorOrchestrator,
+)
 
 
 class EligibilityArguments(BaseModel):
@@ -199,7 +202,7 @@ def test_no_tool_response_is_returned_directly() -> None:
     assert response.requires_human_review is False
     assert len(provider.requests) == 1
     system_prompt = provider.requests[0].messages[0].content
-    assert "advisor-system-v1" in system_prompt
+    assert "advisor-system-v2" in system_prompt
     assert "INDETERMINATE" in system_prompt
     assert "requires_human_review=true" in system_prompt
     assert [definition.name for definition in provider.requests[0].tools] == [
@@ -249,7 +252,7 @@ def test_eligibility_flow_executes_once_with_trusted_context_and_preserves_messa
         separators=(",", ":"),
         allow_nan=False,
     )
-    assert provider.requests[1].tools == []
+    assert provider.requests[1].tools
 
 
 def test_degree_audit_flow_preserves_indeterminate_human_review_result() -> None:
@@ -307,7 +310,7 @@ def test_official_document_flow_passes_evidence_and_citations_to_final_generatio
     assert '"page":42' in provider.requests[1].messages[3].content
 
 
-def test_multiple_initial_tool_calls_are_rejected_without_execution() -> None:
+def test_multiple_initial_tool_calls_execute_in_order_and_preserve_transcript() -> None:
     provider = QueueProvider(
         [
             GenerationResponse(
@@ -315,20 +318,50 @@ def test_multiple_initial_tool_calls_are_rejected_without_execution() -> None:
                     _tool_call(call_id="call-1"),
                     _tool_call("degree_audit", {}, call_id="call-2"),
                 ]
-            )
+            ),
+            GenerationResponse(content="The eligibility and audit results are available."),
         ]
     )
     registry, eligibility, audit, search = _registry()
 
     response = _orchestrator(provider, registry).respond(_request())
 
-    assert "multiple tool calls" in response.text.lower()
+    assert response.text == "The eligibility and audit results are available."
     assert response.tool_name is None
     assert response.tool_result is None
-    assert eligibility.calls == []
-    assert audit.calls == []
+    assert [record.tool_name for record in response.tool_executions] == [
+        "check_course_eligibility",
+        "degree_audit",
+    ]
+    assert [record.status for record in response.tool_executions] == [
+        "executed",
+        "executed",
+    ]
+    assert len(eligibility.calls) == 1
+    assert len(audit.calls) == 1
     assert search.calls == []
-    assert len(provider.requests) == 1
+    assert [message.role for message in provider.requests[1].messages] == [
+        MessageRole.SYSTEM,
+        MessageRole.USER,
+        MessageRole.ASSISTANT,
+        MessageRole.TOOL,
+        MessageRole.TOOL,
+    ]
+    assistant_message = provider.requests[1].messages[2]
+    assert [call.call_id for call in assistant_message.tool_calls] == [
+        "call-1",
+        "call-2",
+    ]
+    assert [message.tool_call_id for message in provider.requests[1].messages[3:]] == [
+        "call-1",
+        "call-2",
+    ]
+    assert [message.tool_name for message in provider.requests[1].messages[3:]] == [
+        "check_course_eligibility",
+        "degree_audit",
+    ]
+    assert len(response.transcript) == len(provider.requests[1].messages) + 1
+    assert provider.requests[1].tools
 
 
 def test_final_tool_call_is_rejected_and_the_tool_was_still_executed_only_once() -> None:
@@ -344,11 +377,231 @@ def test_final_tool_call_is_rejected_and_the_tool_was_still_executed_only_once()
 
     response = _orchestrator(provider, registry).respond(_request())
 
-    assert "additional tool call" in response.text.lower()
+    assert "repeated" in response.text.lower()
     assert response.tool_name == "check_course_eligibility"
     assert response.tool_result == eligibility.payload
     assert len(eligibility.calls) == 1
     assert len(provider.requests) == 2
+    assert [record.status for record in response.tool_executions] == [
+        "executed",
+        "rejected",
+    ]
+
+
+def test_missing_call_ids_are_generated_and_correlated_per_tool_result() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(
+                tool_calls=[
+                    _tool_call(call_id=None),
+                    _tool_call("degree_audit", {}, call_id=None),
+                ]
+            ),
+            GenerationResponse(content="Both trusted results were considered."),
+        ]
+    )
+    registry, *_ = _registry()
+
+    response = _orchestrator(provider, registry).respond(_request())
+
+    assistant = provider.requests[1].messages[2]
+    call_ids = [call.call_id for call in assistant.tool_calls]
+    assert all(call_ids)
+    assert len(set(call_ids)) == 2
+    assert [message.tool_call_id for message in provider.requests[1].messages[3:]] == call_ids
+    assert [record.call_id for record in response.tool_executions] == call_ids
+
+
+def test_distinct_tool_calls_can_execute_over_successive_rounds() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(tool_calls=[_tool_call()]),
+            GenerationResponse(
+                tool_calls=[
+                    _tool_call(
+                        "search_official_documents",
+                        {"query": "maximum registered credit hours"},
+                        call_id="call-2",
+                    )
+                ]
+            ),
+            GenerationResponse(content="The trusted results were combined."),
+        ]
+    )
+    registry, *_ = _registry()
+
+    response = _orchestrator(provider, registry).respond(_request())
+
+    assert [record.tool_name for record in response.tool_executions] == [
+        "check_course_eligibility",
+        "search_official_documents",
+    ]
+    assert [record.round_index for record in response.tool_executions] == [1, 2]
+    assert len(provider.requests) == 3
+    assert provider.requests[1].tools
+    assert provider.requests[2].tools
+
+
+def test_human_review_is_aggregated_across_all_executed_tools() -> None:
+    eligibility = RecordingEligibilityTool(
+        {"decision": "ELIGIBLE", "requires_human_review": False}
+    )
+    registry, _, audit, _ = _registry(eligibility)
+    provider = QueueProvider(
+        [
+            GenerationResponse(
+                tool_calls=[
+                    _tool_call(call_id="call-1"),
+                    _tool_call("degree_audit", {}, call_id="call-2"),
+                ]
+            ),
+            GenerationResponse(content="One result remains subject to review."),
+        ]
+    )
+
+    response = _orchestrator(provider, registry).respond(_request())
+
+    assert audit.calls
+    assert response.requires_human_review is True
+    assert len(response.tool_executions) == 2
+
+
+def test_maximum_tool_rounds_disable_later_execution_without_partial_batch() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(tool_calls=[_tool_call()]),
+            GenerationResponse(tool_calls=[_tool_call("degree_audit", {}, call_id="call-2")]),
+        ]
+    )
+    registry, eligibility, audit, _ = _registry()
+    orchestrator = AdvisorOrchestrator(
+        LLMService(provider),
+        registry,
+        limits=AdvisorOrchestrationLimits(max_tool_rounds=1, max_tool_executions=5),
+    )
+
+    response = orchestrator.respond(_request())
+
+    assert len(eligibility.calls) == 1
+    assert audit.calls == []
+    assert [record.status for record in response.tool_executions] == [
+        "executed",
+        "rejected",
+    ]
+    assert "round limit" in response.text.lower()
+    assert provider.requests[1].tools == []
+
+
+def test_over_budget_batch_is_rejected_without_partial_execution() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(
+                tool_calls=[
+                    _tool_call(call_id="call-1"),
+                    _tool_call("degree_audit", {}, call_id="call-2"),
+                ]
+            )
+        ]
+    )
+    registry, eligibility, audit, _ = _registry()
+    orchestrator = AdvisorOrchestrator(
+        LLMService(provider),
+        registry,
+        limits=AdvisorOrchestrationLimits(max_tool_rounds=3, max_tool_executions=1),
+    )
+
+    response = orchestrator.respond(_request())
+
+    assert eligibility.calls == []
+    assert audit.calls == []
+    assert [record.status for record in response.tool_executions] == [
+        "rejected",
+        "rejected",
+    ]
+    assert "execution limit" in response.text.lower()
+    assert len(provider.requests) == 1
+
+
+def test_over_budget_later_batch_is_rejected_without_partial_execution() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(tool_calls=[_tool_call()]),
+            GenerationResponse(
+                tool_calls=[
+                    _tool_call("degree_audit", {}, call_id="call-2"),
+                    _tool_call(
+                        "search_official_documents",
+                        {"query": "registration"},
+                        call_id="call-3",
+                    ),
+                ]
+            ),
+        ]
+    )
+    registry, eligibility, audit, search = _registry()
+    orchestrator = AdvisorOrchestrator(
+        LLMService(provider),
+        registry,
+        limits=AdvisorOrchestrationLimits(max_tool_rounds=3, max_tool_executions=2),
+    )
+
+    response = orchestrator.respond(_request())
+
+    assert len(eligibility.calls) == 1
+    assert audit.calls == []
+    assert search.calls == []
+    assert [record.status for record in response.tool_executions] == [
+        "executed",
+        "rejected",
+        "rejected",
+    ]
+    assert "execution limit" in response.text.lower()
+
+
+def test_failed_tool_does_not_hide_successful_result_from_same_batch() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(
+                tool_calls=[
+                    _tool_call(call_id="call-1"),
+                    _tool_call("degree_audit", {}, call_id="call-2"),
+                ]
+            ),
+            GenerationResponse(content="The audit result still requires review."),
+        ]
+    )
+    registry, unavailable, audit, _ = _registry(UnavailableEligibilityTool())
+
+    response = _orchestrator(provider, registry).respond(_request())
+
+    assert unavailable.calls == []
+    assert len(audit.calls) == 1
+    assert [record.status for record in response.tool_executions] == [
+        "failed",
+        "executed",
+    ]
+    assert response.tool_name is None
+    assert response.tool_result is None
+    assert response.requires_human_review is True
+
+
+def test_provider_failure_in_later_round_preserves_prior_tool_execution() -> None:
+    class LaterFailureProvider(QueueProvider):
+        def generate(self, request: GenerationRequest) -> GenerationResponse:
+            self.requests.append(request)
+            if len(self.requests) == 1:
+                return GenerationResponse(tool_calls=[_tool_call()])
+            raise ProviderTimeoutError()
+
+    provider = LaterFailureProvider()
+    registry, eligibility, *_ = _registry()
+
+    response = _orchestrator(provider, registry).respond(_request())
+
+    assert len(eligibility.calls) == 1
+    assert len(response.tool_executions) == 1
+    assert response.tool_executions[0].status == "executed"
+    assert "timed out" in response.text.lower()
 
 
 def test_unknown_tool_returns_safe_failure_without_a_second_generation() -> None:

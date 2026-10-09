@@ -6,6 +6,10 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.rag.metadata.taxonomy import (
+    SUPPORTED_DOCUMENT_TYPES,
+    canonical_document_type_filters,
+)
 from app.schemas.rag import RAGRequest
 from app.services.rag_service import RAGService
 from app.planning.repositories.student_repository import StudentRepository
@@ -19,21 +23,34 @@ class SearchOfficialDocumentsArguments(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     query: str = Field(min_length=1)
-    document_types: list[str] | None = None
+    document_types: list[str] | None = Field(
+        default=None,
+        description=(
+            "Optional canonical document categories. Supported values: "
+            + ", ".join(sorted(SUPPORTED_DOCUMENT_TYPES))
+            + ". Omit when no category is known."
+        ),
+    )
 
     @field_validator("document_types")
     @classmethod
     def _reject_blank_document_types(
         cls, value: list[str] | None
     ) -> list[str] | None:
-        if value is not None and any(not item.strip() for item in value):
+        if value is None:
+            return None
+        if any(not item.strip() for item in value):
             raise ValueError("document_types must not contain blank values")
-        return value
+        return canonical_document_type_filters(value)
 
 
 class SearchOfficialDocumentsTool(AcademicTool[SearchOfficialDocumentsArguments]):
     name = "search_official_documents"
-    description = "Search official academic documents for relevant evidence."
+    description = (
+        "Search official academic documents for relevant evidence. "
+        "document_types is optional; use only canonical values from the input "
+        "schema or omit it when uncertain."
+    )
     arguments_model = SearchOfficialDocumentsArguments
 
     def __init__(
