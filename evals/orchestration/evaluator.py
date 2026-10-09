@@ -109,7 +109,7 @@ def skip_case(
     }
 
 
-def grade_turn(
+def _grade_turn(
     *,
     case: Mapping[str, Any],
     response: AdvisorResponse,
@@ -229,6 +229,24 @@ def grade_turn(
     return result
 
 
+def grade_turn(
+    *,
+    case: Mapping[str, Any],
+    response: AdvisorResponse,
+    initial_tool_calls: Sequence[ToolCall],
+    known_course_codes: Sequence[str] = (),
+) -> dict[str, Any]:
+    """Grade one turn and always record the expected/observed language pair."""
+
+    result = _grade_turn(
+        case=case,
+        response=response,
+        initial_tool_calls=initial_tool_calls,
+        known_course_codes=known_course_codes,
+    )
+    return _apply_language_grade(result, case)
+
+
 def detect_language(text: str) -> str:
     """Classify the visible answer as English, Arabic, mixed, or unknown."""
 
@@ -241,6 +259,24 @@ def detect_language(text: str) -> str:
     if has_latin:
         return "en"
     return "unknown"
+
+
+def _apply_language_grade(
+    result: dict[str, Any],
+    case: Mapping[str, Any],
+) -> dict[str, Any]:
+    expected = case.get("language_expected")
+    actual = result.get("response_language")
+    result["language_expected"] = expected
+    result["language_match"] = (
+        None if expected is None else actual == expected
+    )
+    if expected is not None and actual != expected:
+        if "response_language_mismatch" not in result["reasons"]:
+            result["reasons"].append("response_language_mismatch")
+        if result["status"] == "PASS":
+            result["status"] = "NEEDS_MANUAL_REVIEW"
+    return result
 
 
 def _safe_arguments(tool_name: str, arguments: Mapping[str, Any]) -> dict[str, Any]:
@@ -399,42 +435,127 @@ def _claims_non_authoritative_data_is_authoritative(
 def _grade_citations(
     tool_result: Mapping[str, Any],
     answer: str,
-) -> tuple[bool, str | None]:
+) -> tuple[bool | None, str | None]:
     evidence = tool_result.get("results")
     if not isinstance(evidence, list):
         return False, "citation_evidence_missing"
 
-    source_ids = {
-        str(item.get("source_id"))
-        for item in evidence
-        if isinstance(item, Mapping) and item.get("source_id")
+    source_ranges: dict[str, list[tuple[int, int]]] = {}
+    for item in evidence:
+        if not isinstance(item, Mapping) or not item.get("source_id"):
+            continue
+        source_id = str(item["source_id"])
+        normalized_source = source_id.casefold()
+        start = item.get("page_start")
+        end = item.get("page_end")
+        if isinstance(start, int) and isinstance(end, int):
+            source_ranges.setdefault(normalized_source, []).append((start, end))
+        elif isinstance(start, int):
+            source_ranges.setdefault(normalized_source, []).append((start, start))
+        elif isinstance(end, int):
+            source_ranges.setdefault(normalized_source, []).append((end, end))
+        else:
+            source_ranges.setdefault(normalized_source, [])
+
+    if not source_ranges:
+        return False, "citation_evidence_missing"
+
+    source_mentions = _source_mentions(answer, source_ranges)
+    mentioned_pattern_sources = {
+        _normalize_source_token(source)
+        for source in _SOURCE_RE.findall(answer)
     }
-    pages = {
-        int(page)
-        for item in evidence
-        if isinstance(item, Mapping)
-        for page in (item.get("page_start"), item.get("page_end"))
-        if isinstance(page, int)
-    }
-    lowered_answer = answer.casefold()
-    mentioned_supported_sources = {
-        source_id
-        for source_id in source_ids
-        if source_id.casefold() in lowered_answer
-    }
-    mentioned_pattern_sources = set(_SOURCE_RE.findall(answer))
-    normalized_source_ids = {source_id.casefold() for source_id in source_ids}
-    if {
-        source.casefold() for source in mentioned_pattern_sources
-    } - normalized_source_ids:
+    if mentioned_pattern_sources - set(source_ranges):
         return False, "unsupported_citation"
 
-    mentioned_pages = {int(page) for page in _PAGE_RE.findall(answer)}
-    if mentioned_pages - pages:
-        return False, "unsupported_citation"
-    if not mentioned_supported_sources and not mentioned_pages:
+    page_mentions = list(_PAGE_RE.finditer(answer))
+    if not source_mentions and not page_mentions:
         return False, "citation_not_present"
+
+    if not page_mentions:
+        return None, "ambiguous_citation"
+
+    for page_match in page_mentions:
+        page = int(page_match.group(1))
+        candidate_sources = _candidate_sources_for_page(
+            answer,
+            page_match.start(),
+            source_mentions,
+        )
+        if not candidate_sources:
+            return None, "ambiguous_citation"
+        if len(candidate_sources) > 1:
+            return None, "ambiguous_citation"
+
+        source_id = next(iter(candidate_sources))
+        ranges = source_ranges[source_id]
+        if not ranges or not any(start <= page <= end for start, end in ranges):
+            return False, "unsupported_citation"
+
     return True, None
+
+
+def _source_mentions(
+    answer: str,
+    source_ranges: Mapping[str, Sequence[tuple[int, int]]],
+) -> list[tuple[str, int, int]]:
+    mentions: list[tuple[str, int, int]] = []
+    for source_id in source_ranges:
+        pattern = re.compile(
+            rf"(?<![A-Za-z0-9_]){re.escape(source_id)}(?![A-Za-z0-9_])",
+            re.IGNORECASE,
+        )
+        mentions.extend(
+            (source_id, match.start(), match.end())
+            for match in pattern.finditer(answer)
+        )
+
+    for token_match in _SOURCE_RE.finditer(answer):
+        normalized = _normalize_source_token(token_match.group(0))
+        if normalized in source_ranges and not any(
+            start == token_match.start() and end == token_match.end()
+            for _, start, end in mentions
+        ):
+            mentions.append((normalized, token_match.start(), token_match.end()))
+    return sorted(mentions, key=lambda mention: mention[1])
+
+
+def _normalize_source_token(token: str) -> str:
+    return token.rstrip(".,;:)]}").casefold()
+
+
+def _candidate_sources_for_page(
+    answer: str,
+    page_position: int,
+    source_mentions: Sequence[tuple[str, int, int]],
+) -> set[str]:
+    start = max(
+        answer.rfind(".", 0, page_position),
+        answer.rfind("!", 0, page_position),
+        answer.rfind("?", 0, page_position),
+        answer.rfind(";", 0, page_position),
+        answer.rfind("\n", 0, page_position),
+    )
+    end_candidates = [
+        position
+        for separator in (".", "!", "?", ";", "\n")
+        for position in [answer.find(separator, page_position)]
+        if position != -1
+    ]
+    end = min(end_candidates, default=len(answer))
+    page_positions = [
+        match.start()
+        for match in _PAGE_RE.finditer(answer)
+        if start < match.start() < end
+    ]
+    direct_sources = []
+    for source_id, source_start, source_end in source_mentions:
+        if not (start < source_start < source_end < page_position < end):
+            continue
+        if any(source_end < other_page < page_position for other_page in page_positions):
+            continue
+        direct_sources.append(source_id)
+    return set(direct_sources)
 
 
 def _detect_invented_information(

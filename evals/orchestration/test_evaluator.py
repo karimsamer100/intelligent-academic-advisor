@@ -42,7 +42,11 @@ def _eligibility_response(
 
 def test_valid_grounded_answer_passes() -> None:
     result = grade_turn(
-        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        case={
+            "id": "eligibility_en",
+            "expected_tool": "check_course_eligibility",
+            "language_expected": "en",
+        },
         response=_eligibility_response("You are eligible to take CSE221."),
         initial_tool_calls=[_eligibility_call()],
         known_course_codes=["CSE221"],
@@ -51,6 +55,9 @@ def test_valid_grounded_answer_passes() -> None:
     assert result["status"] == "PASS"
     assert result["decision_preserved"] is True
     assert result["tool_executed"] is True
+    assert result["language_expected"] == "en"
+    assert result["response_language"] == "en"
+    assert result["language_match"] is True
 
 
 def test_eligibility_narrative_requires_manual_review() -> None:
@@ -59,6 +66,7 @@ def test_eligibility_narrative_requires_manual_review() -> None:
             "id": "eligibility_en",
             "kind": "eligibility",
             "expected_tool": "check_course_eligibility",
+            "language_expected": "ar",
         },
         response=_eligibility_response("You are eligible to take CSE221."),
         initial_tool_calls=[_eligibility_call()],
@@ -67,11 +75,19 @@ def test_eligibility_narrative_requires_manual_review() -> None:
 
     assert result["status"] == "NEEDS_MANUAL_REVIEW"
     assert "narrative_requires_manual_review" in result["reasons"]
+    assert result["language_expected"] == "ar"
+    assert result["response_language"] == "en"
+    assert result["language_match"] is False
+    assert "response_language_mismatch" in result["reasons"]
 
 
 def test_contradictory_planning_answer_is_hard_failure() -> None:
     result = grade_turn(
-        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        case={
+            "id": "eligibility_en",
+            "expected_tool": "check_course_eligibility",
+            "language_expected": "ar",
+        },
         response=_eligibility_response("You are not eligible to take CSE221."),
         initial_tool_calls=[_eligibility_call()],
         known_course_codes=["CSE221"],
@@ -79,6 +95,8 @@ def test_contradictory_planning_answer_is_hard_failure() -> None:
 
     assert result["status"] == "FAIL"
     assert "final_answer_contradicts_tool_result" in result["reasons"]
+    assert result["language_match"] is False
+    assert "response_language_mismatch" in result["reasons"]
 
 
 def test_unsupported_source_citation_is_hard_failure() -> None:
@@ -115,14 +133,53 @@ def test_unsupported_source_citation_is_hard_failure() -> None:
 
 def test_supported_citation_is_recorded_but_requires_manual_review() -> None:
     response = AdvisorResponse(
-        text="The regulation is relevant; see REG-2023, page 3.",
+        text="The regulation is relevant; see REG-2023, page 4.",
         tool_name="search_official_documents",
         tool_result={
             "results": [
                 {
                     "source_id": "REG-2023",
                     "page_start": 3,
-                    "page_end": 3,
+                    "page_end": 5,
+                    "document_type": "REGULATION",
+                    "text": "Registration requirements.",
+                }
+            ]
+        },
+    )
+
+    result = grade_turn(
+        case={
+            "id": "official_regulation",
+            "expected_tool": "search_official_documents",
+            "kind": "official_documents",
+            "language_expected": "en",
+        },
+        response=response,
+        initial_tool_calls=[
+            ToolCall(
+                name="search_official_documents",
+                arguments={"query": "registration requirements"},
+            )
+        ],
+    )
+
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+    assert result["citations_supported"] is True
+    assert "narrative_requires_manual_review" in result["reasons"]
+    assert result["language_match"] is True
+
+
+def test_unsupported_page_for_valid_source_is_hard_failure() -> None:
+    response = AdvisorResponse(
+        text="The regulation is relevant; see REG-2023, page 6.",
+        tool_name="search_official_documents",
+        tool_result={
+            "results": [
+                {
+                    "source_id": "REG-2023",
+                    "page_start": 3,
+                    "page_end": 5,
                     "document_type": "REGULATION",
                     "text": "Registration requirements.",
                 }
@@ -145,9 +202,96 @@ def test_supported_citation_is_recorded_but_requires_manual_review() -> None:
         ],
     )
 
+    assert result["status"] == "FAIL"
+    assert result["citations_supported"] is False
+    assert "unsupported_citation" in result["reasons"]
+
+
+def test_multiple_sources_use_their_own_page_ranges() -> None:
+    response = AdvisorResponse(
+        text="See REG-2023, page 4; and REG-2024, page 11.",
+        tool_name="search_official_documents",
+        tool_result={
+            "results": [
+                {
+                    "source_id": "REG-2023",
+                    "page_start": 3,
+                    "page_end": 5,
+                    "document_type": "REGULATION",
+                    "text": "Older registration requirements.",
+                },
+                {
+                    "source_id": "REG-2024",
+                    "page_start": 10,
+                    "page_end": 12,
+                    "document_type": "REGULATION",
+                    "text": "Current registration requirements.",
+                },
+            ]
+        },
+    )
+
+    result = grade_turn(
+        case={
+            "id": "official_regulation",
+            "expected_tool": "search_official_documents",
+            "kind": "official_documents",
+        },
+        response=response,
+        initial_tool_calls=[
+            ToolCall(
+                name="search_official_documents",
+                arguments={"query": "registration requirements"},
+            )
+        ],
+    )
+
     assert result["status"] == "NEEDS_MANUAL_REVIEW"
     assert result["citations_supported"] is True
-    assert "narrative_requires_manual_review" in result["reasons"]
+
+
+def test_ambiguous_page_citation_requires_manual_review() -> None:
+    response = AdvisorResponse(
+        text="The requirement is described on page 4.",
+        tool_name="search_official_documents",
+        tool_result={
+            "results": [
+                {
+                    "source_id": "REG-2023",
+                    "page_start": 3,
+                    "page_end": 5,
+                    "document_type": "REGULATION",
+                    "text": "Older registration requirements.",
+                },
+                {
+                    "source_id": "REG-2024",
+                    "page_start": 10,
+                    "page_end": 12,
+                    "document_type": "REGULATION",
+                    "text": "Current registration requirements.",
+                },
+            ]
+        },
+    )
+
+    result = grade_turn(
+        case={
+            "id": "official_regulation",
+            "expected_tool": "search_official_documents",
+            "kind": "official_documents",
+        },
+        response=response,
+        initial_tool_calls=[
+            ToolCall(
+                name="search_official_documents",
+                arguments={"query": "registration requirements"},
+            )
+        ],
+    )
+
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+    assert result["citations_supported"] is None
+    assert "ambiguous_citation" in result["reasons"]
 
 
 def test_missing_human_review_warning_is_hard_failure() -> None:
