@@ -6,7 +6,14 @@ from app.llm.contracts import ToolCall
 from app.orchestration.contracts import AdvisorResponse
 
 from evaluator import grade_turn, skip_case
-from live_eval import _redact_student_sensitive_text
+from live_eval import (
+    Discovery,
+    _blocked_case_result,
+    _blocked_payload,
+    _case_report_prompt,
+    _redact_student_sensitive_text,
+    _safe_report_prompt,
+)
 
 
 def _eligibility_call(*, extra: dict[str, object] | None = None) -> ToolCall:
@@ -421,3 +428,41 @@ def test_live_report_redacts_student_sensitive_totals() -> None:
     assert "6 of 144" not in redacted
     assert "[redacted-gpa]" in redacted
     assert "[redacted-credits]" in redacted
+
+
+def test_persisted_prompts_are_redacted_on_normal_blocked_and_skipped_paths() -> None:
+    raw_prompt = "Student DEV-TEST has GPA 4.0 and 120 credits."
+    expected = "Student [redacted-student] has [redacted-gpa] and [redacted-credits]."
+    discovery = Discovery(
+        student_id="DEV-TEST",
+        regulation=2018,
+        program="CS",
+        course_codes=(),
+        eligibility_course=None,
+        review_course=None,
+        student_count=1,
+        valid_student_count=1,
+        rag_available=False,
+        rag_reason="test",
+    )
+
+    assert _safe_report_prompt(raw_prompt, "DEV-TEST") == expected
+
+    blocked = _blocked_case_result(
+        case={"id": "blocked"},
+        prompt=raw_prompt,
+        student_id="DEV-TEST",
+        provider=None,
+        response=None,
+        error=RuntimeError("provider unavailable"),
+    )
+    assert blocked["prompt"] == expected
+
+    skipped_prompt = _case_report_prompt({"prompt": raw_prompt}, discovery)
+    assert skipped_prompt == expected
+
+    blocked_payload = _blocked_payload(
+        [{"id": "blocked-before-discovery", "prompt": raw_prompt}],
+        "application dependency unavailable",
+    )
+    assert blocked_payload["cases"][0]["prompt"] is None

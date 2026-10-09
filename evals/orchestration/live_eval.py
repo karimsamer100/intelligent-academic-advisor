@@ -315,11 +315,40 @@ def _bounded_value(value: Any) -> Any:
     return value
 
 
-def _redact_student_sensitive_text(text: str, student_id: str) -> str:
-    redacted = text.replace(student_id, "[redacted-student]")
+def _redact_student_sensitive_text(
+    text: str,
+    student_id: str | None = None,
+) -> str:
+    redacted = text
+    if student_id:
+        redacted = redacted.replace(student_id, "[redacted-student]")
     redacted = _GPA_RE.sub("[redacted-gpa]", redacted)
     redacted = _CREDIT_TOTAL_RE.sub("[redacted-credits]", redacted)
     return _ARABIC_CREDIT_TOTAL_RE.sub("[redacted-credits]", redacted)
+
+
+def _safe_report_prompt(
+    prompt: str | None,
+    student_id: str | None = None,
+) -> str | None:
+    """Redact a prompt only when it crosses into persisted evaluation output."""
+
+    if prompt is None:
+        return None
+    return _redact_student_sensitive_text(prompt, student_id)
+
+
+def _case_report_prompt(
+    case: Mapping[str, Any],
+    discovery: Discovery | None = None,
+) -> str | None:
+    if discovery is None:
+        return None
+    template = case.get("prompt")
+    if not isinstance(template, str):
+        return None
+    rendered = _render_prompt(template, discovery)
+    return _safe_report_prompt(rendered, discovery.student_id)
 
 
 def _safe_arguments(tool_name: str, arguments: Mapping[str, Any]) -> dict[str, Any]:
@@ -398,6 +427,7 @@ def _blocked_case_result(
     *,
     case: Mapping[str, Any],
     prompt: str,
+    student_id: str | None,
     provider: RecordingProvider | None,
     response: AdvisorResponse | None,
     error: BaseException,
@@ -405,7 +435,7 @@ def _blocked_case_result(
     calls = _initial_tool_calls(provider) if provider is not None else []
     return {
         "case_id": str(case["id"]),
-        "prompt": prompt,
+        "prompt": _safe_report_prompt(prompt, student_id),
         "language_expected": case.get("language_expected"),
         "status": "BLOCKED",
         "selected_tools": [call.name for call in calls],
@@ -463,6 +493,7 @@ def _run_case(
         return _blocked_case_result(
             case=case,
             prompt=prompt,
+            student_id=discovery.student_id,
             provider=provider,
             response=response,
             error=error,
@@ -477,6 +508,7 @@ def _run_case(
         return _blocked_case_result(
             case=case,
             prompt=prompt,
+            student_id=discovery.student_id,
             provider=provider,
             response=response,
             error=provider_error,
@@ -490,7 +522,7 @@ def _run_case(
         initial_tool_calls=initial_calls,
         known_course_codes=discovery.course_codes,
     )
-    graded["prompt"] = prompt
+    graded["prompt"] = _safe_report_prompt(prompt, discovery.student_id)
     graded["final_answer"] = _redact_student_sensitive_text(
         str(graded["final_answer"]), discovery.student_id
     )
@@ -568,7 +600,14 @@ def _summary(results: Sequence[Mapping[str, Any]], status: str) -> dict[str, Any
 
 
 def _blocked_payload(cases: Sequence[Mapping[str, Any]], reason: str) -> dict[str, Any]:
-    results = [skip_case(str(case.get("id", "unknown")), reason) for case in cases]
+    results = [
+        skip_case(
+            str(case.get("id", "unknown")),
+            reason,
+            prompt=_case_report_prompt(case),
+        )
+        for case in cases
+    ]
     results = [dict(result, status="BLOCKED", skip_reason=reason) for result in results]
     return {
         "schema_version": "orchestration-live-eval-v1",
@@ -609,6 +648,7 @@ def run_evaluation(cases_path: Path) -> dict[str, Any]:
                         skip_case(
                             str(case["id"]),
                             "missing_prerequisite:" + ",".join(missing),
+                            prompt=_case_report_prompt(case, discovery),
                         )
                     )
                     continue
@@ -625,6 +665,7 @@ def run_evaluation(cases_path: Path) -> dict[str, Any]:
                         skip_case(
                             str(remaining_case["id"]),
                             "previous_case_blocked",
+                            prompt=_case_report_prompt(remaining_case, discovery),
                         )
                         for remaining_case in cases[case_index + 1 :]
                     )
