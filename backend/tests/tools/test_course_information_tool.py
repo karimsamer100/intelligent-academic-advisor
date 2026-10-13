@@ -32,6 +32,7 @@ from app.planning.domain.rules import AcademicRule
 from app.tools.context import ToolExecutionContext
 from app.tools.course_information import GetCourseInformationTool
 from app.tools.errors import ToolArgumentValidationError, ToolContextRequiredError
+from app.tools.projections import _course_information_is_authoritative
 
 
 TARGET = CourseIdentity.parse("R23:CAIE:CSE221")
@@ -75,13 +76,18 @@ def _student_repository(
     return JsonStudentRepository(path)
 
 
-def _course(identity: CourseIdentity = TARGET) -> Course:
+def _course(
+    identity: CourseIdentity = TARGET,
+    *,
+    approval_status: ApprovalStatus = ApprovalStatus.SOURCE_VERIFIED,
+    verification_status: VerificationStatus = VerificationStatus.SOURCE_VERIFIED,
+) -> Course:
     return Course(
         identity=identity,
         course_name="Logic Design and Computer Organization",
         credit_hours=4,
-        approval_status=ApprovalStatus.SOURCE_VERIFIED,
-        verification_status=VerificationStatus.SOURCE_VERIFIED,
+        approval_status=approval_status,
+        verification_status=verification_status,
     )
 
 
@@ -92,6 +98,8 @@ def _rule_set(
     status: RuleSetStatus = RuleSetStatus.COMPLETE,
     reason_codes: tuple[ReasonCode, ...] = (),
     include_rule: bool = True,
+    approval_status: ApprovalStatus = ApprovalStatus.SOURCE_VERIFIED,
+    verification_status: VerificationStatus = VerificationStatus.SOURCE_VERIFIED,
 ) -> CourseEligibilityRuleSet:
     if expression is None:
         expression = AndExpression(
@@ -104,8 +112,8 @@ def _rule_set(
         rule_id=f"PRE-{identity.course_id}",
         regulation=identity.regulation,
         program=identity.program,
-        approval_status=ApprovalStatus.SOURCE_VERIFIED,
-        verification_status=VerificationStatus.SOURCE_VERIFIED,
+        approval_status=approval_status,
+        verification_status=verification_status,
         critical_for_planner=True,
         provenance=Provenance(
             rule_id=f"PRE-{identity.course_id}",
@@ -259,6 +267,109 @@ def test_cse221_returns_scoped_static_course_information(tmp_path) -> None:
     assert "requires_human_review" not in result
 
 
+def test_complete_empty_rule_set_is_not_complete_course_information(
+    tmp_path,
+) -> None:
+    data = FakeAcademicData(
+        (
+            _course(
+                approval_status=ApprovalStatus.APPROVED,
+                verification_status=VerificationStatus.SOURCE_VERIFIED,
+            ),
+        ),
+        _rule_set(
+            status=RuleSetStatus.COMPLETE,
+            include_rule=False,
+        ),
+        source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+    )
+
+    result = _tool(tmp_path, academic_data=data).execute(
+        {"course_code": "CSE221"},
+        ToolExecutionContext(student_id="student-001"),
+    )
+
+    assert result["coverage"]["prerequisites"] == "INCOMPLETE"
+    assert result["prerequisites"]["rules"] == []
+    assert result["authoritative"] is False
+
+
+def test_authority_requires_verified_nonempty_rules_and_complete_corequisites(
+    tmp_path,
+) -> None:
+    course = _course(
+        approval_status=ApprovalStatus.APPROVED,
+        verification_status=VerificationStatus.SOURCE_VERIFIED,
+    )
+    complete_rule_set = _rule_set(
+        approval_status=ApprovalStatus.APPROVED,
+        verification_status=VerificationStatus.SOURCE_VERIFIED,
+    )
+    assert (
+        _course_information_is_authoritative(
+            course,
+            complete_rule_set,
+            source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+            corequisite_status="AVAILABLE",
+        )
+        is True
+    )
+    assert (
+        _course_information_is_authoritative(
+            course,
+            complete_rule_set,
+            source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+            corequisite_status="UNAVAILABLE",
+        )
+        is False
+    )
+    assert (
+        _course_information_is_authoritative(
+            course,
+            _rule_set(status=RuleSetStatus.COMPLETE, include_rule=False),
+            source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+            corequisite_status="AVAILABLE",
+        )
+        is False
+    )
+    assert (
+        _course_information_is_authoritative(
+            course,
+            _rule_set(
+                approval_status=ApprovalStatus.APPROVED,
+                verification_status=VerificationStatus.NEEDS_VERIFICATION,
+            ),
+            source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+            corequisite_status="AVAILABLE",
+        )
+        is False
+    )
+    assert (
+        _course_information_is_authoritative(
+            _course(
+                approval_status=ApprovalStatus.SOURCE_VERIFIED,
+                verification_status=VerificationStatus.SOURCE_VERIFIED,
+            ),
+            complete_rule_set,
+            source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+            corequisite_status="AVAILABLE",
+        )
+        is False
+    )
+    assert (
+        _course_information_is_authoritative(
+            course,
+            _rule_set(
+                approval_status=ApprovalStatus.SOURCE_VERIFIED,
+                verification_status=VerificationStatus.SOURCE_VERIFIED,
+            ),
+            source_mode=AcademicDataSourceMode.VERIFIED_AUTHORITATIVE,
+            corequisite_status="AVAILABLE",
+        )
+        is False
+    )
+
+
 def test_nested_and_or_not_and_unsupported_expression_semantics_are_preserved(
     tmp_path,
 ) -> None:
@@ -303,6 +414,7 @@ def test_nested_and_or_not_and_unsupported_expression_semantics_are_preserved(
     assert tree["children"][2]["type"] == "UNSUPPORTED"
     assert tree["children"][2]["source_type"] == "UNRESOLVED_CONDITION"
     assert tree["children"][2]["supported"] is False
+    assert result["coverage"]["prerequisites"] == "UNSUPPORTED"
 
 
 @pytest.mark.parametrize(

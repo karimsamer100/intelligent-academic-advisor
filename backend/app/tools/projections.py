@@ -201,6 +201,7 @@ def project_course_information(
             course,
             rule_set,
             source_mode=source_mode,
+            corequisite_status=corequisite_status,
         ),
         "diagnostics": combined_diagnostics,
     }
@@ -297,6 +298,16 @@ def _course_rule_coverage_status(
         return RuleSetStatus.UNAVAILABLE.value
     if ReasonCode.UNSUPPORTED_RULE in rule_set.reason_codes:
         return "UNSUPPORTED"
+    if any(
+        rule.expression is not None
+        and _serialized_expression_contains_unsupported(
+            serialize_rule_expression(rule.expression)
+        )
+        for rule in rule_set.rules
+    ):
+        return "UNSUPPORTED"
+    if not rule_set.rules or any(rule.expression is None for rule in rule_set.rules):
+        return RuleSetStatus.INCOMPLETE.value
     return rule_set.status.value
 
 
@@ -380,17 +391,51 @@ def _course_information_is_authoritative(
     rule_set: CourseEligibilityRuleSet | None,
     *,
     source_mode: AcademicDataSourceMode,
+    corequisite_status: str,
 ) -> bool:
+    """Return authority for the complete course-information response.
+
+    Section-level lifecycle and coverage fields still describe known course
+    and prerequisite facts when the response is partial.  The top-level flag
+    is deliberately stricter: unavailable corequisites, incomplete rules, or
+    any unverified/unapproved rule prevent the complete response from being
+    presented as authoritative.
+    """
+
     return (
         source_mode is AcademicDataSourceMode.VERIFIED_AUTHORITATIVE
         and course.approval_status is ApprovalStatus.APPROVED
         and course.verification_status.is_source_verified
+        and _course_rule_coverage_status(rule_set) == RuleSetStatus.COMPLETE.value
+        and corequisite_status == "AVAILABLE"
         and rule_set is not None
-        and rule_set.status is RuleSetStatus.COMPLETE
+        and bool(rule_set.rules)
         and all(
             rule.approval_status is ApprovalStatus.APPROVED
             for rule in rule_set.rules
         )
+        and all(
+            rule.verification_status.is_source_verified
+            for rule in rule_set.rules
+        )
+    )
+
+
+def _serialized_expression_contains_unsupported(
+    expression: dict[str, Any],
+) -> bool:
+    if expression.get("supported") is False:
+        return True
+    children = expression.get("children")
+    if isinstance(children, list) and any(
+        _serialized_expression_contains_unsupported(child)
+        for child in children
+        if isinstance(child, dict)
+    ):
+        return True
+    operand = expression.get("operand")
+    return isinstance(operand, dict) and _serialized_expression_contains_unsupported(
+        operand
     )
 
 
