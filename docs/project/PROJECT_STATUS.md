@@ -1,11 +1,11 @@
 # Project Status
 
 **Project:** Local Intelligent Academic Advisor
-**Status date:** 2026-10-09
+**Status date:** 2026-10-13
 **Repository:** `karimsamer100/intelligent-academic-advisor`
 **Integration branch:** `feat/orchestration-grounded-advisor`
-**Current verified code HEAD:** `c9aa843330638f9b9e48981a912cc30232273f6e`
-**Latest verified code commit:** `fix(advisor): improve tool selection and grounded evaluation`
+**Current verified code HEAD:** `c596e7f039bba6ab3a5a7e689a64fe3a6da80d2c`
+**Latest verified code commit:** `feat(tools): add structured course information routing`
 
 ---
 
@@ -168,15 +168,34 @@ Structured generation: think=false
 
 8K and 16K runtime context settings were successfully probed. Practical semantic retention was validated at roughly 4K prompt tokens; full 8K semantic retention has not been benchmarked.
 
-### Frozen initial tool set
+### Current Planning/RAG tool set
 
-Exactly three initial tools:
+Checkpoint 1 adds the fourth read-only Planning-facing tool:
 
 ```text
 check_course_eligibility
 degree_audit
+get_course_information
 search_official_documents
 ```
+
+get_course_information accepts only course_code, resolves regulation and
+program from trusted student context, and returns static typed course facts
+without evaluating student history. Its projection preserves scoped identity,
+name, credit hours, the complete typed prerequisite expression when available,
+rule IDs, provenance, approval/verification state, data-source metadata, and
+explicit incomplete/unavailable/unsupported coverage.
+
+The current normalized development data is still non-authoritative. The
+current corequisite artifact does not expose complete typed corequisite
+definitions, so the new tool reports corequisites as unavailable rather than
+claiming that none exist.
+
+The versioned advisor prompt routes standalone course facts and prerequisites
+to get_course_information, student-specific registration questions to
+check_course_eligibility, and policy/document wording to RAG. It permits
+compound use only when each tool serves an independently requested
+responsibility.
 
 Trusted academic/student fields are server-controlled and are not accepted from the LLM as authoritative input.
 
@@ -198,6 +217,8 @@ Trusted regulation/program scope is injected by the backend.
 - per-course corequisite coverage
 - safe expected/unexpected tool-error boundary
 - existing services are injected into tool composition
+- static course-information projection with preserved AND/OR expression trees
+- explicit Planning-first routing for course facts versus policy evidence
 
 ---
 
@@ -373,6 +394,32 @@ quality approval has been granted.
 
 **Remaining QA infrastructure gap:** GitHub Actions CI workflow is not yet present; `.github/workflows/` currently contains only `.gitkeep`.
 
+Course-information Checkpoint 1 verification on 2026-10-13:
+
+~~~text
+Implementation commit:                         c596e7f039bba6ab3a5a7e689a64fe3a6da80d2c
+Focused backend tools/planning/orchestration/llm: 588 passed, 1 skipped
+Deterministic orchestration evaluator:          29 passed
+Full local backend:                             687 passed, 11 skipped, 1 pre-existing failure
+Changed-file Ruff:                              passed
+Compileall:                                     passed
+Docker DB-required backend:                     not run; Docker API unavailable
+Live Ollama evaluation:                         not run by checkpoint scope
+~~~
+
+The local full-suite failure is the pre-existing Windows path assertion in
+`tests/test_config.py`; Checkpoint 1 does not modify configuration. Full Ruff
+still reports five unrelated pre-existing unused-import findings. `git
+diff --check` also reports the pre-existing trailing whitespace in the dirty
+`docs/decisions/Project_Decisions.md` change. The Docker/PostgreSQL
+`REQUIRE_DB_TESTS=1` regression could not run because the Docker Desktop Linux
+engine pipe was unavailable. No live Ollama evaluation was run.
+
+Checkpoint 1 is complete for review. Checkpoint 2 remains deferred:
+grounded final-answer validation, degree-audit projection redesign,
+cross-tool citation validation, frontend response-schema redesign, and
+answer-repair/claim-verification pipelines.
+
 ---
 
 ## 7. Known Academic / Product Limitations
@@ -480,7 +527,9 @@ Then evaluate:
 - tool-error behavior
 - latency
 
-Do not expand the tool set automatically before this flow is proven.
+Do not begin Checkpoint 2 without explicit project-owner approval. The
+four-tool Checkpoint 1 implementation is stopped for review; live final-answer
+quality remains pending.
 
 ---
 

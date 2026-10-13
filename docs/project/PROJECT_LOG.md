@@ -215,3 +215,35 @@ The project already completed and integrated:
   passed.
 - Live grounded-response evaluation remains pending; no final grounded-
   response quality approval has been granted.
+
+## 2026-10-13 - Course-information Checkpoint 1 implemented offline
+
+- Implementation commit:
+  c596e7f039bba6ab3a5a7e689a64fe3a6da80d2c.
+- Added the read-only get_course_information Planning-facing tool. It
+  resolves only the trusted student regulation/program scope, never runs
+  student eligibility evaluation, and preserves static course metadata,
+  structured prerequisite expression trees, rule provenance, lifecycle state,
+  dataset metadata, and explicit coverage limitations.
+- The advisor registry now contains four tools:
+  check_course_eligibility, degree_audit, get_course_information, and
+  search_official_documents.
+- Versioned advisor routing now sends standalone course facts and
+  prerequisites to structured Planning data, eligibility questions to
+  Planning eligibility, and policy/document wording to RAG. Compound requests
+  may use both Planning and RAG when responsibilities are independent.
+- Updated the affected orchestration evaluation cases, including a
+  standalone course-information case and the mixed eligibility/prerequisite
+  case. The evaluator accepts the new tool's bounded input/output contract.
+- Verification: focused backend tools/planning/orchestration/LLM tests
+  588 passed, 1 skipped; deterministic orchestration evaluator 29 passed;
+  full local backend 687 passed, 11 skipped, 1 pre-existing failure;
+  changed-file Ruff passed; compileall passed.
+- Docker/PostgreSQL REQUIRE_DB_TESTS=1 verification was blocked because the
+  Docker Desktop Linux engine was unavailable. Full Ruff retains five
+  unrelated pre-existing unused-import findings. No live Ollama evaluation
+  was run.
+- Remaining course-data limitation: the current corequisite artifact does not
+  expose complete typed corequisite definitions, so the new tool reports
+  explicit unavailability. Checkpoint 2 grounding and response-schema work is
+  intentionally deferred pending review.
