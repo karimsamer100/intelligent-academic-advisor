@@ -272,3 +272,28 @@ The project already completed and integrated:
   the full dirty-tree diff check retains the unrelated Project_Decisions.md
   trailing-whitespace finding. Existing unrelated changes remain untouched.
 - Checkpoint 2 remains deferred.
+
+## 2026-10-13 - Checkpoint 2 grounded response facts verified offline
+
+- Implementation commit: `b1bb5c7a67b21c6c4163b64d81d3c5041a6d7f47`.
+- Pushed to `origin/feat/orchestration-grounded-advisor` successfully.
+- Added the additive typed `AdvisorResponse.academic_facts` contract for
+  eligibility, static course information, degree-audit facts, and official
+  document evidence, plus per-tool authority/review metadata.
+- Added deterministic facts construction from successful trusted tool
+  executions only. Existing response fields, four-tool registry, trusted
+  context, orchestration budgets, Planning algorithms, academic data, and RAG
+  retrieval remain unchanged.
+- Improved bounded degree-audit requirement details with outcomes,
+  requirement-level review flags, reason codes, and provenance. The v4
+  advisor prompt and narrow runtime safeguards preserve Planning decisions,
+  separate audit review from eligibility review, reject unsupported numeric or
+  source/page claims, and keep unavailable coverage explicit.
+- Verification: focused backend tools/planning/orchestration/LLM 606 passed,
+  1 skipped; evaluator 29 passed; full local backend 705 passed, 11 skipped,
+  1 pre-existing Windows path failure; changed-file Ruff and compileall
+  passed.
+- Docker/PostgreSQL `REQUIRE_DB_TESTS=1` was blocked because Docker Desktop was
+  manually paused. Full Ruff retains five unrelated pre-existing F401
+  findings. No Ollama/live evaluation was run.
+- Checkpoint 3 remains intentionally deferred pending review.

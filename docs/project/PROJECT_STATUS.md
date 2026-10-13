@@ -4,8 +4,8 @@
 **Status date:** 2026-10-13
 **Repository:** `karimsamer100/intelligent-academic-advisor`
 **Integration branch:** `feat/orchestration-grounded-advisor`
-**Current verified code HEAD:** `15d7e2aa0b93e43ba5fe21e76904e86eb1626949`
-**Latest verified code commit:** `fix: harden course information projection safety`
+**Current verified code HEAD:** `b1bb5c7a67b21c6c4163b64d81d3c5041a6d7f47`
+**Latest verified code commit:** `feat(orchestration): add grounded academic response facts`
 
 ---
 
@@ -22,13 +22,14 @@ Local LLM Foundation          DONE
 Real Local LLM Validation     DONE
 Pre-Orchestration Hardening   DONE
 Orchestration                 COMPLETE OFFLINE / LIVE EVALUATION PENDING
-Final Grounded Responses      BOUNDED MULTI-TOOL LOOP VERIFIED / LIVE QUALITY PENDING
+Final Grounded Responses      CHECKPOINT 2 VERIFIED OFFLINE / LIVE QUALITY PENDING
 Chat API / Persistence        NOT STARTED
 Frontend Implementation       DESIGN IN PROGRESS
 CI Workflow                   NOT IMPLEMENTED YET
 ```
 
-**Immediate technical phase:** Orchestration and grounded final-answer evaluation.
+**Immediate technical phase:** Checkpoint 2 is stopped for review; do not begin
+Checkpoint 3 without explicit approval.
 
 ---
 
@@ -588,3 +589,56 @@ Before starting a new task:
 4. Read component-specific decision docs if relevant.
 5. Inspect the current branch and exact code.
 6. Do not rely on old roadmaps when current code/status says otherwise.
+
+---
+
+## 12. Checkpoint 2 — Grounded Response Reliability
+
+Checkpoint 2 implementation is verified offline and stopped for review.
+
+Implementation commit:
+
+```text
+b1bb5c7a67b21c6c4163b64d81d3c5041a6d7f47
+feat(orchestration): add grounded academic response facts
+```
+
+The additive `AdvisorResponse` contract now exposes deterministic
+`academic_facts` and a `grounding` assessment alongside the existing `text`,
+legacy single-tool fields, execution history, and transcript. Facts are built
+only from successful trusted tool projections and are never parsed from LLM
+text. Eligibility, course information, degree-audit, and official-document
+facts remain separate. Planning authority and formal review flags are copied
+from their corresponding tool only; they are not derived from one another.
+
+Degree-audit projections now preserve bounded requirement-level IDs, outcomes,
+review flags, reason codes, and provenance, while retaining the existing
+aggregate fields for compatibility. The v4 advisor prompt states the
+cross-tool boundaries and the distinction between unavailable coverage and a
+verified absence. Narrow deterministic checks protect against detectable
+eligibility, review-attribution, numeric, coverage, authority, and source/page
+metadata contradictions. They do not claim semantic quote verification.
+
+Verification:
+
+```text
+Focused backend tools/planning/orchestration/LLM: 606 passed, 1 skipped
+Deterministic orchestration evaluator:            29 passed
+Full local backend:                               705 passed, 11 skipped, 1 pre-existing failure
+Changed-file Ruff:                                passed
+Compileall:                                       passed
+Scoped staged diff check:                         passed
+Docker/PostgreSQL REQUIRE_DB_TESTS=1:             blocked; Docker Desktop paused
+```
+
+The full local failure is the pre-existing Windows path assertion in
+`tests/test_config.py::test_values_are_loaded_from_environment` (`/tmp/docs`
+versus Windows `\\tmp\\docs`). Full Ruff retains five unrelated pre-existing
+unused-import findings. No Ollama or live evaluation was run.
+
+Known Checkpoint 2 limitations remain: normalized development academic data is
+non-authoritative, typed corequisite coverage is unavailable, citation checks
+validate source/page metadata only, and the frontend/HTTP response surface is
+unchanged. Checkpoint 3 work remains deferred, including broader claim
+verification, cross-tool citation validation, frontend response redesign, and
+general answer repair.
