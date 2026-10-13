@@ -22,9 +22,37 @@ from app.planning.domain.conditions import (
     FutureCondition,
 )
 from app.planning.domain.course import Course, CourseIdentity
-from app.planning.domain.eligibility import EligibilityResult
+from app.planning.domain.eligibility import (
+    CourseEligibilityRuleSet,
+    EligibilityResult,
+    RuleSetStatus,
+)
+from app.planning.domain.expressions import (
+    AndExpression,
+    CourseCompletedExpression,
+    CourseConcurrentExpression,
+    CourseCurrentlyRegisteredExpression,
+    EntryRequirementExpression,
+    CoursePassedExpression,
+    MaxEarnedCreditsExpression,
+    MaxGpaExpression,
+    MinEarnedCreditsExpression,
+    MinGpaExpression,
+    NotExpression,
+    OrExpression,
+    RuleExpression,
+    UnsupportedExpression,
+)
+from app.planning.domain.lifecycle import ApprovalStatus
 from app.planning.domain.provenance import Provenance
+from app.planning.domain.reasons import ReasonCode
 from app.planning.domain.trace import DecisionStatus, DecisionTraceNode, TraceCode
+from app.planning.domain.version import DatasetVersion
+from app.planning.repositories.adapters.academic_data_types import (
+    AcademicDataDiagnostic,
+    AcademicDataLookup,
+    AcademicDataSourceMode,
+)
 
 
 # A deterministic character budget is used by tests as a tokenizer-free
@@ -78,6 +106,292 @@ def project_eligibility(
         "conditions": _eligibility_conditions(result),
         "citations": _eligibility_citations(result),
     }
+
+
+def project_course_information(
+    *,
+    course_lookup: AcademicDataLookup[Course],
+    rule_lookup: AcademicDataLookup[CourseEligibilityRuleSet],
+    source_mode: AcademicDataSourceMode,
+    dataset_version: DatasetVersion | None,
+) -> dict[str, Any]:
+    """Return static course facts without student-specific evaluation."""
+
+    course = course_lookup.value
+    if not isinstance(course, Course):
+        raise TypeError("course_lookup must contain a Course")
+    if not isinstance(source_mode, AcademicDataSourceMode):
+        raise TypeError("source_mode must be an AcademicDataSourceMode")
+
+    rule_set = rule_lookup.value
+    if rule_set is not None and not isinstance(
+        rule_set, CourseEligibilityRuleSet
+    ):
+        raise TypeError("rule_lookup must contain a CourseEligibilityRuleSet or None")
+
+    rules = (
+        [_compact_course_rule(rule) for rule in rule_set.rules]
+        if rule_set is not None
+        else []
+    )
+    prerequisite_status = _course_rule_coverage_status(rule_set)
+    corequisite_status, corequisite_reason_codes, corequisite_diagnostics = (
+        _corequisite_coverage(rule_lookup.diagnostics)
+    )
+    combined_diagnostics = _compact_diagnostics(
+        (*course_lookup.diagnostics, *rule_lookup.diagnostics)
+    )
+    course_provenance = _compact_provenances(course_lookup.provenance)
+    rule_provenance = _compact_provenances(rule_lookup.provenance)
+
+    prerequisite_payload: dict[str, Any] = {
+        "status": prerequisite_status,
+        "rule_set_status": (
+            rule_set.status.value if rule_set is not None else RuleSetStatus.UNAVAILABLE.value
+        ),
+        "reason_codes": (
+            _enum_values(rule_set.reason_codes)
+            if rule_set is not None
+            else [ReasonCode.MISSING_REQUIRED_DATA.value]
+        ),
+        "rules": rules,
+        "expression": rules[0]["expression"] if len(rules) == 1 else None,
+    }
+    if rule_provenance:
+        prerequisite_payload["provenance"] = rule_provenance
+
+    corequisite_payload: dict[str, Any] = {
+        "status": corequisite_status,
+        "rules": [],
+        "reason": (
+            "Complete typed corequisite information is not available "
+            "through the Academic Data adapter."
+        ),
+        "reason_codes": corequisite_reason_codes,
+    }
+    if corequisite_diagnostics:
+        corequisite_payload["diagnostics"] = corequisite_diagnostics
+
+    return {
+        "course": {
+            "identity": course.identity.course_id,
+            "code": course.identity.course_code,
+            "name": course.course_name,
+            "credit_hours": course.credit_hours,
+            "regulation": course.identity.regulation.value,
+            "program": str(course.identity.program),
+            "approval_status": course.approval_status.value,
+            "verification_status": course.verification_status.value,
+        },
+        "prerequisites": prerequisite_payload,
+        "corequisites": corequisite_payload,
+        "coverage": {
+            "course": "AVAILABLE",
+            "prerequisites": prerequisite_status,
+            "corequisites": corequisite_status,
+        },
+        "data_source": {
+            "source_mode": source_mode.value,
+            "dataset_version": (
+                dataset_version.to_dict() if dataset_version is not None else None
+            ),
+        },
+        "course_provenance": course_provenance,
+        "authoritative": _course_information_is_authoritative(
+            course,
+            rule_set,
+            source_mode=source_mode,
+        ),
+        "diagnostics": combined_diagnostics,
+    }
+
+
+def serialize_rule_expression(expression: RuleExpression) -> dict[str, Any]:
+    """Serialize one typed expression without flattening its logical tree."""
+
+    if isinstance(expression, (AndExpression, OrExpression)):
+        return {
+            "type": expression.expression_type.value,
+            "children": [
+                serialize_rule_expression(child) for child in expression.children
+            ],
+        }
+    if isinstance(expression, NotExpression):
+        return {
+            "type": expression.expression_type.value,
+            "operand": serialize_rule_expression(expression.operand),
+        }
+    if isinstance(
+        expression,
+        (
+            CoursePassedExpression,
+            CourseCompletedExpression,
+            CourseCurrentlyRegisteredExpression,
+            CourseConcurrentExpression,
+        ),
+    ):
+        return {
+            "type": expression.expression_type.value,
+            "course_id": expression.course.course_id,
+            "course_code": expression.course.course_code,
+        }
+    if isinstance(expression, MinEarnedCreditsExpression):
+        return {"type": expression.expression_type.value, "minimum": expression.minimum}
+    if isinstance(expression, MaxEarnedCreditsExpression):
+        return {"type": expression.expression_type.value, "maximum": expression.maximum}
+    if isinstance(expression, MinGpaExpression):
+        return {"type": expression.expression_type.value, "minimum": expression.minimum}
+    if isinstance(expression, MaxGpaExpression):
+        return {"type": expression.expression_type.value, "maximum": expression.maximum}
+    if isinstance(expression, UnsupportedExpression):
+        payload: dict[str, Any] = {
+            "type": "UNSUPPORTED",
+            "source_type": expression.source_type,
+            "supported": False,
+        }
+        for field_name in (
+            "course_id",
+            "course_code",
+            "code",
+            "condition_note",
+            "reason",
+            "external_reference",
+        ):
+            value = getattr(expression, field_name)
+            if value is not None:
+                payload[field_name] = value
+        if isinstance(expression, EntryRequirementExpression):
+            payload["reference"] = expression.reference.to_dict()
+        return payload
+    return {
+        "type": "UNSUPPORTED",
+        "source_type": type(expression).__name__,
+        "supported": False,
+        "reason": "Expression type is not supported by the course-information serializer",
+    }
+
+
+def _compact_course_rule(rule: Any) -> dict[str, Any]:
+    expression = (
+        serialize_rule_expression(rule.expression)
+        if rule.expression is not None
+        else None
+    )
+    provenance = _compact_provenances(
+        (rule.provenance,) if rule.provenance is not None else ()
+    )
+    return {
+        "rule_id": rule.rule_id,
+        "expression": expression,
+        "approval_status": rule.approval_status.value,
+        "verification_status": rule.verification_status.value,
+        "critical_for_planner": rule.critical_for_planner,
+        "provenance": provenance[0] if provenance else None,
+    }
+
+
+def _course_rule_coverage_status(
+    rule_set: CourseEligibilityRuleSet | None,
+) -> str:
+    if rule_set is None:
+        return RuleSetStatus.UNAVAILABLE.value
+    if ReasonCode.UNSUPPORTED_RULE in rule_set.reason_codes:
+        return "UNSUPPORTED"
+    return rule_set.status.value
+
+
+def _corequisite_coverage(
+    diagnostics: Iterable[AcademicDataDiagnostic],
+) -> tuple[str, list[str], list[dict[str, Any]]]:
+    values = tuple(
+        diagnostic
+        for diagnostic in diagnostics
+        if diagnostic.field == "corequisites"
+        or diagnostic.source_type == "corequisites"
+    )
+    reason_codes = list(
+        dict.fromkeys(
+            reason.value for diagnostic in values for reason in diagnostic.reason_codes
+        )
+    )
+    compact = _compact_diagnostics(values)
+    if any(ReasonCode.UNSUPPORTED_RULE in item.reason_codes for item in values):
+        return "UNSUPPORTED", reason_codes, compact
+    if values:
+        return "INCOMPLETE", reason_codes, compact
+    return "UNAVAILABLE", [ReasonCode.MISSING_REQUIRED_DATA.value], compact
+
+
+def _compact_provenances(
+    provenances: Iterable[Provenance],
+) -> list[dict[str, Any]]:
+    values: list[dict[str, Any]] = []
+    seen: set[tuple[Any, ...]] = set()
+    for provenance in provenances:
+        value: dict[str, Any] = {}
+        if provenance.rule_id is not None:
+            value["rule_id"] = provenance.rule_id
+        if provenance.source_id is not None:
+            value["source_id"] = provenance.source_id
+        if provenance.source_page is not None:
+            value["page"] = provenance.source_page
+        if provenance.approval_status is not None:
+            value["approval_status"] = provenance.approval_status.value
+        if provenance.verification_status is not None:
+            value["verification_status"] = provenance.verification_status.value
+        key = tuple(
+            value.get(name)
+            for name in (
+                "rule_id",
+                "source_id",
+                "page",
+                "approval_status",
+                "verification_status",
+            )
+        )
+        if value and key not in seen:
+            seen.add(key)
+            values.append(value)
+    return values[:_MAX_LIST_ITEMS]
+
+
+def _compact_diagnostics(
+    diagnostics: Iterable[AcademicDataDiagnostic],
+) -> list[dict[str, Any]]:
+    values: list[dict[str, Any]] = []
+    for diagnostic in diagnostics:
+        value: dict[str, Any] = {"code": diagnostic.code.value}
+        if diagnostic.record_id is not None:
+            value["record_id"] = diagnostic.record_id
+        if diagnostic.field is not None:
+            value["field"] = diagnostic.field
+        if diagnostic.source_id is not None:
+            value["source_id"] = diagnostic.source_id
+        if diagnostic.detail is not None:
+            value["detail"] = diagnostic.detail
+        if diagnostic.reason_codes:
+            value["reason_codes"] = _enum_values(diagnostic.reason_codes)
+        values.append(value)
+    return values[:_MAX_LIST_ITEMS]
+
+
+def _course_information_is_authoritative(
+    course: Course,
+    rule_set: CourseEligibilityRuleSet | None,
+    *,
+    source_mode: AcademicDataSourceMode,
+) -> bool:
+    return (
+        source_mode is AcademicDataSourceMode.VERIFIED_AUTHORITATIVE
+        and course.approval_status is ApprovalStatus.APPROVED
+        and course.verification_status.is_source_verified
+        and rule_set is not None
+        and rule_set.status is RuleSetStatus.COMPLETE
+        and all(
+            rule.approval_status is ApprovalStatus.APPROVED
+            for rule in rule_set.rules
+        )
+    )
 
 
 def project_degree_audit(result: DegreeAuditResult) -> dict[str, Any]:
@@ -284,6 +598,8 @@ def _enum_values(values: Iterable[Any]) -> list[str]:
 
 __all__ = [
     "DEGREE_AUDIT_PROJECTION_MAX_CHARS",
+    "project_course_information",
     "project_degree_audit",
     "project_eligibility",
+    "serialize_rule_expression",
 ]

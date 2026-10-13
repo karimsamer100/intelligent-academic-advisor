@@ -746,3 +746,90 @@ def test_degree_audit_numeric_summary_mismatch_is_a_hard_failure() -> None:
 
     assert result["status"] == "FAIL"
     assert "degree_audit_deterministic_contradiction" in result["reasons"]
+
+
+def test_course_information_result_shape_and_routing_are_accepted() -> None:
+    response = AdvisorResponse(
+        text="CSE221 requires CSE141 and CSE121 and has 4 credit hours.",
+        tool_name="get_course_information",
+        tool_result={
+            "course": {
+                "identity": "R23:CAIE:CSE221",
+                "code": "CSE221",
+                "credit_hours": 4,
+            },
+            "prerequisites": {
+                "status": "COMPLETE",
+                "expression": {
+                    "type": "AND",
+                    "children": [
+                        {"type": "COURSE_PASSED", "course_code": "CSE141"},
+                        {"type": "COURSE_PASSED", "course_code": "CSE121"},
+                    ],
+                },
+                "rules": [],
+            },
+            "corequisites": {"status": "UNAVAILABLE", "rules": []},
+            "coverage": {
+                "course": "AVAILABLE",
+                "prerequisites": "COMPLETE",
+                "corequisites": "UNAVAILABLE",
+            },
+            "data_source": {
+                "source_mode": "NORMALIZED_DEVELOPMENT",
+                "dataset_version": None,
+            },
+        },
+    )
+
+    result = grade_turn(
+        case={
+            "id": "course_information",
+            "kind": "course_information",
+            "expected_tool": "get_course_information",
+            "language_expected": "en",
+        },
+        response=response,
+        initial_tool_calls=[
+            ToolCall(
+                name="get_course_information",
+                arguments={"course_code": "CSE221"},
+            )
+        ],
+        known_course_codes=["CSE221", "CSE141", "CSE121"],
+    )
+
+    assert result["status"] == "PASS"
+    assert result["selected_tools"] == ["get_course_information"]
+    assert result["decision_preserved"] is True
+
+
+def test_course_information_rejects_llm_scope_override_arguments() -> None:
+    response = AdvisorResponse(
+        text="The course information request was rejected.",
+        tool_name="get_course_information",
+        tool_result={
+            "error": {
+                "code": "INVALID_TOOL_ARGUMENTS",
+                "message": "The academic request contained invalid tool arguments.",
+            }
+        },
+    )
+
+    result = grade_turn(
+        case={
+            "id": "course_information",
+            "kind": "course_information",
+            "expected_tool": "get_course_information",
+        },
+        response=response,
+        initial_tool_calls=[
+            ToolCall(
+                name="get_course_information",
+                arguments={"course_code": "CSE221", "regulation": 2018},
+            )
+        ],
+    )
+
+    assert result["status"] == "FAIL"
+    assert "trusted_argument_override_attempted" in result["reasons"]

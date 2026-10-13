@@ -20,6 +20,7 @@ EvaluationStatus = Literal[
 _ALLOWED_ARGUMENT_KEYS = {
     "check_course_eligibility": {"course_code"},
     "degree_audit": set(),
+    "get_course_information": {"course_code"},
     "search_official_documents": {"query", "document_types"},
 }
 _ARABIC_RE = re.compile(r"[\u0600-\u06ff]")
@@ -566,6 +567,13 @@ def _tool_result_shape_error(
             "requirements",
             "requires_human_review",
         },
+        "get_course_information": {
+            "course",
+            "prerequisites",
+            "corequisites",
+            "coverage",
+            "data_source",
+        },
         "search_official_documents": {"results"},
     }.get(tool_name)
     if required_keys is None:
@@ -939,6 +947,11 @@ def _summarize_tool_result(tool_result: Mapping[str, Any] | None) -> dict[str, A
         "authoritative",
         "requires_human_review",
         "rule_set_status",
+        "coverage",
+        "course",
+        "prerequisites",
+        "corequisites",
+        "data_source",
         "reasons",
         "citations",
     ):

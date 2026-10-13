@@ -1,5 +1,5 @@
 {
-  "schema_version": "orchestration-eval-v2",
+  "schema_version": "orchestration-eval-v3",
   "cases": [
     {
       "id": "eligibility_en",
@@ -19,12 +19,22 @@
     },
     {
       "id": "eligibility_mixed",
-      "kind": "eligibility",
       "language_expected": "mixed",
-      "expected_tool": "check_course_eligibility",
-      "allowed_extra_tools": ["search_official_documents"],
+      "kind": "compound",
+      "required_tools": [
+        "check_course_eligibility",
+        "get_course_information"
+      ],
       "requires": ["eligibility_course"],
       "prompt": "Check my eligibility for {{eligibility_course}} و اشرح prerequisites باختصار، مع الحفاظ على أي human review flag."
+    },
+    {
+      "id": "course_information",
+      "kind": "course_information",
+      "language_expected": "en",
+      "expected_tool": "get_course_information",
+      "requires": ["eligibility_course"],
+      "prompt": "What are the structured prerequisites, corequisites, name, and credit hours for {{eligibility_course}}? Do not use RAG for course facts."
     },
     {
       "id": "degree_audit",
@@ -76,7 +86,7 @@
         "search_official_documents"
       ],
       "requires": ["eligibility_course", "rag_available"],
-      "prompt": "Combine an eligibility check for {{eligibility_course}}, my degree progress, and official regulation evidence about prerequisites. Use each result only for the part it supports, preserve any human-review or non-authoritative limitation, and cite returned documents only."
+      "prompt": "Combine an eligibility check for {{eligibility_course}}, my degree progress, and official regulation evidence about registration policy. Use each result only for the part it supports, preserve any human-review or non-authoritative limitation, and cite returned documents only."
     },
     {
       "id": "sequential_grounded_followup",

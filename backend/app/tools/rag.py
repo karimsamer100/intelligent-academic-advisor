@@ -47,7 +47,9 @@ class SearchOfficialDocumentsArguments(BaseModel):
 class SearchOfficialDocumentsTool(AcademicTool[SearchOfficialDocumentsArguments]):
     name = "search_official_documents"
     description = (
-        "Search official academic documents for relevant evidence. "
+        "Search official academic documents for policy wording, procedures, "
+        "and document evidence. Do not use this for structured course facts, "
+        "prerequisites, eligibility, or degree calculations. "
         "document_types is optional; use only canonical values from the input "
         "schema or omit it when uncertain."
     )

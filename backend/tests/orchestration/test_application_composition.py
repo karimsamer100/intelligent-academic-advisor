@@ -157,6 +157,88 @@ def test_composed_orchestrator_executes_real_eligibility_and_delivers_compact_re
     assert eligibility_tool._planning_service is static.planning_service
 
 
+def test_composed_orchestrator_routes_static_course_questions_to_planning_data() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(
+                tool_calls=[
+                    _call("get_course_information", {"course_code": "CSE221"})
+                ]
+            ),
+            GenerationResponse(content="The structured course facts are available."),
+        ]
+    )
+    application = _application(provider)
+
+    response = application.orchestrator.respond(
+        AdvisorRequest(
+            user_message="What prerequisites and credit hours does CSE221 have?",
+            student_id="DEV-STUDENT-001",
+        )
+    )
+
+    assert response.tool_name == "get_course_information"
+    assert response.tool_result is not None
+    assert response.tool_result["course"]["identity"] == "R23:CAIE:CSE221"
+    assert response.tool_result["prerequisites"]["expression"]["type"] == "AND"
+    assert response.tool_result["prerequisites"]["expression"]["children"] == [
+        {
+            "type": "COURSE_PASSED",
+            "course_id": "R23:CAIE:CSE141",
+            "course_code": "CSE141",
+        },
+        {
+            "type": "COURSE_PASSED",
+            "course_id": "R23:CAIE:CSE121",
+            "course_code": "CSE121",
+        },
+    ]
+    assert response.tool_result["authoritative"] is False
+    assert len(response.tool_executions) == 1
+
+
+def test_composed_orchestrator_keeps_course_facts_and_policy_search_independent() -> None:
+    provider = QueueProvider(
+        [
+            GenerationResponse(
+                tool_calls=[
+                    _call("get_course_information", {"course_code": "CSE221"}),
+                    _call(
+                        "search_official_documents",
+                        {
+                            "query": "registration deadline",
+                            "document_types": ["REGULATION"],
+                        },
+                        call_id="call-2",
+                    ),
+                ]
+            ),
+            GenerationResponse(content="The course facts and policy evidence are separate."),
+        ]
+    )
+    application = _application(provider)
+
+    response = application.orchestrator.respond(
+        AdvisorRequest(
+            user_message=(
+                "Give me the prerequisites for CSE221 and the official "
+                "registration deadline policy."
+            ),
+            student_id="DEV-STUDENT-001",
+        )
+    )
+
+    assert [record.tool_name for record in response.tool_executions] == [
+        "get_course_information",
+        "search_official_documents",
+    ]
+    assert response.tool_executions[0].result["course"]["identity"] == (
+        "R23:CAIE:CSE221"
+    )
+    assert response.tool_executions[1].result["results"] == []
+    assert len(response.tool_executions) == 2
+
+
 def test_composed_orchestrator_executes_real_degree_audit_and_preserves_review_state() -> None:
     provider = QueueProvider(
         [

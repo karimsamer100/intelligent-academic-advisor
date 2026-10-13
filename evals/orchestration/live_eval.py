@@ -54,6 +54,7 @@ EXIT_CODES = {
 _ALLOWED_ARGUMENT_KEYS = {
     "check_course_eligibility": {"course_code"},
     "degree_audit": set(),
+    "get_course_information": {"course_code"},
     "search_official_documents": {"query", "document_types"},
 }
 _MAX_COURSE_PROBES = 200
@@ -384,6 +385,11 @@ def _safe_tool_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | Non
         "authoritative",
         "requires_human_review",
         "rule_set_status",
+        "coverage",
+        "course",
+        "prerequisites",
+        "corequisites",
+        "data_source",
         "requirement_set_status",
         "reasons",
         "warnings",

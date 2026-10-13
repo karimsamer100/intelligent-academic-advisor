@@ -33,7 +33,10 @@ class CheckCourseEligibilityArguments(BaseModel):
 
 class CheckCourseEligibilityTool(AcademicTool[CheckCourseEligibilityArguments]):
     name = "check_course_eligibility"
-    description = "Check whether the trusted student may take one course."
+    description = (
+        "Check whether the trusted student may take one course. Use this for "
+        "student-specific registration eligibility, not standalone course facts."
+    )
     arguments_model = CheckCourseEligibilityArguments
 
     def __init__(

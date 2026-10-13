@@ -1,6 +1,10 @@
 """Application tools exposed to future LLM orchestration."""
 
 from app.tools.context import ToolExecutionContext
+from app.tools.course_information import (
+    GetCourseInformationArguments,
+    GetCourseInformationTool,
+)
 from app.tools.degree_audit import DegreeAuditArguments, DegreeAuditTool
 from app.tools.eligibility import (
     CheckCourseEligibilityArguments,
@@ -26,6 +30,8 @@ __all__ = [
     "build_academic_tool_registry",
     "CheckCourseEligibilityArguments",
     "CheckCourseEligibilityTool",
+    "GetCourseInformationArguments",
+    "GetCourseInformationTool",
     "DegreeAuditArguments",
     "DegreeAuditTool",
     "SearchOfficialDocumentsArguments",
