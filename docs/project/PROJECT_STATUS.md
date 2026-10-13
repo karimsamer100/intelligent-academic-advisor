@@ -4,8 +4,8 @@
 **Status date:** 2026-10-13
 **Repository:** `karimsamer100/intelligent-academic-advisor`
 **Integration branch:** `feat/orchestration-grounded-advisor`
-**Current verified code HEAD:** `b1bb5c7a67b21c6c4163b64d81d3c5041a6d7f47`
-**Latest verified code commit:** `feat(orchestration): add grounded academic response facts`
+**Current verified code HEAD:** `a326bbed827e296725fc5893bb64002e6e6f6d1b`
+**Latest verified code commit:** `feat: harden offline advisor grounding and evaluation`
 
 ---
 
@@ -21,15 +21,17 @@ RAG Pipeline                  DONE
 Local LLM Foundation          DONE
 Real Local LLM Validation     DONE
 Pre-Orchestration Hardening   DONE
-Orchestration                 COMPLETE OFFLINE / LIVE EVALUATION PENDING
-Final Grounded Responses      CHECKPOINT 2 VERIFIED OFFLINE / LIVE QUALITY PENDING
+Orchestration                 COMPLETE OFFLINE / LIVE QWEN EVALUATION PENDING
+Final Grounded Responses      CHECKPOINT 2 + ITERATION 3 VERIFIED OFFLINE / LIVE QUALITY PENDING
+Grounding / Evaluation V3     VERIFIED OFFLINE / LIVE QWEN EVALUATION PENDING
 Chat API / Persistence        NOT STARTED
 Frontend Implementation       DESIGN IN PROGRESS
 CI Workflow                   NOT IMPLEMENTED YET
 ```
 
-**Immediate technical phase:** Checkpoint 2 is stopped for review; do not begin
-Checkpoint 3 without explicit approval.
+**Immediate technical phase:** Big Iteration 3 is complete and stopped for
+review. The next iteration is limited to cloud-hosted Qwen evaluation and
+benchmarking; do not begin it without explicit project-owner approval.
 
 ---
 
@@ -487,9 +489,10 @@ deterministic tests pass. Real Ollama final-answer quality remains unevaluated.
 Current focus:
 
 - Local LLM work is validated.
-- Orchestration Checkpoint 2 application composition and real-tool execution
-  are verified offline; real final-response evaluation remains pending until
-  the Ollama host is available.
+- Orchestration Checkpoint 2 and Big Iteration 3 application composition,
+  trusted facts, grounding protection, and evaluator V3 are verified offline;
+  real Qwen final-response evaluation remains pending until the next approved
+  iteration.
 - Orchestration implementation checkpoint:
   `user → LLM → tool execution → Planning/RAG → tool result → final grounded LLM response`.
 - After the Ollama host is available, run full final-response evaluation.
@@ -525,8 +528,8 @@ Previous backend QA/regression testing has already been performed; do not assign
 
 ## 9. Immediate Next Technical Step
 
-Run the smallest bounded orchestration loop against the configured Ollama model when
-the remote host is available:
+In the next approved iteration, run the smallest bounded orchestration loop
+against the configured Ollama model when the remote host is available:
 
 ```text
 User
@@ -554,8 +557,8 @@ Then evaluate:
 - tool-error behavior
 - latency
 
-Do not begin Checkpoint 2 without explicit project-owner approval. The
-four-tool Checkpoint 1 implementation is stopped for review; live final-answer
+Do not begin the cloud/live Qwen iteration without explicit project-owner
+approval. No live model request was made in Big Iteration 3; final-answer
 quality remains pending.
 
 ---
@@ -642,3 +645,48 @@ validate source/page metadata only, and the frontend/HTTP response surface is
 unchanged. Checkpoint 3 work remains deferred, including broader claim
 verification, cross-tool citation validation, frontend response redesign, and
 general answer repair.
+
+---
+
+## 13. Big Iteration 3 - Backend Reliability and Offline Evaluation
+
+Big Iteration 3 is implemented and verified offline in commit
+`a326bbed827e296725fc5893bb64002e6e6f6d1b`, which was pushed to
+`origin/feat/orchestration-grounded-advisor`.
+
+The implementation keeps the four-tool registry, Planning/RAG responsibility
+split, trusted backend context, and the existing 3-round/5-execution
+orchestration bounds. It adds narrow grounding protections for negated,
+quoted, interrogative, Arabic, mixed-language, multi-course, review-flag, and
+source/page-mapping cases. It also upgrades the offline evaluator to report
+provider generations separately from tool rounds, preserve structured facts in
+sanitized reports, and classify runtime fallback as protection rather than as
+proof of a correct generated narrative.
+
+The real-composition offline suite now exercises course information,
+eligibility, degree audit, RAG no-evidence, compound and sequential tool use,
+partial failures, provider failures, and trusted-context override rejection.
+
+Final verification for this iteration:
+
+```text
+Focused backend tools/planning/orchestration/LLM + evaluator: 660 passed, 1 skipped
+Grounding/offline-composition/evaluator subset:                68 passed
+Full local backend:                                            723 passed, 11 skipped, 1 pre-existing failure
+Changed-file Ruff:                                             passed
+Full Ruff:                                                      5 pre-existing F401 findings only
+Compileall:                                                     passed
+Scoped git diff checks:                                         passed
+Docker/PostgreSQL REQUIRE_DB_TESTS=1:                          blocked; Docker Desktop manually paused
+Live Ollama/Qwen evaluation:                                   not run by scope
+```
+
+The full local failure remains the unrelated Windows path assertion in
+`tests/test_config.py::test_values_are_loaded_from_environment` (`/tmp/docs`
+versus `\\tmp\\docs`). The five full-Ruff findings and the dirty-tree
+`Project_Decisions.md` whitespace finding are pre-existing and unrelated.
+
+The next approved iteration is cloud-hosted Qwen inference, latency/quality
+benchmarking, and live academic-answer validation. It must not change the
+Planning algorithms, academic data, RAG retrieval, or bounded orchestration
+architecture without a new decision.

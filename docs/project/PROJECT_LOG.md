@@ -297,3 +297,36 @@ The project already completed and integrated:
   manually paused. Full Ruff retains five unrelated pre-existing F401
   findings. No Ollama/live evaluation was run.
 - Checkpoint 3 remains intentionally deferred pending review.
+
+## 2026-10-13 - Big Iteration 3 backend reliability verified offline
+
+- Implementation commit: `a326bbed827e296725fc5893bb64002e6e6f6d1b`.
+- Pushed successfully to `origin/feat/orchestration-grounded-advisor`.
+- Hardened the narrow grounding validator against false positives from
+  negated, quoted, interrogative, Arabic, and mixed-language authority or
+  eligibility wording while retaining deterministic contradiction protection.
+  Added course-scoped authority checks, review-flag attribution checks, and
+  Planning citation-to-course mapping checks. Safe fallback now preserves
+  trusted facts and provides a readable Arabic summary when appropriate.
+- Upgraded the offline evaluator to schema V3 dimensions for tool selection,
+  execution, trusted arguments, structured facts, per-tool authority/review,
+  grounding protection, citation metadata, language, and provider failures.
+  Final no-tool provider generations are excluded from `tool_round_count` and
+  counted separately as provider generations. Reports persist bounded facts,
+  grounding status, and latency without student identifiers, raw history, or
+  GPA.
+- Added real-composition deterministic offline scenarios for course
+  information, eligibility, degree audit, RAG no-evidence, compound and
+  sequential multi-tool turns, partial/provider failures, and trusted-context
+  override rejection. Scripted-provider results validate backend handling, not
+  live Qwen routing behavior.
+- Verification: focused backend tools/planning/orchestration/LLM plus evaluator
+  660 passed, 1 skipped; grounding/offline/evaluator subset 68 passed; full
+  local backend 723 passed, 11 skipped, 1 pre-existing Windows path failure;
+  changed-file Ruff passed; compileall passed; scoped diff checks passed.
+- Full Ruff retains five unrelated pre-existing F401 findings. Docker/PostgreSQL
+  `REQUIRE_DB_TESTS=1` was attempted but blocked because Docker Desktop was
+  manually paused. No Ollama or live Qwen evaluation was run.
+- Big Iteration 3 is complete and stopped for review. The next iteration is
+  limited to cloud-hosted Qwen inference, benchmark measurements, and live
+  academic-answer validation.
