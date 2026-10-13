@@ -15,6 +15,13 @@ application-owned static Planning and academic-data dependencies are reused.
 The orchestrator permits at most 3 tool rounds and 5 total tool executions per
 turn, and records every requested and executed call.
 
+The persisted report uses `orchestration-live-eval-v3`. A provider generation
+count is recorded separately from `tool_round_count`; a final provider
+generation with no tool calls is not a tool round. Each completed case also
+contains bounded structured academic facts, grounding status/issues, fallback
+classification, per-tool authority/review integrity, citation metadata status,
+language status, and provider latency statistics.
+
 ## Run later when Ollama is available
 
 From the repository root, with Docker Compose and the configured database
@@ -38,8 +45,9 @@ when manual review is required.
 
 The runner never writes academic or RAG data and does not require an HTTP chat
 endpoint. It records bounded tool evidence and model answers for evaluation;
-it does not include the trusted student identifier or student-specific GPA and
-credit totals in the result payload.
+it does not include the trusted student identifier, raw student history, or
+student-specific GPA in the result payload. Bounded aggregate progress facts
+may be included for diagnostics.
 
 ## Cases and grading
 
@@ -51,13 +59,17 @@ prerequisites are not present are explicitly marked `SKIPPED`; no academic
 result is invented.
 
 Automated grading checks requested tools across all rounds, bounded execution,
-trusted argument boundaries, deterministic Planning contradictions, human-
-review preservation, numeric/rule consistency where trusted data is explicit,
-and whether cited source IDs/pages occur in returned RAG evidence. A
-contradiction of a deterministic Planning result is a hard failure. Retrieval
-with no evidence, unsupported or ambiguous citations, and nuanced language,
-completeness, and academic interpretation require manual review; a PASS is not
-a claim that live academic correctness has been fully verified.
+trusted argument boundaries, exact structured-facts integrity, per-tool
+authority/review semantics, deterministic Planning contradictions,
+human-review preservation, numeric/rule consistency where trusted data is
+explicit, and whether cited source IDs/pages occur in returned RAG evidence.
+A contradiction of a deterministic Planning result that escapes runtime
+protection is a hard failure. A `SAFE_FALLBACK` is reported as runtime
+protection of a model mistake, not as proof that the original narrative was
+correct. Retrieval with no evidence, unsupported or ambiguous citations, and
+nuanced language, completeness, and academic interpretation require manual
+review; a PASS is not a claim that live academic correctness has been fully
+verified.
 
 ## Deterministic evaluator tests
 

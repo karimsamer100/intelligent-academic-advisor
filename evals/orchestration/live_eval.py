@@ -290,6 +290,18 @@ def _render_prompt(template: str, discovery: Discovery) -> str:
     )
 
 
+def _render_case_values(value: Any, discovery: Discovery) -> Any:
+    if isinstance(value, str):
+        return _render_prompt(value, discovery)
+    if isinstance(value, list):
+        return [_render_case_values(item, discovery) for item in value]
+    if isinstance(value, Mapping):
+        return {
+            key: _render_case_values(item, discovery) for key, item in value.items()
+        }
+    return value
+
+
 def _missing_prerequisites(
     case: Mapping[str, Any],
     discovery: Discovery,
@@ -391,8 +403,14 @@ def _safe_tool_summary(result: Mapping[str, Any] | None) -> dict[str, Any] | Non
         "corequisites",
         "data_source",
         "requirement_set_status",
+        "credits",
+        "requirements",
+        "mandatory_missing_courses",
+        "elective_progress",
         "reasons",
         "warnings",
+        "missing_requirements",
+        "conditions",
         "citations",
     ):
         if key in result:
@@ -433,8 +451,23 @@ def _tool_calls_by_round(provider: RecordingProvider) -> list[list[ToolCall]]:
     return [
         list(call.response.tool_calls)
         for call in provider.calls
-        if call.response is not None
+        if call.response is not None and call.response.tool_calls
     ]
+
+
+def _safe_academic_facts(response: AdvisorResponse | None) -> dict[str, Any] | None:
+    if response is None:
+        return None
+    return _bounded_value(response.academic_facts.model_dump(mode="json"))
+
+
+def _safe_grounding(response: AdvisorResponse | None) -> dict[str, Any] | None:
+    if response is None:
+        return None
+    return {
+        "status": response.grounding.status,
+        "issues": list(response.grounding.issues)[:20],
+    }
 
 
 def _blocked_case_result(
@@ -498,6 +531,11 @@ def _blocked_case_result(
         "tool_execution_count": len(executed),
         "tool_round_count": len(requested_rounds),
         "tool_result_available": available_result,
+        "tool_selection_correct": None,
+        "tool_execution_success": None,
+        "trusted_arguments_integrity": None,
+        "facts_integrity": None,
+        "tool_authority_review_integrity": None,
         "trusted_tool_summary": summaries[0] if len(summaries) == 1 else None,
         "trusted_tool_summaries": summaries,
         "final_answer": None,
@@ -505,11 +543,25 @@ def _blocked_case_result(
         "decision_preserved": None,
         "human_review_preserved": None,
         "citations_supported": None,
+        "citation_metadata_integrity": None,
+        "grounding_status": response.grounding.status if response else None,
+        "grounding_issues": list(response.grounding.issues) if response else [],
+        "fallback_occurred": bool(
+            response is not None and response.grounding.status == "SAFE_FALLBACK"
+        ),
+        "grounding_protection": None,
+        "narrative_quality": None,
         "invented_academic_information": [],
         "latency_ms": round(
             sum(call.latency_ms for call in provider.calls), 2
         ) if provider is not None else 0.0,
         "provider_call_count": len(provider.calls) if provider is not None else 0,
+        "provider_generation_count": len(provider.calls) if provider is not None else 0,
+        "provider_call_latencies_ms": [
+            round(call.latency_ms, 2) for call in provider.calls
+        ] if provider is not None else [],
+        "academic_facts": _safe_academic_facts(response),
+        "grounding": _safe_grounding(response),
         "provider_error": _safe_error(error),
         "reasons": ["live_dependency_unavailable"],
     }
@@ -568,12 +620,14 @@ def _run_case(
     assert response is not None
 
     initial_calls = _initial_tool_calls(provider)
+    grading_case = _render_case_values(case, discovery)
     graded = grade_turn(
-        case=case,
+        case=grading_case,
         response=response,
         initial_tool_calls=initial_calls,
         tool_calls_by_round=_tool_calls_by_round(provider),
         known_course_codes=discovery.course_codes,
+        provider_generation_count=len(provider.calls),
     )
     graded["prompt"] = _safe_report_prompt(prompt, discovery.student_id)
     graded["final_answer"] = _redact_student_sensitive_text(
@@ -602,6 +656,8 @@ def _run_case(
         round(call.latency_ms, 2) for call in provider.calls
     ]
     graded["provider_generation_count"] = len(provider.calls)
+    graded["academic_facts"] = _safe_academic_facts(response)
+    graded["grounding"] = _safe_grounding(response)
     if len(provider.calls) > 4:
         graded["status"] = "FAIL"
         graded["reasons"].append("orchestration_generation_bound_exceeded")
@@ -641,7 +697,32 @@ def _summary(results: Sequence[Mapping[str, Any]], status: str) -> dict[str, Any
         result_status = str(result.get("status"))
         if result_status in counts:
             counts[result_status] += 1
-    return {"status": status, "counts": counts, "total_cases": len(results)}
+    dimension_names = (
+        "tool_selection_correct",
+        "tool_execution_success",
+        "trusted_arguments_integrity",
+        "facts_integrity",
+        "tool_authority_review_integrity",
+        "grounding_protection",
+        "citation_metadata_integrity",
+        "language_match",
+    )
+    dimensions: dict[str, dict[str, int]] = {}
+    for name in dimension_names:
+        values: dict[str, int] = {}
+        for result in results:
+            value = result.get(name)
+            if value is None:
+                continue
+            key = str(value)
+            values[key] = values.get(key, 0) + 1
+        dimensions[name] = values
+    return {
+        "status": status,
+        "counts": counts,
+        "total_cases": len(results),
+        "dimensions": dimensions,
+    }
 
 
 def _blocked_payload(cases: Sequence[Mapping[str, Any]], reason: str) -> dict[str, Any]:
@@ -655,7 +736,7 @@ def _blocked_payload(cases: Sequence[Mapping[str, Any]], reason: str) -> dict[st
     ]
     results = [dict(result, status="BLOCKED", skip_reason=reason) for result in results]
     return {
-        "schema_version": "orchestration-live-eval-v2",
+        "schema_version": "orchestration-live-eval-v3",
         "evaluation": "grounded-advisor-orchestration",
         "status": "BLOCKED",
         "model": None,
@@ -736,7 +817,7 @@ def run_evaluation(
 
             status = _aggregate_status(results)
             return {
-                "schema_version": "orchestration-live-eval-v2",
+                "schema_version": "orchestration-live-eval-v3",
                 "evaluation": "grounded-advisor-orchestration",
                 "status": status,
                 "model": settings.llm_model,

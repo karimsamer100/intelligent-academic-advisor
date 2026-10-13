@@ -202,7 +202,7 @@ def test_no_tool_response_is_returned_directly() -> None:
     assert response.requires_human_review is False
     assert len(provider.requests) == 1
     system_prompt = provider.requests[0].messages[0].content
-    assert "advisor-system-v4" in system_prompt
+    assert "advisor-system-v5" in system_prompt
     assert "INDETERMINATE" in system_prompt
     assert "requires_human_review=true" in system_prompt
     assert [definition.name for definition in provider.requests[0].tools] == [

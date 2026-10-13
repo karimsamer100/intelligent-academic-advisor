@@ -6,8 +6,10 @@ import re
 from collections.abc import Mapping, Sequence
 from typing import Any, Literal
 
-from app.llm.contracts import ToolCall
+from app.llm.contracts import MessageRole, ToolCall
 from app.orchestration.contracts import AdvisorResponse, AdvisorToolExecution
+from app.orchestration.facts import build_advisor_academic_facts
+from app.orchestration.grounding import protect_advisor_text
 
 EvaluationStatus = Literal[
     "PASS",
@@ -121,14 +123,29 @@ def skip_case(
         "tool_execution_count": 0,
         "tool_round_count": 0,
         "tool_result_available": False,
+        "tool_selection_correct": None,
+        "tool_execution_success": None,
+        "trusted_arguments_integrity": None,
+        "facts_integrity": None,
+        "tool_authority_review_integrity": None,
         "trusted_tool_summary": None,
         "trusted_tool_summaries": [],
         "final_answer": None,
         "response_language": None,
+        "language_expected": None,
+        "language_match": None,
         "decision_preserved": None,
         "human_review_preserved": None,
         "citations_supported": None,
+        "citation_metadata_integrity": None,
+        "grounding_status": None,
+        "grounding_issues": [],
+        "fallback_occurred": False,
+        "grounding_protection": None,
+        "narrative_quality": None,
         "invented_academic_information": [],
+        "provider_failure": None,
+        "provider_generation_count": 0,
         "reasons": [reason],
     }
 
@@ -140,6 +157,8 @@ def _grade_turn(
     initial_tool_calls: Sequence[ToolCall],
     tool_calls_by_round: Sequence[Sequence[ToolCall]] | None = None,
     known_course_codes: Sequence[str] = (),
+    provider_generation_count: int | None = None,
+    provider_failure: str | None = None,
 ) -> dict[str, Any]:
     """Grade one completed orchestrator turn using deterministic facts."""
 
@@ -160,6 +179,9 @@ def _grade_turn(
         _summarize_tool_result(record.result) for record in records if record.result is not None
     ]
     summaries = [summary for summary in summaries if summary is not None]
+    observed_generation_count = provider_generation_count
+    if observed_generation_count is None and tool_calls_by_round is not None:
+        observed_generation_count = len(tool_calls_by_round)
     result: dict[str, Any] = {
         "case_id": str(case["id"]),
         "status": "PASS",
@@ -183,7 +205,13 @@ def _grade_turn(
         "tool_executed": bool(executed_records),
         "tool_execution_count": len(executed_records),
         "tool_round_count": len(requested_rounds),
+        "provider_generation_count": observed_generation_count,
         "tool_result_available": bool(available_records),
+        "tool_selection_correct": None,
+        "tool_execution_success": None,
+        "trusted_arguments_integrity": None,
+        "facts_integrity": None,
+        "tool_authority_review_integrity": None,
         "trusted_tool_summary": summaries[0] if len(summaries) == 1 else None,
         "trusted_tool_summaries": summaries,
         "final_answer": response.text,
@@ -193,12 +221,34 @@ def _grade_turn(
         "human_review_required": False,
         "human_review_warning_present": _has_review_warning(response.text),
         "citations_supported": None,
+        "citation_metadata_integrity": None,
+        "grounding_status": response.grounding.status,
+        "grounding_issues": list(response.grounding.issues),
+        "fallback_occurred": response.grounding.status == "SAFE_FALLBACK",
+        "grounding_protection": None,
+        "narrative_quality": None,
         "invented_academic_information": [],
+        "provider_failure": provider_failure,
         "reasons": [],
     }
 
+    _grade_contract_integrity(result, response)
+    _grade_grounding_protection(result, response, records)
+
+    if requested_calls:
+        result["trusted_arguments_integrity"] = _trusted_arguments_integrity(
+            case,
+            requested_calls,
+        )
+        if result["trusted_arguments_integrity"] == "FAIL":
+            _fail(result, "trusted_argument_value_mismatch")
+    else:
+        result["trusted_arguments_integrity"] = "NOT_APPLICABLE"
+
     required_tools = _required_tools(case)
     if not required_tools:
+        result["tool_selection_correct"] = "PASS" if not selected_tools else "FAIL"
+        result["tool_execution_success"] = "NOT_APPLICABLE"
         if selected_tools:
             return _fail(result, "unexpected_tool")
         if case.get("kind") == "clarification" and not _looks_like_clarification(
@@ -221,6 +271,7 @@ def _grade_turn(
     allowed_extra = set(case.get("allowed_extra_tools", []))
     missing_tools = [tool for tool in required_tools if tool not in selected_tools]
     if missing_tools:
+        result["tool_selection_correct"] = "FAIL"
         return _fail(result, "required_tool_not_requested")
     extra_tools = [
         tool
@@ -228,7 +279,10 @@ def _grade_turn(
         if tool not in expected_set and tool not in allowed_extra
     ]
     if extra_tools:
+        result["tool_selection_correct"] = "FAIL"
         _manual(result, "unjustified_extra_tool_call")
+    elif not missing_tools:
+        result["tool_selection_correct"] = "PASS"
 
     for record in records:
         if record.status != "rejected":
@@ -245,6 +299,7 @@ def _grade_turn(
     for tool_name in required_tools:
         matching = [record for record in records if record.tool_name == tool_name]
         if not matching:
+            result["tool_execution_success"] = "FAIL"
             return _fail(result, "tool_result_missing")
         required_records.append(matching[0])
 
@@ -253,12 +308,14 @@ def _grade_turn(
         tool_result = record.result
         error_code = _tool_error_code(tool_result)
         if record.status == "rejected":
+            result["tool_execution_success"] = "FAIL"
             if error_code == "INVALID_TOOL_ARGUMENTS":
                 return _fail(result, "invalid_tool_arguments")
             if error_code in {"REPEATED_TOOL_CALL", "TOOL_ROUND_LIMIT_EXCEEDED", "TOOL_EXECUTION_LIMIT_EXCEEDED"}:
                 return _fail(result, "tool_execution_bound_exceeded")
             return _fail(result, "tool_call_rejected")
         if not _is_available_result(tool_result):
+            result["tool_execution_success"] = "FAIL"
             if error_code == "INVALID_TOOL_ARGUMENTS":
                 return _fail(result, "invalid_tool_arguments")
             _manual(result, "tool_result_unavailable")
@@ -267,6 +324,11 @@ def _grade_turn(
         if shape_error is not None:
             _manual(result, shape_error)
         available_results.append((record.tool_name, tool_result))
+
+    if result["tool_execution_success"] is None:
+        result["tool_execution_success"] = (
+            "PASS" if len(available_results) == len(required_records) else "FAIL"
+        )
 
     formal_review = any(_requires_review(tool_result) for _, tool_result in available_results)
     result["human_review_required"] = formal_review
@@ -318,10 +380,15 @@ def _grade_turn(
                 response.text,
             )
             result["citations_supported"] = citation_state
+            result["citation_metadata_integrity"] = (
+                "PASS" if citation_state is True else "FAIL" if citation_state is False else "MANUAL"
+            )
             if citation_reason == "unsupported_citation":
                 return _fail(result, citation_reason)
             if citation_reason is not None:
                 _manual(result, citation_reason)
+    elif required_tools:
+        result["citation_metadata_integrity"] = "NOT_APPLICABLE"
 
     for tool_name, tool_result in available_results:
         if tool_name == "degree_audit":
@@ -363,6 +430,8 @@ def grade_turn(
     initial_tool_calls: Sequence[ToolCall],
     tool_calls_by_round: Sequence[Sequence[ToolCall]] | None = None,
     known_course_codes: Sequence[str] = (),
+    provider_generation_count: int | None = None,
+    provider_failure: str | None = None,
 ) -> dict[str, Any]:
     """Grade one turn and always record the expected/observed language pair."""
 
@@ -372,6 +441,8 @@ def grade_turn(
         initial_tool_calls=initial_tool_calls,
         tool_calls_by_round=tool_calls_by_round,
         known_course_codes=known_course_codes,
+        provider_generation_count=provider_generation_count,
+        provider_failure=provider_failure,
     )
     return _apply_language_grade(result, case)
 
@@ -426,7 +497,7 @@ def _requested_rounds(
     tool_calls_by_round: Sequence[Sequence[ToolCall]] | None,
 ) -> list[list[ToolCall]]:
     if tool_calls_by_round is not None:
-        return [list(round_calls) for round_calls in tool_calls_by_round]
+        return [list(round_calls) for round_calls in tool_calls_by_round if round_calls]
     return [list(initial_tool_calls)] if initial_tool_calls else []
 
 
@@ -477,6 +548,103 @@ def _execution_records(
             result=result,
         )
     ]
+
+
+def _grade_contract_integrity(
+    result: dict[str, Any],
+    response: AdvisorResponse,
+) -> None:
+    """Compare additive response facts with the trusted execution records."""
+
+    if not response.tool_executions:
+        result["facts_integrity"] = (
+            "NOT_AVAILABLE_LEGACY"
+            if not response.academic_facts.model_dump(mode="json")
+            else "FAIL"
+        )
+        result["tool_authority_review_integrity"] = result["facts_integrity"]
+        return
+
+    expected = build_advisor_academic_facts(response.tool_executions)
+    actual_dump = response.academic_facts.model_dump(mode="json")
+    expected_dump = expected.model_dump(mode="json")
+    if not any(actual_dump.values()) and any(expected_dump.values()):
+        result["facts_integrity"] = "NOT_AVAILABLE"
+        result["tool_authority_review_integrity"] = "NOT_AVAILABLE"
+        return
+    if actual_dump == expected_dump:
+        result["facts_integrity"] = "PASS"
+        result["tool_authority_review_integrity"] = "PASS"
+        return
+
+    result["facts_integrity"] = "FAIL"
+    result["tool_authority_review_integrity"] = "FAIL"
+    _fail(result, "structured_academic_facts_mismatch")
+
+
+def _grade_grounding_protection(
+    result: dict[str, Any],
+    response: AdvisorResponse,
+    records: Sequence[AdvisorToolExecution],
+) -> None:
+    """Classify runtime grounding without treating fallback as model success."""
+
+    result["grounding_status"] = response.grounding.status
+    result["grounding_issues"] = list(response.grounding.issues)
+    result["fallback_occurred"] = response.grounding.status == "SAFE_FALLBACK"
+    if any(
+        issue.startswith(("CITATION_", "UNSUPPORTED_CITATION"))
+        for issue in response.grounding.issues
+    ):
+        result["citation_metadata_integrity"] = "FAIL"
+
+    if not response.tool_executions:
+        result["grounding_protection"] = (
+            "NO_TRUSTED_FACTS"
+            if response.grounding.status == "NO_TRUSTED_FACTS"
+            else "NOT_ASSESSED"
+        )
+        result["narrative_quality"] = "NOT_ASSESSED"
+        return
+
+    facts = build_advisor_academic_facts(records)
+    generated_text = _last_generated_text(response) or response.text
+    _, expected_assessment = protect_advisor_text(generated_text, facts)
+
+    if expected_assessment.status == "SAFE_FALLBACK":
+        if response.grounding.status == "SAFE_FALLBACK":
+            result["grounding_protection"] = "FALLBACK_APPLIED"
+            result["narrative_quality"] = "MODEL_CONTRADICTION_PROTECTED"
+            _manual(result, "runtime_protected_model_contradiction")
+        else:
+            result["grounding_protection"] = "ESCAPED"
+            result["narrative_quality"] = "MODEL_CONTRADICTION_ESCAPED"
+            _fail(result, "grounding_protection_escaped")
+        return
+
+    if expected_assessment.status == "GROUNDED":
+        if response.grounding.status == "SAFE_FALLBACK":
+            result["grounding_protection"] = "FALSE_REJECTION"
+            result["narrative_quality"] = "RUNTIME_FALSE_POSITIVE"
+            _manual(result, "runtime_false_positive_grounding_rejection")
+        else:
+            result["grounding_protection"] = "NOT_NEEDED"
+            result["narrative_quality"] = "STRUCTURALLY_CONSISTENT_UNVERIFIED"
+        return
+
+    result["grounding_protection"] = "NO_TRUSTED_FACTS"
+    result["narrative_quality"] = "NOT_ASSESSED"
+
+
+def _last_generated_text(response: AdvisorResponse) -> str | None:
+    for message in reversed(response.transcript):
+        if (
+            message.role is MessageRole.ASSISTANT
+            and message.content
+            and not message.tool_calls
+        ):
+            return message.content
+    return None
 
 
 def _required_tools(case: Mapping[str, Any]) -> list[str]:
@@ -533,6 +701,30 @@ def _bounded_value(value: Any) -> Any:
 
 def _forbidden_argument_keys(tool_name: str, arguments: Mapping[str, Any]) -> set[str]:
     return set(arguments) - _ALLOWED_ARGUMENT_KEYS.get(tool_name, set())
+
+
+def _trusted_arguments_integrity(
+    case: Mapping[str, Any],
+    requested_calls: Sequence[ToolCall],
+) -> Literal["PASS", "FAIL"]:
+    if any(_forbidden_argument_keys(call.name, call.arguments) for call in requested_calls):
+        return "FAIL"
+
+    configured = case.get("expected_arguments")
+    if not isinstance(configured, Mapping):
+        return "PASS"
+    for tool_name, expected_value in configured.items():
+        if not isinstance(expected_value, Mapping):
+            return "FAIL"
+        matches = [call for call in requested_calls if call.name == str(tool_name)]
+        if not matches:
+            return "FAIL"
+        if any(
+            any(call.arguments.get(str(key)) != value for key, value in expected_value.items())
+            for call in matches
+        ):
+            return "FAIL"
+    return "PASS"
 
 
 def _is_available_result(tool_result: Mapping[str, Any] | None) -> bool:
@@ -954,6 +1146,13 @@ def _summarize_tool_result(tool_result: Mapping[str, Any] | None) -> dict[str, A
         "data_source",
         "reasons",
         "citations",
+        "missing_requirements",
+        "conditions",
+        "requirement_set_status",
+        "credits",
+        "requirements",
+        "mandatory_missing_courses",
+        "elective_progress",
     ):
         if key in tool_result:
             summary[key] = _bounded_value(tool_result[key])

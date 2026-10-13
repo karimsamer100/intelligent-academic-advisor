@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from app.llm.contracts import ToolCall
 from app.orchestration.contracts import AdvisorResponse, AdvisorToolExecution
+from app.orchestration.facts import (
+    AdvisorGroundingAssessment,
+    build_advisor_academic_facts,
+)
+from app.llm.contracts import LLMMessage, MessageRole
 
 from evaluator import detect_language, grade_turn, skip_case
 from live_eval import (
@@ -14,6 +21,8 @@ from live_eval import (
     _redact_student_sensitive_text,
     _safe_report_prompt,
     _select_cases,
+    _tool_calls_by_round,
+    RecordingProvider,
 )
 
 
@@ -833,3 +842,213 @@ def test_course_information_rejects_llm_scope_override_arguments() -> None:
 
     assert result["status"] == "FAIL"
     assert "trusted_argument_override_attempted" in result["reasons"]
+
+
+def test_expected_trusted_argument_value_mismatch_is_not_a_selection_pass() -> None:
+    result = grade_turn(
+        case={
+            "id": "course_information",
+            "expected_tool": "get_course_information",
+            "expected_arguments": {
+                "get_course_information": {"course_code": "CSE221"}
+            },
+        },
+        response=AdvisorResponse(
+            text="The course information request was completed.",
+            tool_name="get_course_information",
+            tool_result={
+                "course": {"code": "CSE222"},
+                "prerequisites": {"status": "COMPLETE"},
+                "corequisites": {"status": "UNAVAILABLE"},
+                "coverage": {
+                    "course": "AVAILABLE",
+                    "prerequisites": "COMPLETE",
+                    "corequisites": "UNAVAILABLE",
+                },
+                "data_source": {"source_mode": "NORMALIZED_DEVELOPMENT"},
+            },
+        ),
+        initial_tool_calls=[
+            ToolCall(
+                name="get_course_information",
+                arguments={"course_code": "CSE222"},
+            )
+        ],
+    )
+
+    assert result["trusted_arguments_integrity"] == "FAIL"
+    assert "trusted_argument_value_mismatch" in result["reasons"]
+
+
+def test_final_tool_free_generation_is_not_counted_as_a_tool_round() -> None:
+    result = grade_turn(
+        case={
+            "id": "eligibility_en",
+            "expected_tool": "check_course_eligibility",
+        },
+        response=_eligibility_response("You are eligible to take CSE221."),
+        initial_tool_calls=[_eligibility_call()],
+        tool_calls_by_round=[[_eligibility_call()], []],
+        provider_generation_count=2,
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["tool_round_count"] == 1
+    assert result["provider_generation_count"] == 2
+
+
+def test_live_recording_keeps_final_tool_free_generation_out_of_tool_rounds() -> None:
+    provider = object.__new__(RecordingProvider)
+    provider.calls = [
+        SimpleNamespace(response=SimpleNamespace(tool_calls=[_eligibility_call()])),
+        SimpleNamespace(response=SimpleNamespace(tool_calls=[])),
+    ]
+
+    rounds = _tool_calls_by_round(provider)
+
+    assert len(rounds) == 1
+    assert rounds[0][0].name == "check_course_eligibility"
+
+
+def test_structured_facts_integrity_is_graded_against_successful_tool_results() -> None:
+    tool_result = _eligibility_response("unused").tool_result
+    assert tool_result is not None
+    execution = AdvisorToolExecution(
+        call_id="call-1",
+        tool_name="check_course_eligibility",
+        arguments={"course_code": "CSE221"},
+        status="executed",
+        round_index=1,
+        result=tool_result,
+    )
+    response = AdvisorResponse(
+        text="The modeled result is eligible.",
+        tool_executions=[execution],
+        academic_facts=build_advisor_academic_facts([execution]),
+        grounding=AdvisorGroundingAssessment(status="GROUNDED"),
+    )
+
+    result = grade_turn(
+        case={
+            "id": "eligibility_en",
+            "expected_tool": "check_course_eligibility",
+        },
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["facts_integrity"] == "PASS"
+    assert result["tool_authority_review_integrity"] == "PASS"
+
+
+def test_runtime_fallback_is_reported_as_protection_not_narrative_success() -> None:
+    tool_result = _eligibility_response("unused").tool_result
+    assert tool_result is not None
+    execution = AdvisorToolExecution(
+        call_id="call-1",
+        tool_name="check_course_eligibility",
+        arguments={"course_code": "CSE221"},
+        status="executed",
+        round_index=1,
+        result=tool_result,
+    )
+    response = AdvisorResponse(
+        text="Eligibility for CSE221: ELIGIBLE.",
+        tool_executions=[execution],
+        transcript=[
+            LLMMessage(
+                role=MessageRole.ASSISTANT,
+                content="You are not eligible to take CSE221.",
+            )
+        ],
+        academic_facts=build_advisor_academic_facts([execution]),
+        grounding=AdvisorGroundingAssessment(
+            status="SAFE_FALLBACK",
+            issues=["ELIGIBILITY_CONTRADICTION"],
+        ),
+    )
+
+    result = grade_turn(
+        case={
+            "id": "eligibility_en",
+            "kind": "eligibility",
+            "expected_tool": "check_course_eligibility",
+        },
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["grounding_protection"] == "FALLBACK_APPLIED"
+    assert result["narrative_quality"] == "MODEL_CONTRADICTION_PROTECTED"
+    assert "runtime_protected_model_contradiction" in result["reasons"]
+    assert result["status"] == "NEEDS_MANUAL_REVIEW"
+
+
+def test_structured_fact_mismatch_is_not_hidden_by_a_correct_final_text() -> None:
+    tool_result = _eligibility_response("unused").tool_result
+    assert tool_result is not None
+    execution = AdvisorToolExecution(
+        call_id="call-1",
+        tool_name="check_course_eligibility",
+        arguments={"course_code": "CSE221"},
+        status="executed",
+        round_index=1,
+        result=tool_result,
+    )
+    expected = build_advisor_academic_facts([execution])
+    assert expected.eligibility
+    altered = expected.eligibility[0].model_copy(update={"decision": "INELIGIBLE"})
+    response = AdvisorResponse(
+        text="The modeled result is eligible.",
+        tool_executions=[execution],
+        academic_facts=expected.model_copy(update={"eligibility": [altered]}),
+    )
+
+    result = grade_turn(
+        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["facts_integrity"] == "FAIL"
+    assert result["status"] == "FAIL"
+    assert "structured_academic_facts_mismatch" in result["reasons"]
+
+
+def test_grounding_escape_is_a_failure_when_runtime_reports_grounded() -> None:
+    tool_result = _eligibility_response("unused").tool_result
+    assert tool_result is not None
+    execution = AdvisorToolExecution(
+        call_id="call-1",
+        tool_name="check_course_eligibility",
+        arguments={"course_code": "CSE221"},
+        status="executed",
+        round_index=1,
+        result=tool_result,
+    )
+    response = AdvisorResponse(
+        text="You are not eligible to take CSE221.",
+        tool_executions=[execution],
+        transcript=[
+            LLMMessage(
+                role=MessageRole.ASSISTANT,
+                content="You are not eligible to take CSE221.",
+            )
+        ],
+        academic_facts=build_advisor_academic_facts([execution]),
+        grounding=AdvisorGroundingAssessment(status="GROUNDED"),
+    )
+
+    result = grade_turn(
+        case={"id": "eligibility_en", "expected_tool": "check_course_eligibility"},
+        response=response,
+        initial_tool_calls=[_eligibility_call()],
+        known_course_codes=["CSE221"],
+    )
+
+    assert result["grounding_protection"] == "ESCAPED"
+    assert result["status"] == "FAIL"
+    assert "grounding_protection_escaped" in result["reasons"]

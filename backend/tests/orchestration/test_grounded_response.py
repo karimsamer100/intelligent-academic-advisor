@@ -253,6 +253,21 @@ def test_critical_eligibility_contradiction_uses_safe_fallback() -> None:
     assert protected_text != "You are not eligible to take CSE221."
 
 
+def test_arabic_contradiction_uses_a_readable_arabic_safe_fallback() -> None:
+    facts = build_advisor_academic_facts(
+        [_execution("check_course_eligibility", "eligibility-1", _eligibility_result())]
+    )
+
+    protected_text, assessment = protect_advisor_text(
+        "أنت غير مؤهل لتسجيل CSE221.",
+        facts,
+    )
+
+    assert assessment.status == "SAFE_FALLBACK"
+    assert "تعذر" in protected_text
+    assert "ELIGIBLE" in protected_text
+
+
 def test_degree_audit_review_does_not_become_an_eligibility_review_flag() -> None:
     facts = build_advisor_academic_facts(
         [
@@ -402,3 +417,159 @@ def test_wrong_requirement_source_page_pair_is_rejected() -> None:
 
     assert assessment.status == "SAFE_FALLBACK"
     assert "CITATION_PAGE_MISMATCH" in assessment.issues
+
+
+def test_planning_citation_from_another_tool_cannot_be_attached_to_eligibility() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(),
+            ),
+            _execution("degree_audit", "audit-1", _degree_audit_result()),
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "Eligibility for CSE221 is ELIGIBLE according to AUDIT-REQ-003 page 84.",
+        facts,
+    )
+
+    assert assessment.status == "SAFE_FALLBACK"
+    assert "CITATION_FACT_MAPPING" in assessment.issues
+
+
+def test_negated_non_authoritative_language_does_not_trigger_fallback() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(authoritative=False),
+            )
+        ]
+    )
+
+    text, assessment = protect_advisor_text(
+        "This decision is not authoritative and the rule has not been officially approved.",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"
+    assert text.startswith("This decision")
+
+
+def test_authority_question_and_quoted_caution_do_not_trigger_fallback() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(authoritative=False),
+            )
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "Is this result authoritative? The phrase 'officially approved' is not applicable here.",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"
+
+
+def test_interrogative_without_question_mark_does_not_trigger_fallback() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(authoritative=False),
+            )
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "What is authoritative for CSE221",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"
+
+
+def test_explicit_false_authority_field_is_not_a_positive_approval_claim() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(authoritative=False),
+            )
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "The result is eligible and authoritative=false.",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"
+
+
+def test_cautious_arabic_eligibility_wording_does_not_trigger_fallback() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(authoritative=False),
+            )
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "هذه النتيجة لا تعني أنك غير مؤهل لتسجيل CSE221، والبيانات غير معتمدة نهائياً.",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"
+
+
+def test_authority_claim_is_scoped_to_the_referenced_course() -> None:
+    first = _eligibility_result(authoritative=False)
+    second = _eligibility_result(authoritative=True)
+    second["course"] = {"code": "CSE222", "name": "Algorithms"}
+    facts = build_advisor_academic_facts(
+        [
+            _execution("check_course_eligibility", "eligibility-1", first),
+            _execution("check_course_eligibility", "eligibility-2", second),
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "CSE222 is officially approved, while CSE221 remains non-authoritative.",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"
+
+
+def test_review_caution_keeps_degree_audit_review_separate_from_eligibility() -> None:
+    facts = build_advisor_academic_facts(
+        [
+            _execution(
+                "check_course_eligibility",
+                "eligibility-1",
+                _eligibility_result(requires_human_review=False),
+            ),
+            _execution("degree_audit", "audit-1", _degree_audit_result()),
+        ]
+    )
+
+    _, assessment = protect_advisor_text(
+        "Eligibility for CSE221 does not require human review; the degree audit requires human review.",
+        facts,
+    )
+
+    assert assessment.status == "GROUNDED"

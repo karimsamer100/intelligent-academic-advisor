@@ -6,6 +6,9 @@
       "kind": "eligibility",
       "language_expected": "en",
       "expected_tool": "check_course_eligibility",
+      "expected_arguments": {
+        "check_course_eligibility": {"course_code": "{{eligibility_course}}"}
+      },
       "requires": ["eligibility_course"],
       "prompt": "Can I take {{eligibility_course}}? Please explain the result and mention if the academic data is not authoritative."
     },
@@ -14,6 +17,9 @@
       "kind": "eligibility",
       "language_expected": "ar",
       "expected_tool": "check_course_eligibility",
+      "expected_arguments": {
+        "check_course_eligibility": {"course_code": "{{eligibility_course}}"}
+      },
       "requires": ["eligibility_course"],
       "prompt": "هل يمكنني تسجيل مقرر {{eligibility_course}}؟ اشرح النتيجة واذكر إذا كانت البيانات الأكاديمية غير معتمدة نهائياً."
     },
@@ -25,6 +31,10 @@
         "check_course_eligibility",
         "get_course_information"
       ],
+      "expected_arguments": {
+        "check_course_eligibility": {"course_code": "{{eligibility_course}}"},
+        "get_course_information": {"course_code": "{{eligibility_course}}"}
+      },
       "requires": ["eligibility_course"],
       "prompt": "Check my eligibility for {{eligibility_course}} و اشرح prerequisites باختصار، مع الحفاظ على أي human review flag."
     },
@@ -33,6 +43,9 @@
       "kind": "course_information",
       "language_expected": "en",
       "expected_tool": "get_course_information",
+      "expected_arguments": {
+        "get_course_information": {"course_code": "{{eligibility_course}}"}
+      },
       "requires": ["eligibility_course"],
       "prompt": "What are the structured prerequisites, corequisites, name, and credit hours for {{eligibility_course}}? Do not use RAG for course facts."
     },
@@ -73,6 +86,9 @@
       "kind": "eligibility",
       "language_expected": "en",
       "expected_tool": "check_course_eligibility",
+      "expected_arguments": {
+        "check_course_eligibility": {"course_code": "{{review_course}}"}
+      },
       "requires": ["review_course"],
       "prompt": "Can I take {{review_course}}? State the result exactly, and clearly explain if a human academic review is required."
     },
@@ -85,6 +101,9 @@
         "degree_audit",
         "search_official_documents"
       ],
+      "expected_arguments": {
+        "check_course_eligibility": {"course_code": "{{eligibility_course}}"}
+      },
       "requires": ["eligibility_course", "rag_available"],
       "prompt": "Combine an eligibility check for {{eligibility_course}}, my degree progress, and official regulation evidence about registration policy. Use each result only for the part it supports, preserve any human-review or non-authoritative limitation, and cite returned documents only."
     },
@@ -96,6 +115,9 @@
         "check_course_eligibility",
         "search_official_documents"
       ],
+      "expected_arguments": {
+        "check_course_eligibility": {"course_code": "{{eligibility_course}}"}
+      },
       "requires": ["eligibility_course", "rag_available"],
       "prompt": "First determine whether I can take {{eligibility_course}}. Then use official document evidence to explain the relevant prerequisite or registration rule. Keep the two trusted results distinct."
     }
