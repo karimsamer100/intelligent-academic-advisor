@@ -247,3 +247,28 @@ The project already completed and integrated:
   expose complete typed corequisite definitions, so the new tool reports
   explicit unavailability. Checkpoint 2 grounding and response-schema work is
   intentionally deferred pending review.
+
+## 2026-10-13 - Course-information projection safety follow-up verified
+
+- Fix commit:
+  `15d7e2aa0b93e43ba5fe21e76904e86eb1626949`.
+- Added focused regressions for complete empty rule sets, missing/unsupported
+  expression coverage, rule verification status, SOURCE_VERIFIED versus
+  APPROVED, and unavailable corequisite authority.
+- `_course_rule_coverage_status()` now reports incomplete coverage for empty or
+  expression-missing rule sets and unsupported coverage for unsupported nodes,
+  including nested nodes. AND/OR/NOT serialization remains unchanged.
+- `_course_information_is_authoritative()` now represents the complete
+  course-information response. It requires nonempty complete prerequisite
+  rules, approved and source-verified course/rules, and available corequisite
+  coverage. It does not create eligibility decisions or human-review flags.
+- Verified focused course-information tests: 13 passed; focused backend
+  tools/planning/orchestration/LLM regression: 590 passed, 1 skipped;
+  deterministic evaluator: 29 passed.
+- Verified full local backend: 689 passed, 11 skipped, 1 pre-existing Windows
+  path failure. Docker/PostgreSQL `REQUIRE_DB_TESTS=1` suite: 701 passed.
+  Changed-file Ruff, compileall, and scoped `git diff --check` passed.
+- Full Ruff retains five unrelated pre-existing unused-import findings, and
+  the full dirty-tree diff check retains the unrelated Project_Decisions.md
+  trailing-whitespace finding. Existing unrelated changes remain untouched.
+- Checkpoint 2 remains deferred.

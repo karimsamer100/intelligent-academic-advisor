@@ -317,10 +317,17 @@ The result carries:
 - dataset version when available;
 - authoritative=false for the normalized development composition.
 
-The projection only returns authoritative=true when the source mode is
-VERIFIED_AUTHORITATIVE, the course is APPROVED and source-verified, the rule
-set is complete, and all exposed rules are APPROVED. This is a source-data
-authority signal; it is not an eligibility decision.
+The top-level `authoritative` field represents the complete
+course-information response, not merely the specific course and prerequisite
+facts that happen to be known. It returns true only when the source mode is
+VERIFIED_AUTHORITATIVE, the course is APPROVED and source-verified, the
+prerequisite coverage is complete with a nonempty rule set and no missing or
+unsupported expressions, every exposed rule is APPROVED and source-verified,
+and corequisite coverage is AVAILABLE. The current adapter reports
+corequisites as UNAVAILABLE, so the current composition remains
+non-authoritative even when individual course or prerequisite lifecycle fields
+are source-verified. This is a source-data authority signal; it is not an
+eligibility decision or a human-review flag.
 
 SOURCE_VERIFIED remains distinct from APPROVED. The tool does not turn the
 current development source into institutionally approved academic data.
@@ -443,6 +450,33 @@ code change introduced a reported diff-check issue.
 
 The evaluation case JSON was parsed successfully with Python's JSON tool.
 
+### Projection-safety follow-up
+
+The focused regressions reproduced the two reviewed hazards before the fix:
+complete empty rule sets reported `COMPLETE`, and nested
+`UnsupportedExpression` nodes could coexist with `COMPLETE` prerequisite
+coverage. The verified fix was committed as:
+
+~~~text
+15d7e2aa0b93e43ba5fe21e76904e86eb1626949
+fix: harden course information projection safety
+~~~
+
+Follow-up results:
+
+- course-information tests: 13 passed;
+- focused backend tools/planning/orchestration/LLM regression: 590 passed,
+  1 skipped;
+- deterministic orchestration evaluator: 29 passed;
+- full local backend: 689 passed, 11 skipped, 1 pre-existing failure;
+- Docker/PostgreSQL `REQUIRE_DB_TESTS=1` suite: 701 passed;
+- changed-file Ruff, compileall, and scoped `git diff --check`: passed.
+
+The full local failure remains the pre-existing Windows path assertion in
+`tests/test_config.py`. Full Ruff retains five unrelated pre-existing F401
+findings, and the full dirty-tree diff check retains only the unrelated
+`docs/decisions/Project_Decisions.md` trailing-whitespace finding.
+
 ### Docker, database, and live model verification
 
 The canonical Docker Compose full-suite command was not runnable because the
@@ -480,6 +514,13 @@ The Checkpoint 1 implementation was committed as:
 ~~~text
 c596e7f039bba6ab3a5a7e689a64fe3a6da80d2c
 feat(tools): add structured course information routing
+~~~
+
+The projection-safety follow-up was committed as:
+
+~~~text
+15d7e2aa0b93e43ba5fe21e76904e86eb1626949
+fix: harden course information projection safety
 ~~~
 
 The commit was pushed successfully to:

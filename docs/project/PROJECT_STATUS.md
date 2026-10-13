@@ -4,8 +4,8 @@
 **Status date:** 2026-10-13
 **Repository:** `karimsamer100/intelligent-academic-advisor`
 **Integration branch:** `feat/orchestration-grounded-advisor`
-**Current verified code HEAD:** `c596e7f039bba6ab3a5a7e689a64fe3a6da80d2c`
-**Latest verified code commit:** `feat(tools): add structured course information routing`
+**Current verified code HEAD:** `15d7e2aa0b93e43ba5fe21e76904e86eb1626949`
+**Latest verified code commit:** `fix: harden course information projection safety`
 
 ---
 
@@ -419,6 +419,32 @@ Checkpoint 1 is complete for review. Checkpoint 2 remains deferred:
 grounded final-answer validation, degree-audit projection redesign,
 cross-tool citation validation, frontend response-schema redesign, and
 answer-repair/claim-verification pipelines.
+
+Course-information projection safety follow-up verified on 2026-10-13:
+
+~~~text
+Fix commit:                                  15d7e2aa0b93e43ba5fe21e76904e86eb1626949
+Focused course-information tests:             13 passed
+Focused backend tools/planning/orchestration/llm: 590 passed, 1 skipped
+Deterministic orchestration evaluator:        29 passed
+Full local backend:                           689 passed, 11 skipped, 1 pre-existing failure
+Docker DB-required backend:                   701 passed
+Changed-file Ruff:                            passed
+Compileall:                                   passed
+Scoped git diff --check:                      passed
+~~~
+
+The follow-up hardens the static course-information projection without
+changing Planning algorithms, academic data, RAG retrieval, or orchestration
+budgets. A complete empty rule set or a rule with a missing/unsupported
+expression is not reported as complete prerequisite coverage. Top-level
+`authoritative` now means the complete course-information response and also
+requires available corequisite coverage plus approved, source-verified
+course/rule data. SOURCE_VERIFIED remains distinct from APPROVED, and no
+eligibility or human-review fields are derived from this authority signal.
+The full local failure and five full-Ruff findings remain the pre-existing
+issues recorded above; the dirty working-tree diff check still reports only
+the unrelated Project_Decisions.md whitespace. Checkpoint 2 remains deferred.
 
 ---
 
