@@ -7,6 +7,8 @@ from app.orchestration.composition import (
     build_advisor_static_dependencies,
 )
 from app.orchestration.contracts import (
+    AdvisorAcademicFacts,
+    AdvisorGroundingAssessment,
     AdvisorRequest,
     AdvisorResponse,
     AdvisorToolExecution,
@@ -18,6 +20,8 @@ from app.orchestration.orchestrator import (
 
 __all__ = [
     "AdvisorApplication",
+    "AdvisorAcademicFacts",
+    "AdvisorGroundingAssessment",
     "AdvisorOrchestrationLimits",
     "AdvisorOrchestrator",
     "AdvisorRequest",

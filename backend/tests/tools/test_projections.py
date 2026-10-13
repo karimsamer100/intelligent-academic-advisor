@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 
 from app.planning.domain.academic_state import FactStatus
 from app.planning.domain.audit import (
@@ -257,6 +258,13 @@ def test_degree_audit_projection_preserves_progress_and_is_bounded() -> None:
     assert projection["mandatory_missing_courses"][:2] == ["CSE100", "CSE101"]
     assert projection["requirements"]["total_count"] == 30
     assert projection["requirements"]["review_ids"]
+    assert projection["requirements"]["details"][0]["requires_human_review"] is True
+    assert projection["requirements"]["details"][0]["reason_codes"] == [
+        "MISSING_REQUIRED_DATA"
+    ]
+    assert projection["requirements"]["details"][0]["provenance"] == [
+        {"source_id": "SRC-AUDIT", "page": 84}
+    ]
     assert projection["citations"] == [
         {"source_id": "SRC-AUDIT", "page": 84}
     ]
@@ -264,3 +272,34 @@ def test_degree_audit_projection_preserves_progress_and_is_bounded() -> None:
     assert "metadata" not in projection
     assert "decision_trace" in result.to_dict()["metadata"]
     assert projection["status"] == result.to_dict()["status"]
+
+
+def test_degree_audit_projection_keeps_requirement_provenance_with_requirement() -> None:
+    result = _audit_result(2)
+    scoped_requirements = []
+    for index, requirement in enumerate(result.requirement_results):
+        provenance = Provenance(
+            source_id=f"SRC-REQ-{index}",
+            source_page=10 + index,
+            rule_id=requirement.requirement_id,
+        )
+        trace = DecisionTrace(
+            replace(requirement.decision_trace.root, provenance=(provenance,))
+        )
+        metadata = replace(
+            requirement.metadata,
+            provenance=(provenance,),
+            decision_trace=trace,
+        )
+        scoped_requirements.append(replace(requirement, metadata=metadata))
+
+    scoped_result = replace(result, requirement_results=tuple(scoped_requirements))
+    details = project_degree_audit(scoped_result)["requirements"]["details"]
+
+    assert [detail["id"] for detail in details] == ["REQ-000", "REQ-001"]
+    assert details[0]["provenance"] == [
+        {"source_id": "SRC-REQ-0", "page": 10, "rule_id": "REQ-000"}
+    ]
+    assert details[1]["provenance"] == [
+        {"source_id": "SRC-REQ-1", "page": 11, "rule_id": "REQ-001"}
+    ]

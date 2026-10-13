@@ -141,6 +141,9 @@ def test_composed_orchestrator_executes_real_eligibility_and_delivers_compact_re
     }
     assert response.tool_result["decision"] == "ELIGIBLE"
     assert response.tool_result["authoritative"] is False
+    assert response.academic_facts.eligibility[0].decision == "ELIGIBLE"
+    assert response.academic_facts.eligibility[0].authoritative is False
+    assert response.academic_facts.eligibility[0].requires_human_review is False
     assert response.requires_human_review is False
     assert len(provider.requests) == 2
     assert provider.requests[1].tools
@@ -194,6 +197,16 @@ def test_composed_orchestrator_routes_static_course_questions_to_planning_data()
         },
     ]
     assert response.tool_result["authoritative"] is False
+    assert response.academic_facts.course_information[0].course["identity"] == (
+        "R23:CAIE:CSE221"
+    )
+    assert response.academic_facts.course_information[0].prerequisites["expression"] == (
+        response.tool_result["prerequisites"]["expression"]
+    )
+    assert response.academic_facts.course_information[0].coverage["corequisites"] == (
+        "UNAVAILABLE"
+    )
+    assert response.academic_facts.authority[0].requires_human_review is None
     assert len(response.tool_executions) == 1
 
 
@@ -236,6 +249,8 @@ def test_composed_orchestrator_keeps_course_facts_and_policy_search_independent(
         "R23:CAIE:CSE221"
     )
     assert response.tool_executions[1].result["results"] == []
+    assert response.academic_facts.course_information
+    assert response.academic_facts.official_documents[0].evidence_available is False
     assert len(response.tool_executions) == 2
 
 
@@ -260,6 +275,8 @@ def test_composed_orchestrator_executes_real_degree_audit_and_preserves_review_s
     assert response.tool_result["requirement_set_status"] == "INCOMPLETE"
     assert response.tool_result["authoritative"] is False
     assert response.tool_result["requires_human_review"] is True
+    assert response.academic_facts.degree_audit[0].requires_human_review is True
+    assert response.academic_facts.degree_audit[0].authoritative is False
     assert response.requires_human_review is True
     assert len(provider.requests) == 2
 

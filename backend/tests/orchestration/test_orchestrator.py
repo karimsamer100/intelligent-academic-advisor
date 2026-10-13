@@ -202,7 +202,7 @@ def test_no_tool_response_is_returned_directly() -> None:
     assert response.requires_human_review is False
     assert len(provider.requests) == 1
     system_prompt = provider.requests[0].messages[0].content
-    assert "advisor-system-v3" in system_prompt
+    assert "advisor-system-v4" in system_prompt
     assert "INDETERMINATE" in system_prompt
     assert "requires_human_review=true" in system_prompt
     assert [definition.name for definition in provider.requests[0].tools] == [
@@ -253,6 +253,40 @@ def test_eligibility_flow_executes_once_with_trusted_context_and_preserves_messa
         allow_nan=False,
     )
     assert provider.requests[1].tools
+
+
+def test_orchestrator_exposes_trusted_facts_and_protects_contradictory_text() -> None:
+    eligibility = RecordingEligibilityTool(
+        payload={
+            "course": {"code": "CSE341", "name": "Algorithms"},
+            "decision": "ELIGIBLE",
+            "status": "ELIGIBLE",
+            "eligible": True,
+            "authoritative": False,
+            "requires_human_review": False,
+            "rule_set_status": "COMPLETE",
+            "reasons": [],
+            "warnings": [],
+            "missing_requirements": [],
+            "conditions": [],
+            "citations": [],
+        }
+    )
+    provider = QueueProvider(
+        [
+            GenerationResponse(tool_calls=[_tool_call()]),
+            GenerationResponse(content="You are not eligible to take CSE341."),
+        ]
+    )
+    registry, _, _, _ = _registry(eligibility)
+
+    response = _orchestrator(provider, registry).respond(_request())
+
+    assert response.academic_facts.eligibility[0].eligible is True
+    assert response.academic_facts.eligibility[0].authoritative is False
+    assert response.academic_facts.eligibility[0].requires_human_review is False
+    assert response.grounding.status == "SAFE_FALLBACK"
+    assert "ELIGIBLE" in response.text
 
 
 def test_degree_audit_flow_preserves_indeterminate_human_review_result() -> None:

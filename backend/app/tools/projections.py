@@ -525,19 +525,26 @@ def _append_requirement(
 
 def _requirement_summary(result: DegreeAuditResult) -> dict[str, Any]:
     remaining = result.unsatisfied_requirements + result.indeterminate_requirements
+    ordered = list(remaining) + [
+        requirement
+        for requirement in result.requirement_results
+        if requirement not in remaining
+    ]
     details = [
         _compact_requirement(requirement)
-        for requirement in remaining[:_MAX_LIST_ITEMS]
+        for requirement in ordered[:_MAX_LIST_ITEMS]
     ]
     progress = result.progress
     return {
         "satisfied_count": len(result.satisfied_requirements),
         "total_count": len(result.requirement_results),
+        "satisfied_ids": _capped_unique(progress.satisfied_requirement_ids),
         "remaining_ids": _capped_unique(
             progress.outstanding_requirement_ids + progress.unknown_requirement_ids
         ),
         "review_ids": _capped_unique(progress.review_requirement_ids),
         "details": details,
+        "details_truncated": len(ordered) > _MAX_LIST_ITEMS,
     }
 
 
@@ -546,6 +553,12 @@ def _compact_requirement(requirement: RequirementEvaluation) -> dict[str, Any]:
         "id": requirement.requirement_id,
         "type": requirement.definition_type,
         "outcome": requirement.outcome.value,
+        "requires_human_review": requirement.requires_human_review,
+        "reason_codes": _enum_values(requirement.reason_codes),
+        "warnings": _enum_values(requirement.warnings),
+        "provenance": _compact_citations(
+            (*requirement.provenance, *_trace_provenance(requirement.decision_trace.root))
+        ),
     }
     if isinstance(requirement.evidence, CourseRequirementEvidence):
         value["course_code"] = requirement.evidence.course.course_code

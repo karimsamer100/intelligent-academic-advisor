@@ -7,6 +7,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.llm.contracts import LLMMessage
+from app.orchestration.facts import AdvisorAcademicFacts, AdvisorGroundingAssessment
 
 
 class _AdvisorModel(BaseModel):
@@ -49,6 +50,16 @@ class AdvisorResponse(_AdvisorModel):
     requires_human_review: bool = False
     tool_executions: list[AdvisorToolExecution] = Field(default_factory=list)
     transcript: list[LLMMessage] = Field(default_factory=list)
+    academic_facts: AdvisorAcademicFacts = Field(default_factory=AdvisorAcademicFacts)
+    grounding: AdvisorGroundingAssessment = Field(
+        default_factory=AdvisorGroundingAssessment
+    )
 
 
-__all__ = ["AdvisorRequest", "AdvisorResponse", "AdvisorToolExecution"]
+__all__ = [
+    "AdvisorAcademicFacts",
+    "AdvisorGroundingAssessment",
+    "AdvisorRequest",
+    "AdvisorResponse",
+    "AdvisorToolExecution",
+]

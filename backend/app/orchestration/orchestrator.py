@@ -28,6 +28,8 @@ from app.orchestration.contracts import (
     AdvisorResponse,
     AdvisorToolExecution,
 )
+from app.orchestration.facts import build_advisor_academic_facts
+from app.orchestration.grounding import protect_advisor_text
 from app.orchestration.prompts import ADVISOR_SYSTEM_PROMPT
 from app.services.llm_service import LLMService
 from app.tools.context import ToolExecutionContext
@@ -377,8 +379,10 @@ class AdvisorOrchestrator:
         transcript: list[LLMMessage],
     ) -> AdvisorResponse:
         legacy_name, legacy_result = _legacy_tool_fields(executions)
+        academic_facts = build_advisor_academic_facts(executions)
+        protected_text, grounding = protect_advisor_text(text, academic_facts)
         return AdvisorResponse(
-            text=text,
+            text=protected_text,
             tool_name=legacy_name,
             tool_result=legacy_result,
             requires_human_review=any(
@@ -388,6 +392,8 @@ class AdvisorOrchestrator:
             ),
             tool_executions=list(executions),
             transcript=list(transcript),
+            academic_facts=academic_facts,
+            grounding=grounding,
         )
 
     @classmethod
